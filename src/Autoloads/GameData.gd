@@ -2,9 +2,9 @@ class_name Data
 extends Node
 
 # Storage
-var karts: Dictionary = {}   # { id: KartDef }
-var powers: Dictionary = {}  # { id: PowerDef }
-var tracks: Dictionary = {}  # { id: TrackDef }
+var karts: Dictionary[String, KartDef] = {}   # { id: KartDef }
+var powers: Dictionary[String, PowerDef] = {}  # { id: PowerDef }
+var tracks: Dictionary[String, TrackDef] = {}  # { id: TrackDef }
 var current_track: TrackDef = null
 
 func _ready():
@@ -87,6 +87,7 @@ func _parse_power_json(data: Dictionary) -> PowerDef:
 	var def = PowerDef.new()
 	def.id = data.get("id", "unknown_power")
 	def.type = data.get("type", "projectile")
+	def.cooldown = data.get("cooldown", 1.0)
 	def.damage = data.get("damage", 0)
 	def.speed = data.get("speed", 0.0)
 	def.stat_target = data.get("stat_target", "")

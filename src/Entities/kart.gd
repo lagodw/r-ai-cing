@@ -1,5 +1,7 @@
 class_name Kart extends CharacterBody2D
 
+signal race_finished(winner_name)
+
 # --- Configuration & Resources ---
 @export var kart_id: String = "speedster" # Default ID, overwritten by Spawner
 @export var is_player_controlled: bool = false
@@ -19,7 +21,13 @@ var current_health: int = 100
 # --- State Variables ---
 var current_speed: float = 0.0
 var is_stunned: bool = false
-var power_inventory: Array = [null, null, null] # Slots 0, 1, 2
+var power_inventory: Array[PowerDef] = [null, null, null] # Slots 0, 1, 2
+var slot_on_cooldown: Array[bool] = [false, false, false]
+var current_lap: int = 0
+var last_waypoint_index: int = -1
+var laps_finished: bool = false
+var current_waypoint_index: int = 0
+var wp_threshold: float = 500.0 # Increased threshold for wider roads
 
 # --- Input Interface (Decoupled for AI/Multiplayer) ---
 var input_steer: float = 0.0    # -1.0 (Left) to 1.0 (Right)
@@ -32,6 +40,7 @@ var input_throttle: float = 0.0 # -1.0 (Brake) to 1.0 (Gas)
 func _enter_tree():
 	# Try to parse the name as a Player ID
 	var id_from_name = name.to_int()
+	power_inventory[0] = load("uid://oul85qrwiggj")
 	
 	if id_from_name > 0:
 		# It's a valid Player ID (e.g. "1", "2491")
@@ -77,6 +86,7 @@ func _physics_process(delta):
 		return
 
 	# 3. Logic
+	_process_waypoints()
 	_gather_input()
 	_apply_physics(delta)
 
@@ -152,9 +162,6 @@ func _break_down():
 	is_stunned = true
 	current_health = 0
 	
-	# Drop all items?
-	# power_inventory = [null, null, null]
-	
 	print(name + " has broken down!")
 	
 	# Respawn Timer
@@ -174,21 +181,32 @@ func _respawn():
 # --- Abilities ---
 func use_power(slot_index: int):
 	# Check Bounds
-	if slot_index < 0 or slot_index >= power_inventory.size(): return
+	if slot_index < 0 or slot_index >= power_inventory.size(): 
+		return
 	
-	var power_id = power_inventory[slot_index]
-	if power_id == null: return
+	# 2. Check if the slot is currently cooling down
+	if slot_on_cooldown[slot_index]:
+		return
+	
+	var power = power_inventory[slot_index]
+	if not power: 
+		return
+	
+	# 3. Activate the power and start the cooldown
+	slot_on_cooldown[slot_index] = true
 	
 	# Multiplayer: Execute on all clients
-	rpc("activate_power_effect", power_id)
+	rpc("activate_power_effect", power)
 	
-	# Consume item (Optional)
-	# power_inventory[slot_index] = null 
+	# 4. Handle the timer to reset the cooldown
+	# We use the cooldown value now defined in the PowerDef
+	await get_tree().create_timer(power.cooldown).timeout
+	slot_on_cooldown[slot_index] = false
 
 @rpc("call_local")
-func activate_power_effect(power_id: String):
+func activate_power_effect(power: PowerDef):
 	# Calls the global manager to spawn projectiles/hazards
-	PowerManager.activate_power(self, power_id)
+	PowerManager.activate_power(self, power)
 
 @rpc("call_local")
 func on_damaged_visual(_new_health):
@@ -196,3 +214,52 @@ func on_damaged_visual(_new_health):
 	var tween = create_tween()
 	tween.tween_property(sprite, "modulate", Color.RED, 0.1)
 	tween.tween_property(sprite, "modulate", Color.WHITE, 0.1)
+
+func _process_waypoints():
+	var track = GameData.current_track
+	if not track or track.waypoints.is_empty():
+		return
+	var target = track.waypoints[current_waypoint_index]
+	# Account for track scaling if necessary (matches track.gd logic)
+	var scaled_target = target * scale 
+	
+	var dist = global_position.distance_to(scaled_target)
+	
+	if dist < wp_threshold:
+		_advance_waypoint(track.waypoints.size())
+
+func _advance_waypoint(total_waypoints: int):
+	# Detect Lap Completion
+	if current_waypoint_index == total_waypoints - 1:
+		current_lap += 1
+		print(name, " started lap: ", current_lap + 1)
+		
+		if current_lap >= GameData.current_track.laps_required:
+			laps_finished = true
+			_declare_victory()
+	
+	# Move to next index
+	current_waypoint_index = (current_waypoint_index + 1) % total_waypoints
+	#
+#func check_lap_progress(index: int, total_waypoints: int):
+	#if laps_finished: return
+	#
+	## Detect Lap Completion: 
+	## Moving from the last waypoint in the array back to index 0
+	#if last_waypoint_index == total_waypoints - 1 and index == 0:
+		#current_lap += 1
+		#print(name, " started lap: ", current_lap + 1)
+		#
+		#var required = GameData.current_track.laps_required
+		#if current_lap >= required:
+			#laps_finished = true
+			#race_finished.emit(name)
+			#_declare_victory()
+#
+	#last_waypoint_index = index
+
+func _declare_victory():
+	# Stop the kart
+	current_speed = 0
+	is_stunned = true # Reusing stun logic to disable input
+	print("WINNER: ", name)

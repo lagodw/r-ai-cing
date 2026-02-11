@@ -93,3 +93,29 @@ func _spawn_racers():
 			kart.add_child(brain)
 			
 		add_child(kart)
+
+func _draw():
+	var track = GameData.current_track
+	if not track or track.waypoints.is_empty():
+		return
+
+	var points = track.waypoints
+	var num_points = points.size()
+	
+	# We must use the same scaling as the walls/background
+	var s = walls.scale 
+
+	for i in range(num_points):
+		var current_p = points[i] * s
+		var next_p = points[(i + 1) % num_points] * s # Wrap around for loop
+		
+		# Draw a line to the next waypoint
+		draw_line(current_p, next_p, Color.CYAN, 4.0)
+		
+		# Draw a circle at the waypoint
+		# Index 0 is GREEN (Start), others are BLUE
+		var color = Color.GREEN if i == 0 else Color.BLUE
+		draw_circle(current_p, 10.0, color)
+		
+		# Optional: Draw the index number
+		# draw_string(ThemeDB.get_default_font(), current_p + Vector2(15, -15), str(i))

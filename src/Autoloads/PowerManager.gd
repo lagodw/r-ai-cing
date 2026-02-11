@@ -1,28 +1,26 @@
 class_name Power
 extends Node
 
-func activate_power(kart: CharacterBody2D, power_id: String):
-	# 1. Look up the data from the JSON loaded in GameData
-	var data = GameData.powers.get(power_id)
-	if not data: 
-		print("Power not found: " + power_id)
-		return
-	
-	var type = data.get("type", "projectile")
+@onready var proj_scene = preload("res://src/Entities/Projectile.tscn")
+
+func activate_power(kart: Kart, power: PowerDef):
+	var type = power.type
 	
 	match type:
 		"projectile":
-			fire_projectile(kart, data)
-		"self_buff":
-			apply_buff(kart, data)
+			fire_projectile(kart, power)
+		"buff":
+			apply_buff(kart, power)
 		"hazard":
-			drop_hazard(kart, data)
+			drop_hazard(kart, power)
 
-func fire_projectile(kart, data):
-	var proj = load("res://src/Entities/Projectile.tscn").instantiate()
-	
+func fire_projectile(kart: Kart, data: PowerDef):
+	var proj: Projectile = proj_scene.instantiate()
 	# Configure visuals
-	proj.texture_path = "res://assets/sprites/" + data.get("sprite_file", "bullet.png")
+	proj.get_node("Sprite2D").texture = load("res://assets/powers/%s.png"%data.id)
+	
+	proj.speed = data.speed
+	proj.damage = data.damage
 	
 	# Spawn at the front of the car
 	# transform.x is the Forward Vector of the car
@@ -34,7 +32,7 @@ func fire_projectile(kart, data):
 	
 	get_tree().current_scene.add_child(proj)
 
-func drop_hazard(kart, _data):
+func drop_hazard(kart: Kart, _data: PowerDef):
 	# Hazards spawn BEHIND the car
 	var hazard = load("res://src/Entities/Hazard.tscn").instantiate()
 	
@@ -43,11 +41,11 @@ func drop_hazard(kart, _data):
 	
 	get_tree().current_scene.add_child(hazard)
 
-func apply_buff(kart, data):
+func apply_buff(kart: Kart, data: PowerDef):
 	# Example: Speed Boost
 	if data.get("stat_target") == "speed":
-		kart.max_speed += data.get("amount", 200)
+		kart.max_speed += data.amount
 		
 		# Reset after duration
-		await get_tree().create_timer(data.get("duration", 2.0)).timeout
-		kart.max_speed -= data.get("amount", 200)
+		await get_tree().create_timer(data.duration).timeout
+		kart.max_speed -= data.amount
