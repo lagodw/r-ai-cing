@@ -4,36 +4,46 @@ const RED_THRESHOLD = 0.5
 const GREEN_BLUE_LIMIT = 0.2
 const SIMPLIFICATION = 2.0
 
-# Added "centered" parameter
 static func generate_walls_from_texture(texture: Texture2D, parent_node: Node, centered: bool = false):
 	var image: Image = texture.get_image()
+	# Ensure image is in a format we can read easily
+	if image.is_compressed():
+		image.decompress()
+		
 	var bitmap = BitMap.new()
 	bitmap.create(image.get_size())
 	
-	# Scan for RED pixels
+	# 1. Precise Scan for RED pixels
 	for y in range(image.get_height()):
 		for x in range(image.get_width()):
 			var color = image.get_pixel(x, y)
+			# Only pick pixels that are strongly Red and weakly Green/Blue
 			if color.r > RED_THRESHOLD and color.g < GREEN_BLUE_LIMIT and color.b < GREEN_BLUE_LIMIT:
 				bitmap.set_bit(x, y, true)
 			else:
 				bitmap.set_bit(x, y, false)
 	
+	# 2. Convert to Polygons
+	# This will return an Array[PackedVector2Array], one for each "island" of red
 	var polygons = bitmap.opaque_to_polygons(Rect2(Vector2.ZERO, image.get_size()), SIMPLIFICATION)
 	
-	# --- THE FIX: Calculate Offset ---
 	var offset = Vector2.ZERO
 	if centered:
 		offset = -Vector2(image.get_width(), image.get_height()) / 2.0
 	
+	# 3. Create individual CollisionPolygon2D nodes for each island
 	for poly in polygons:
+		if poly.size() < 3: continue # Skip invalid polygons
+		
 		var collider = CollisionPolygon2D.new()
-		# Shift every point in the polygon by the offset
 		var centered_poly = PackedVector2Array()
+		
 		for point in poly:
 			centered_poly.append(point + offset)
 			
 		collider.polygon = centered_poly
+		# Set build mode to Segments to avoid "filling" the middle if it's a loop
+		collider.build_mode = CollisionPolygon2D.BUILD_SEGMENTS
 		parent_node.add_child(collider)
 
 static func generate_path_automatically(texture: Texture2D, start_pos: Vector2, centered: bool = false) -> Array[Vector2]:

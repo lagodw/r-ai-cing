@@ -10,7 +10,7 @@ script = ExtResource("1_7nrbi")
 texture = ExtResource("2_imajx")
 
 [node name="Marker2D" type="Marker2D" parent="Background"]
-position = Vector2(193, -216)
+position = Vector2(361, -434)
 
 [node name="Walls" type="StaticBody2D" parent="."]
 
