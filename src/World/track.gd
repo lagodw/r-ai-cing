@@ -21,16 +21,19 @@ func _generate_track_visuals():
 		# 1. Generate Walls (Red Outline)
 		TrackBuilder.generate_walls_from_texture(tex, walls, true)
 		
-		# 2. Generate Path (Auto-Walk) - NO BLUE DOTS NEEDED
-		if track.waypoints.is_empty():
-			var auto_path = TrackBuilder.generate_path_automatically(tex, track.start_position, true)
-			track.waypoints = auto_path
-			
-			# Draw path for debug (optional)
-			queue_redraw()
+		# 2. Generate Path (Auto-Walk)
+		await get_tree().physics_frame
+		await get_tree().physics_frame 
+
+	# Now generate path
+		var auto_path = TrackBuilder.generate_path_automatically(self, track.start_position)
+		track.waypoints = auto_path
+		
+		# Draw path for debug (optional)
+		queue_redraw()
 				
 		# 3. Fit everything to the screen
-		_fit_track_to_screen(tex.get_size())
+		#_fit_track_to_screen(tex.get_size())
 
 func _fit_track_to_screen(image_size: Vector2):
 	# Get the game's resolution (project settings)
@@ -40,11 +43,11 @@ func _fit_track_to_screen(image_size: Vector2):
 	var scale_factor = Vector2.ONE
 	
 	# Option A: Stretch to fill (might distort aspect ratio)
-	scale_factor = screen_size / image_size
+	#scale_factor = screen_size / image_size
 	
 	# Option B: Fit to screen (maintain aspect ratio) - RECOMMENDED
-	var aspect = min(screen_size.x / image_size.x, screen_size.y / image_size.y)
-	scale_factor = Vector2(aspect, aspect)
+	#var aspect = min(screen_size.x / image_size.x, screen_size.y / image_size.y)
+	#scale_factor = Vector2(aspect, aspect)
 	
 	# Apply scale to Visuals
 	background.scale = scale_factor

@@ -46,64 +46,98 @@ static func generate_walls_from_texture(texture: Texture2D, parent_node: Node, c
 		collider.build_mode = CollisionPolygon2D.BUILD_SEGMENTS
 		parent_node.add_child(collider)
 
-static func generate_path_automatically(texture: Texture2D, start_pos: Vector2, centered: bool = false) -> Array[Vector2]:
-	var image: Image = texture.get_image()
-	var offset = Vector2.ZERO
-	if centered:
-		offset = Vector2(image.get_width(), image.get_height()) / 2.0
-	
-	# Convert start_pos (Global) to Image Coordinates (0,0 is Top-Left)
-	var current_pixel = start_pos + offset
-	
+static func generate_path_automatically(context: Node2D, start_pos: Vector2, look_ahead: float = 200.0, collision_mask: int = 1) -> Array[Vector2]:
 	var path: Array[Vector2] = []
-	#var visited_pixels = {} # To prevent backtracking
-	
-	# Config
-	var step_size = 40.0 # How far to step each time
-	var max_steps = 500
-	#var scan_angle_steps = 16 # Check 16 points around the circle
-	
-	# Initial direction (Assumed facing Right, or user defined. We'll try to find the road)
-	var current_angle = 0.0 
-	
 	path.append(start_pos)
 	
+	# Access the Physics State
+	var space_state = context.get_world_2d().direct_space_state
+	
+	var current_pos = start_pos
+	var current_angle = 0.0 # We will auto-detect start angle below
+	
+	# --- CONFIG ---
+	var step_size = 40.0
+	var max_steps = 3000
+	var steering_speed = 0.4 # Smooth turning
+	# --------------
+
+	# 1. AUTO-DETECT START ROTATION (Physics Version)
+	# Scan 360 degrees to find the longest open path
+	var max_start_dist = -1.0
+	
+	for d in range(0, 360, 10):
+		var rad = deg_to_rad(d)
+		var dir = Vector2.RIGHT.rotated(rad)
+		var target = current_pos + (dir * look_ahead)
+		
+		# Create Ray Query
+		var query = PhysicsRayQueryParameters2D.create(current_pos, target, collision_mask)
+		var result = space_state.intersect_ray(query)
+		
+		var dist = look_ahead
+		if result:
+			dist = current_pos.distance_to(result.position)
+			
+		if dist > max_start_dist:
+			max_start_dist = dist
+			current_angle = rad
+			
+	print("Physics Pathfinding: Start Angle ", rad_to_deg(current_angle))
+
+	# 2. MAIN LOOP
 	for i in range(max_steps):
-		var best_next_pos = Vector2.ZERO
-		var found_valid_step = false
+		var weighted_vector_sum = Vector2.ZERO
+		var total_weight = 0.0
+		var rays_cast = 0
 		
-		# Scan a semi-circle ahead of us (-90 to +90 degrees)
-		# We don't scan behind because we don't want to turn around.
-		for angle_offset in range(-100, 101, 20): # Scan wide arc
-			var radians = deg_to_rad(current_angle + angle_offset)
-			var check_dir = Vector2.RIGHT.rotated(radians)
-			var check_pos = current_pixel + (check_dir * step_size)
+		# Fan Scan (-90 to +90 degrees)
+		for angle_offset in range(-90, 91, 10):
+			var radians = current_angle + deg_to_rad(angle_offset)
+			var dir = Vector2.RIGHT.rotated(radians)
+			var target = current_pos + (dir * look_ahead)
 			
-			# Check bounds
-			if check_pos.x < 0 or check_pos.y < 0 or check_pos.x >= image.get_width() or check_pos.y >= image.get_height():
-				continue
+			var query = PhysicsRayQueryParameters2D.create(current_pos, target, collision_mask)
+			var result = space_state.intersect_ray(query)
 			
-			# Check Color (Is it Road? i.e., NOT Red/Wall)
-			var color = image.get_pixel(int(check_pos.x), int(check_pos.y))
-			var is_wall = (color.r > RED_THRESHOLD and color.g < GREEN_BLUE_LIMIT)
+			var dist = look_ahead
+			if result:
+				dist = current_pos.distance_to(result.position)
 			
-			if not is_wall:
-				best_next_pos = check_pos
-				current_angle += deg_to_rad(angle_offset) # Update facing direction
-				found_valid_step = true
-				break # Found a path forward!
-		
-		if found_valid_step:
-			# Store the Global Coordinate
-			path.append(best_next_pos - offset)
-			current_pixel = best_next_pos
+			# WEIGHTING: Squared distance rewards open paths heavily
+			var weight = pow(dist, 2)
 			
-			# Stop if we are back near the start (Loop closed)
-			if i > 10 and current_pixel.distance_to(start_pos + offset) < step_size:
-				print("Track Loop Detected!")
+			weighted_vector_sum += dir * weight
+			total_weight += weight
+			rays_cast += 1
+			
+		if total_weight > 0:
+			# Calculate Best Direction
+			var target_dir = (weighted_vector_sum / total_weight).normalized()
+			var target_angle = target_dir.angle()
+			
+			# Smooth Steering
+			current_angle = lerp_angle(current_angle, target_angle, steering_speed)
+			
+			# Move
+			var move_dir = Vector2.RIGHT.rotated(current_angle)
+			var next_pos = current_pos + (move_dir * step_size)
+			
+			# Safety Check: Did we just drive INSIDE a wall?
+			# We cast a tiny ray from current to next to ensure we don't phase through thin walls
+			var safety_query = PhysicsRayQueryParameters2D.create(current_pos, next_pos, collision_mask)
+			if space_state.intersect_ray(safety_query):
+				print("Pathfinding blocked at step ", i)
+				break
+				
+			path.append(next_pos)
+			current_pos = next_pos
+			
+			# Loop Complete Check
+			if i > 20 and current_pos.distance_to(start_pos) < step_size * 1.5:
+				print("Track Loop Closed!")
 				break
 		else:
-			print("Pathfinding hit a dead end at step ", i)
 			break
 			
 	return path

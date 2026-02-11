@@ -37,6 +37,7 @@ func _add_whisker(target: Vector2) -> RayCast2D:
 	return ray
 
 func _physics_process(delta):
+	waypoints = GameData.current_track.waypoints
 	if waypoints.is_empty(): return
 	
 	# --- 1. TARGETING ---
