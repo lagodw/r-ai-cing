@@ -1,0 +1,18 @@
+[gd_scene load_steps=3 format=3 uid="uid://dnd4ot45brbyk"]
+
+[ext_resource type="Script" uid="uid://dhqvmde3vmpt3" path="res://src/World/track.gd" id="1_7nrbi"]
+[ext_resource type="Texture2D" uid="uid://cyg0bu5cqy8k2" path="res://assets/tracks/Starter_Track.png" id="2_imajx"]
+
+[node name="Track" type="Node2D"]
+script = ExtResource("1_7nrbi")
+
+[node name="Background" type="Sprite2D" parent="."]
+texture = ExtResource("2_imajx")
+
+[node name="Marker2D" type="Marker2D" parent="Background"]
+position = Vector2(185, -215)
+
+[node name="Walls" type="StaticBody2D" parent="."]
+
+[node name="Camera2D" type="Camera2D" parent="."]
+zoom = Vector2(2, 2)

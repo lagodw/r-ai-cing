@@ -1,0 +1,11 @@
+[gd_scene load_steps=2 format=3 uid="uid://5p4v7xvgvs4o"]
+
+[ext_resource type="Script" uid="uid://bd810r378cqt1" path="res://src/Entities/virtual_joystick.gd" id="1_4tlsx"]
+
+[node name="VirtualJoystick" type="TextureRect"]
+script = ExtResource("1_4tlsx")
+
+[node name="Handle" type="TextureRect" parent="."]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
