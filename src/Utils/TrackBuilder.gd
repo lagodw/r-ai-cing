@@ -89,7 +89,6 @@ static func generate_path_automatically(context: Node2D, start_pos: Vector2, loo
 	for i in range(max_steps):
 		var weighted_vector_sum = Vector2.ZERO
 		var total_weight = 0.0
-		var rays_cast = 0
 		
 		# Fan Scan (-90 to +90 degrees)
 		for angle_offset in range(-90, 91, 10):
@@ -109,7 +108,6 @@ static func generate_path_automatically(context: Node2D, start_pos: Vector2, loo
 			
 			weighted_vector_sum += dir * weight
 			total_weight += weight
-			rays_cast += 1
 			
 		if total_weight > 0:
 			# Calculate Best Direction

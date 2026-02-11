@@ -35,12 +35,13 @@ func _generate_track_visuals():
 		# 3. Fit everything to the screen
 		#_fit_track_to_screen(tex.get_size())
 
-func _fit_track_to_screen(image_size: Vector2):
+func _fit_track_to_screen(_image_size: Vector2):
+	pass
 	# Get the game's resolution (project settings)
-	var screen_size = get_viewport_rect().size
+	#var screen_size = get_viewport_rect().size
 	
 	# Calculate how much we need to shrink/grow the image to fit
-	var scale_factor = Vector2.ONE
+	#var scale_factor = Vector2.ONE
 	
 	# Option A: Stretch to fill (might distort aspect ratio)
 	#scale_factor = screen_size / image_size
@@ -50,10 +51,10 @@ func _fit_track_to_screen(image_size: Vector2):
 	#scale_factor = Vector2(aspect, aspect)
 	
 	# Apply scale to Visuals
-	background.scale = scale_factor
+	#background.scale = scale_factor
 	
 	# Apply scale to Physics (Matches the visual perfectly)
-	walls.scale = scale_factor
+	#walls.scale = scale_factor
 
 func _spawn_racers():
 	var track = GameData.current_track
@@ -96,29 +97,26 @@ func _spawn_racers():
 			kart.add_child(brain)
 			
 		add_child(kart)
-
-func _draw():
-	var track = GameData.current_track
-	if not track or track.waypoints.is_empty():
-		return
-
-	var points = track.waypoints
-	var num_points = points.size()
-	
-	# We must use the same scaling as the walls/background
-	var s = walls.scale 
-
-	for i in range(num_points):
-		var current_p = points[i] * s
-		var next_p = points[(i + 1) % num_points] * s # Wrap around for loop
-		
-		# Draw a line to the next waypoint
-		draw_line(current_p, next_p, Color.CYAN, 4.0)
-		
-		# Draw a circle at the waypoint
-		# Index 0 is GREEN (Start), others are BLUE
-		var color = Color.GREEN if i == 0 else Color.BLUE
-		draw_circle(current_p, 10.0, color)
-		
-		# Optional: Draw the index number
-		# draw_string(ThemeDB.get_default_font(), current_p + Vector2(15, -15), str(i))
+#
+#func _draw():
+	#var track = GameData.current_track
+	#if not track or track.waypoints.is_empty():
+		#return
+#
+	#var points = track.waypoints
+	#var num_points = points.size()
+	#
+	## We must use the same scaling as the walls/background
+	#var s = walls.scale 
+#
+	#for i in range(num_points):
+		#var current_p = points[i] * s
+		#var next_p = points[(i + 1) % num_points] * s # Wrap around for loop
+		#
+		## Draw a line to the next waypoint
+		#draw_line(current_p, next_p, Color.CYAN, 4.0)
+		#
+		## Draw a circle at the waypoint
+		## Index 0 is GREEN (Start), others are BLUE
+		#var color = Color.GREEN if i == 0 else Color.BLUE
+		#draw_circle(current_p, 10.0, color)

@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3 uid="uid://ceh82rynpo7cg"]
+[gd_scene load_steps=7 format=3 uid="uid://ceh82rynpo7cg"]
 
 [ext_resource type="Texture2D" uid="uid://533g6wyyxxl3" path="res://assets/karts/Starter_Kart.png" id="1_1f23y"]
 [ext_resource type="Script" uid="uid://b33jv2vay4pj6" path="res://src/Entities/kart.gd" id="1_4um18"]
@@ -23,6 +23,19 @@ properties/4/path = NodePath("Kart:throttle_input")
 properties/4/spawn = true
 properties/4/replication_mode = 1
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_4um18"]
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_4t204"]
+bg_color = Color(0, 0.396098, 0.227512, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
 [node name="Kart" type="CharacterBody2D"]
 script = ExtResource("1_4um18")
 
@@ -35,3 +48,16 @@ shape = SubResource("RectangleShape2D_4um18")
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_4um18")
+
+[node name="HealthBarAnchor" type="Node2D" parent="."]
+
+[node name="ProgressBar" type="ProgressBar" parent="HealthBarAnchor"]
+offset_left = -12.0
+offset_top = -17.0
+offset_right = 12.0
+offset_bottom = -10.0
+theme_override_styles/background = SubResource("StyleBoxFlat_4um18")
+theme_override_styles/fill = SubResource("StyleBoxFlat_4t204")
+step = 1.0
+value = 50.0
+show_percentage = false

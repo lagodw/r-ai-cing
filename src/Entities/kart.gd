@@ -16,7 +16,10 @@ var acceleration: float = 800.0
 var turn_speed: float = 3.5
 var friction: float = 0.95
 var max_health: int = 100
-var current_health: int = 100
+var current_health: int = 100:
+	set(val):
+		current_health = val
+		update_health_bar()
 
 # --- State Variables ---
 var current_speed: float = 0.0
@@ -36,6 +39,8 @@ var input_throttle: float = 0.0 # -1.0 (Brake) to 1.0 (Gas)
 # --- Node References ---
 @onready var sprite = $Sprite2D
 @onready var collider = $CollisionShape2D
+@onready var health_bar = $HealthBarAnchor/ProgressBar
+@onready var health_anchor = $HealthBarAnchor
 
 func _enter_tree():
 	# Try to parse the name as a Player ID
@@ -53,10 +58,16 @@ func _enter_tree():
 func _ready():
 	# Load the stats defined in JSON via the GameData factory
 	configure_from_id(kart_id)
+	
+	if health_bar:
+		health_bar.max_value = max_health
 
 # --- Setup ---
 func configure_from_id(id: String):
 	stats = GameData.karts.get(id)
+	
+	max_health = stats.max_health
+	current_health = max_health
 	
 	if not stats:
 		printerr("Kart ID not found: ", id)
@@ -89,6 +100,11 @@ func _physics_process(delta):
 	_process_waypoints()
 	_gather_input()
 	_apply_physics(delta)
+	
+	if health_anchor:
+		health_anchor.global_rotation = 0
+		# Offset it above the kart
+		health_anchor.global_position = global_position + Vector2(0, -20)
 
 # --- Physics & Movement ---
 func _gather_input():
@@ -153,7 +169,7 @@ func take_damage(amount: int):
 	current_health -= amount
 	
 	# RPC: Tell everyone I took damage (for visual effects/sounds)
-	rpc("on_damaged_visual", current_health)
+	rpc("on_damaged_visual")
 	
 	if current_health <= 0:
 		_break_down()
@@ -209,11 +225,12 @@ func activate_power_effect(power: PowerDef):
 	PowerManager.activate_power(self, power)
 
 @rpc("call_local")
-func on_damaged_visual(_new_health):
+func on_damaged_visual():
 	# Flash Red
 	var tween = create_tween()
 	tween.tween_property(sprite, "modulate", Color.RED, 0.1)
 	tween.tween_property(sprite, "modulate", Color.WHITE, 0.1)
+	
 
 func _process_waypoints():
 	var track = GameData.current_track
@@ -263,3 +280,23 @@ func _declare_victory():
 	current_speed = 0
 	is_stunned = true # Reusing stun logic to disable input
 	print("WINNER: ", name)
+
+func update_health_bar():
+	if not health_bar:
+		return
+	
+	health_bar.value = current_health
+	
+	# Calculate percentage for color coding
+	var health_pct = float(current_health) / float(max_health)
+	
+	var new_color: Color = Color.SEA_GREEN
+	if health_pct <= 0.2:
+		new_color = Color.RED
+	elif health_pct <= 0.5:
+		new_color = Color.YELLOW
+	
+	var style = health_bar.get_theme_stylebox("fill").duplicate()
+	if style is StyleBoxFlat:
+		style.bg_color = new_color
+	health_bar.add_theme_stylebox_override("fill", style)
