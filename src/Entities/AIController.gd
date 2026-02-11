@@ -1,71 +1,129 @@
 extends Node
 
-# References
 @onready var kart = get_parent()
 
-# Pathfinding State
+# Pathfinding
 var waypoints: Array = []
 var current_wp_index = 0
-var wp_threshold = 100.0 # How close we need to get to target the next one
+var wp_threshold = 150.0 
 
-# Obstacle Avoidance (Raycasts)
-var ray_left: RayCast2D
-var ray_right: RayCast2D
+# Sensors
+var ray_l: RayCast2D
+var ray_r: RayCast2D
+var ray_c: RayCast2D
+
+# State
+var stuck_timer: float = 0.0
+var is_reversing: bool = false
+var reverse_timer: float = 0.0
 
 func _ready():
-	# 1. Load Waypoints from Global Data
-	for p in GameData.current_track.waypoints:
-		waypoints.append(Vector2(p["x"], p["y"]))
-			
-	# 2. Setup Raycasts (Eyes) dynamically
-	ray_left = _create_ray(Vector2(50, -30)) # 50px forward, 30px left
-	ray_right = _create_ray(Vector2(50, 30)) # 50px forward, 30px right
+	if GameData.current_track and GameData.current_track.waypoints:
+		waypoints = GameData.current_track.waypoints
+		# Optimization: Find the closest waypoint immediately so we don't start at index 0 if we spawned at index 10
+		current_wp_index = _find_closest_waypoint_index()
+	
+	ray_c = _add_whisker(Vector2(150, 0))
+	ray_l = _add_whisker(Vector2(80, -60))
+	ray_r = _add_whisker(Vector2(80, 60))
 
-func _create_ray(target_pos):
+func _add_whisker(target: Vector2) -> RayCast2D:
 	var ray = RayCast2D.new()
-	ray.target_position = target_pos
+	ray.target_position = target
 	ray.enabled = true
+	ray.collide_with_bodies = true
+	ray.collide_with_areas = false
 	kart.call_deferred("add_child", ray)
 	return ray
 
-func _physics_process(_delta):
+func _physics_process(delta):
 	if waypoints.is_empty(): return
 	
-	# --- 1. FIND TARGET ---
+	# --- 1. TARGETING ---
 	var target = waypoints[current_wp_index]
-	var distance = kart.global_position.distance_to(target)
+	var dist = kart.global_position.distance_to(target)
 	
-	if distance < wp_threshold:
+	# Advance to next waypoint
+	if dist < wp_threshold:
 		current_wp_index = (current_wp_index + 1) % waypoints.size()
 		target = waypoints[current_wp_index]
-		
-	# --- 2. STEERING LOGIC ---
-	# Calculate angle difference between "Facing" and "Target"
-	var desired_direction = (target - kart.global_position).normalized()
-	var current_direction = Vector2.RIGHT.rotated(kart.rotation)
-	var angle_diff = current_direction.angle_to(desired_direction)
-	
-	# Base steering towards waypoint
-	var steer = clamp(angle_diff * 2.0, -1.0, 1.0)
-	
-	# --- 3. AVOIDANCE OVERRIDE ---
-	# If about to hit a wall, steer hard away
-	if ray_left.is_colliding():
-		steer = 1.0 # Turn Right
-	elif ray_right.is_colliding():
-		steer = -1.0 # Turn Left
-		
-	# --- 4. OUTPUT TO KART ---
-	kart.steer_input = steer
-	kart.throttle_input = 1.0 # Always gas (simple AI)
-	
-	# Slow down for sharp turns
-	if abs(angle_diff) > 1.0: # If turn is > 57 degrees
-		kart.throttle_input = 0.5 
-		
-	_handle_combat()
 
-func _handle_combat():
-	# Simple random logic: If we have an item, use it occasionally
-	if randf() < 0.01: # 1% chance per frame (~once every 1.5 sec)
-		kart.use_power(0)
+	# Vector Math
+	var desired_dir = (target - kart.global_position).normalized()
+	var current_dir = Vector2.RIGHT.rotated(kart.rotation)
+	var angle_to_target = current_dir.angle_to(desired_dir)
+	
+	# --- 2. WRONG WAY DETECTION ---
+	# If the angle to target is greater than 90 degrees (approx 1.5 radians), we are facing backwards
+	var is_wrong_way = abs(angle_to_target) > 1.5
+	
+	# --- 3. STUCK DETECTION ---
+	# If we are pushing gas but not moving, we are stuck.
+	if kart.input_throttle > 0 and kart.velocity.length() < 20:
+		stuck_timer += delta
+	else:
+		stuck_timer = 0.0
+	
+	# Trigger Reverse Maneuver
+	if stuck_timer > 1.0:
+		is_reversing = true
+		reverse_timer = 1.5 # Reverse for 1.5 seconds
+		stuck_timer = 0.0
+		
+	if is_reversing:
+		_handle_reverse_maneuver(delta)
+		return # Skip normal steering
+
+	# --- 4. STEERING LOGIC ---
+	if is_wrong_way:
+		# EMERGENCY MODE: Ignore walls, just turn around
+		# If moving fast forward, brake first
+		if kart.velocity.length() > 100 and kart.input_throttle > 0:
+			kart.input_throttle = -1.0 # Brake
+			kart.input_steer = 0.0 # Don't spin while braking hard
+		else:
+			# Stopped or slow? Turn hard.
+			kart.input_throttle = 0.5 # Gentle gas
+			kart.input_steer = 1.0 if angle_to_target > 0 else -1.0
+			
+	else:
+		# NORMAL MODE: Path follow + Wall Avoidance
+		
+		# Base steering towards waypoint
+		var steer = angle_to_target
+		
+		# Raycast Avoidance (Only when going forward!)
+		if ray_l.is_colliding(): steer += 1.5
+		if ray_r.is_colliding(): steer -= 1.5
+		if ray_c.is_colliding(): steer += 1.0 if steer > 0 else -1.0
+		
+		kart.input_steer = clamp(steer * 2.0, -1.0, 1.0)
+		
+		# Cornering speed control
+		if abs(steer) > 0.5:
+			kart.input_throttle = 0.6
+		else:
+			kart.input_throttle = 1.0
+
+func _handle_reverse_maneuver(delta):
+	reverse_timer -= delta
+	if reverse_timer <= 0:
+		is_reversing = false
+		return
+		
+	# Reverse straight back, or turn opposite to obstacle
+	kart.input_throttle = -0.8
+	
+	# If left whisker is hit, steer Right (which in reverse pushes tail Left)
+	# It's confusing, but usually keeping steer 0 or inverting helps unstick
+	kart.input_steer = 0.0 
+
+func _find_closest_waypoint_index() -> int:
+	var closest_idx = 0
+	var min_dist = INF
+	for i in range(waypoints.size()):
+		var d = kart.global_position.distance_squared_to(waypoints[i])
+		if d < min_dist:
+			min_dist = d
+			closest_idx = i
+	return closest_idx

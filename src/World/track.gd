@@ -17,21 +17,17 @@ func _generate_track_visuals():
 	
 	if ResourceLoader.exists(track.background_path):
 		var tex = load(track.background_path)
-		background.texture = tex
+	
+		# 1. Generate Walls (Red Outline)
+		TrackBuilder.generate_walls_from_texture(tex, walls, true)
 		
-		# 1. IMPORTANT: Align coordinates
-		# BitMap generation starts at 0,0 (Top-Left). 
-		# Sprites usually default to Center. We must un-center to match.
-		#background.centered = false 
-		
-		# 2. Generate Walls
-		if track.walls.is_empty():
-			TrackBuilder.generate_walls_from_texture(tex, walls, true)
-		else:
-			for poly_points in track.walls:
-				var col = CollisionPolygon2D.new()
-				col.polygon = poly_points
-				walls.add_child(col)
+		# 2. Generate Path (Auto-Walk) - NO BLUE DOTS NEEDED
+		if track.waypoints.is_empty():
+			var auto_path = TrackBuilder.generate_path_automatically(tex, track.start_position, true)
+			track.waypoints = auto_path
+			
+			# Draw path for debug (optional)
+			queue_redraw()
 				
 		# 3. Fit everything to the screen
 		_fit_track_to_screen(tex.get_size())
@@ -74,7 +70,7 @@ func _spawn_racers():
 		# Grid positioning (scaled)
 		var col = i % 2
 		var row = float(i) / 2
-		var offset = Vector2(col * 80, row * 80) * walls.scale # Scale spacing too
+		var offset = Vector2(col * 20, row * 20) * walls.scale # Scale spacing too
 		
 		kart.scale = walls.scale
 		kart.global_position = final_start + offset

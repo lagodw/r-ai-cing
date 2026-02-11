@@ -10,9 +10,8 @@ script = ExtResource("1_7nrbi")
 texture = ExtResource("2_imajx")
 
 [node name="Marker2D" type="Marker2D" parent="Background"]
-position = Vector2(185, -215)
+position = Vector2(193, -216)
 
 [node name="Walls" type="StaticBody2D" parent="."]
 
 [node name="Camera2D" type="Camera2D" parent="."]
-zoom = Vector2(2, 2)
