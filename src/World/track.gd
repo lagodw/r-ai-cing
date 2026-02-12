@@ -95,11 +95,19 @@ func _spawn_racers():
 	
 	# 2. Bots (Indices 1-7)
 	var all_kart_ids = GameData.karts.keys()
+	var all_powers = GameData.powers.values() # Get all available PowerDef resources
 	for i in range(1):
+		var bot_powers: Array[PowerDef] = []
+		if all_powers.size() >= 2:
+			var shuffled_powers = all_powers.duplicate()
+			shuffled_powers.shuffle()
+			bot_powers = [shuffled_powers[0], shuffled_powers[1]]
+		
+		printt(bot_powers[0].id, bot_powers[1].id)
 		racer_configs.append({
 			"id": all_kart_ids.pick_random(),
 			"is_player": false,
-			"powers": [] # Bots have no powers for now
+			"powers": bot_powers
 		})
 	
 	# --- SPAWN LOOP ---
@@ -144,6 +152,7 @@ func _spawn_racers():
 			kart.is_player_controlled = false
 			var brain = load("res://src/Entities/AIController.gd").new()
 			brain.name = "AIController"
+			kart.power_inventory = config.powers.duplicate()
 			kart.add_child(brain)
 			
 		add_child(kart)

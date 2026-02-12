@@ -66,6 +66,7 @@ func _ready():
 	# Load the stats defined in JSON via the GameData factory
 	configure_from_id(kart_id)
 	
+	add_to_group("karts")
 	if health_bar:
 		health_bar.max_value = max_health
 

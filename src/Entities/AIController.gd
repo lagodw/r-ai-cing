@@ -7,6 +7,10 @@ var waypoints: Array = []
 var current_wp_index = 0
 var wp_threshold = 150.0 
 
+# Power usage timers to prevent spamming checks every frame
+var power_check_timer: float = 0.0
+var check_interval: float = 0.5
+
 # Sensors
 var ray_l: RayCast2D
 var ray_r: RayCast2D
@@ -105,6 +109,11 @@ func _physics_process(delta):
 			kart.input_throttle = 0.6
 		else:
 			kart.input_throttle = 1.0
+			
+	power_check_timer += delta
+	if power_check_timer >= check_interval:
+		power_check_timer = 0.0
+		_evaluate_power_usage()
 
 func _handle_reverse_maneuver(delta):
 	reverse_timer -= delta
@@ -128,3 +137,60 @@ func _find_closest_waypoint_index() -> int:
 			min_dist = d
 			closest_idx = i
 	return closest_idx
+
+func _evaluate_power_usage():
+	if kart.is_stunned: return
+
+	for i in range(kart.power_inventory.size()):
+		var power = kart.power_inventory[i]
+		if not power or kart.slot_on_cooldown[i]: continue
+		
+		match power.type:
+			"Buff":
+				# Strategic choice: Use immediately
+				kart.use_power(i)
+			"Projectile":
+				if _should_use_projectile(power):
+					kart.use_power(i)
+			"Hazard":
+				if _should_use_hazard(power):
+					kart.use_power(i)
+
+func _should_use_projectile(power: PowerDef) -> bool:
+	var forward_dir = Vector2.RIGHT.rotated(kart.rotation)
+	
+	match power.projectile_behavior:
+		"Forward", "Homing":
+			# Check for karts in a 45-degree cone in front
+			return _is_target_in_range(forward_dir, 0.8, power.detection_radius)
+		"Backward":
+			# Check for karts behind
+			return _is_target_in_range(-forward_dir, 0.8, 300.0)
+		"Orbit":
+			# Use if any enemy is nearby
+			return _is_target_in_range(forward_dir, -1.0, 150.0) # -1.0 dot means 360 degrees
+	return false
+
+func _should_use_hazard(power: PowerDef) -> bool:
+	var forward_dir = Vector2.RIGHT.rotated(kart.rotation)
+	if power.projectile_behavior == "Forward":
+		# Lobbing: Check for targets further ahead
+		return _is_target_in_range(forward_dir, 0.9, 400.0)
+	else:
+		# Dropping: Check for targets closely behind
+		return _is_target_in_range(-forward_dir, 0.95, 400.0)
+
+func _is_target_in_range(check_dir: Vector2, dot_threshold: float, radius: float) -> bool:
+	var potential_targets = get_tree().get_nodes_in_group("karts")
+	
+	for target in potential_targets:
+		if target == kart or target.is_stunned: continue
+		
+		var to_target = (target.global_position - kart.global_position)
+		var dist = to_target.length()
+		
+		if dist <= radius:
+			var dot = check_dir.dot(to_target.normalized())
+			if dot >= dot_threshold:
+				return true
+	return false
