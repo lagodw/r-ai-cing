@@ -37,6 +37,7 @@ corner_radius_bottom_right = 2
 corner_radius_bottom_left = 2
 
 [node name="Kart" type="CharacterBody2D"]
+z_index = 1
 script = ExtResource("1_4um18")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]

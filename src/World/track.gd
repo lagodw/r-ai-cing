@@ -8,7 +8,17 @@ extends Node2D
 
 func _ready():
 	_generate_track_visuals()
-	# We spawn racers AFTER the track is scaled so they spawn in the right spot
+	
+	# 1. Instantiate Selection Screen
+	var selection = load("res://src/World/selection.tscn").instantiate()
+	# Add it to the CanvasLayer (Track.tscn doesn't have one, so we add it as child)
+	# Since Selection is a CanvasLayer, it will render on top.
+	add_child(selection)
+	
+	# 2. Wait for player to finish selecting
+	await selection.race_started
+	
+	# 3. NOW we spawn everyone
 	_spawn_racers()
 
 func _generate_track_visuals():
@@ -59,72 +69,70 @@ func _fit_track_to_screen(_image_size: Vector2):
 func _spawn_racers():
 	var track = GameData.current_track
 	
-	# 1. Determine Start Position and Orientation
+	# --- Grid Calculation Setup (Same as before) ---
 	var raw_start = Vector2(200, 200) 
-	var forward_dir = Vector2.RIGHT # Default to pointing Right
+	var forward_dir = Vector2.RIGHT
 	
 	if track: 
 		raw_start = track.start_position
-		# Auto-detect direction based on the first two waypoints
 		if track.waypoints.size() > 1:
 			var p0 = track.waypoints[0]
 			var p1 = track.waypoints[1]
 			forward_dir = (p1 - p0).normalized()
 	
-	# Calculate the "Right" vector (90 degrees from forward) for lane spacing
 	var right_dir = forward_dir.rotated(PI / 2)
-	
 	var final_start = raw_start * walls.scale
-	var all_kart_ids = GameData.karts.keys()
 	
-	# 2. Analyze Kart Sizes for Dynamic Spacing
+	# --- PREPARE RACER LIST ---
+	var racer_configs = []
+	
+	# 1. Player (Index 0)
+	racer_configs.append({
+		"id": GameData.selected_kart_id,
+		"is_player": true,
+		"powers": GameData.selected_powers
+	})
+	
+	# 2. Bots (Indices 1-7)
+	var all_kart_ids = GameData.karts.keys()
+	for i in range(1):
+		racer_configs.append({
+			"id": all_kart_ids.pick_random(),
+			"is_player": false,
+			"powers": [] # Bots have no powers for now
+		})
+	
+	# --- SPAWN LOOP ---
+	# Calculate spacing constants
 	var max_len = 40.0
 	var max_wid = 20.0
+	# (Assuming standard size, or you can loop configs to find max)
 	
-	for id in all_kart_ids:
-		var stats = GameData.karts.get(id)
-		if stats:
-			if stats.length > max_len: max_len = stats.length
-			if stats.width > max_wid: max_wid = stats.width
-			
-	# Grid Configuration
-	# "gap_depth": Distance between a kart and the one directly behind it (in the same lane)
-	# We use 1.5x length for safety.
-	var gap_depth = max_len * 1.25 
-	var gap_width = max_wid * 0.5 # Good spacing between parallel lanes
+	var gap_depth = max_len * 2.5 # Spacing
+	var gap_width = max_wid * 2.0 
 	
-	for i in range(all_kart_ids.size()):
-		var id = all_kart_ids[i]
+	for i in range(racer_configs.size()):
+		var config = racer_configs[i]
 		var kart = kart_scene.instantiate()
 		
-		# 3. Calculate Staggered Position
-		var lane_index = i % 2 # 0 or 1
-		
-		# "Half offset in columns":
-		# We step back by 0.5 * gap_depth for every single kart. 
-		# This puts Kart 2 exactly one full gap_depth behind Kart 0.
+		# Grid Position Logic
+		var lane_index = i % 2 
 		var dist_back = float(i) * (gap_depth * 0.5)
-		
-		# Center the two lanes around the start line
-		# Lane 0 goes Left (-0.5 width), Lane 1 goes Right (+0.5 width)
 		var lane_offset = (float(lane_index) - 0.5) * gap_width
-		
-		# Combine vectors: Start - Backward + Sideways
-		# We multiply by walls.scale to ensure the grid matches the zoom level
 		var grid_offset = (-forward_dir * dist_back) + (right_dir * lane_offset)
 		var final_offset = grid_offset * walls.scale
 		
 		kart.scale = walls.scale
 		kart.global_position = final_start + final_offset
-		
-		# Align kart to face the race direction
 		kart.rotation = forward_dir.angle()
 		
-		# --- Setup (Unchanged) ---
-		if i == 0:
-			kart.name = "1"
-			kart.kart_id = id
+		# Configure Kart
+		kart.kart_id = config.id
+		
+		if config.is_player:
+			kart.name = "1" # Authority
 			kart.is_player_controlled = true
+			kart.power_inventory = config.powers.duplicate() # Inject selected powers
 			
 			camera.position = kart.position
 			var remote = RemoteTransform2D.new()
@@ -132,7 +140,6 @@ func _spawn_racers():
 			kart.add_child(remote)
 		else:
 			kart.name = "Bot_" + str(i)
-			kart.kart_id = id
 			kart.is_player_controlled = false
 			var brain = load("res://src/Entities/AIController.gd").new()
 			brain.name = "AIController"

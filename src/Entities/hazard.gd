@@ -67,8 +67,8 @@ func _on_hit(body: Node) -> void:
 			_activate()
 		return
 
-	if body.name == shooter_id:
-		return
+	#if body.name == shooter_id:
+		#return
 		
 	if body.has_method("take_damage"):
 		body.take_damage(damage)

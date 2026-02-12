@@ -1,8 +1,6 @@
 class_name KartDef extends Resource
 
 @export var id: String
-@export var kart_name: String
-@export var sprite_path: String
 
 # Stats
 @export var max_health: int = 100

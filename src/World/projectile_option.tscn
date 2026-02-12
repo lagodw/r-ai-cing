@@ -20,7 +20,8 @@ theme_override_font_sizes/font_size = 24
 text = "Power Name"
 horizontal_alignment = 1
 
-[node name="TextureRect" type="TextureRect" parent="VBoxContainer"]
+[node name="Icon" type="TextureRect" parent="VBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 texture = ExtResource("1_g0xjb")
 expand_mode = 5

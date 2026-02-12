@@ -51,8 +51,6 @@ var input_throttle: float = 0.0 # -1.0 (Brake) to 1.0 (Gas)
 func _enter_tree():
 	# Try to parse the name as a Player ID
 	var id_from_name = name.to_int()
-	power_inventory[0] = load("uid://oul85qrwiggj")
-	power_inventory[1] = load("uid://drd0qyctfi35c")
 	
 	if id_from_name > 0:
 		# It's a valid Player ID (e.g. "1", "2491")
@@ -81,7 +79,7 @@ func configure_from_id(id: String):
 		return
 
 	# Apply Visuals
-	sprite.texture = load(stats.sprite_path)
+	sprite.texture = load("res://assets/karts/%s.png" % stats.id)
 	_apply_dimensions(stats.length, stats.width)
 	weight = max(stats.length * stats.width, 1.0)
 	

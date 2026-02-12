@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="KartDef" load_steps=2 format=3 uid="uid://bp8a851qfd2y5"]
+
+[ext_resource type="Script" uid="uid://d2vcvaa1qp6xu" path="res://src/Classes/KartDef.gd" id="1_bfn04"]
+
+[resource]
+script = ExtResource("1_bfn04")
+id = "Future_Kart"
+sprite_path = "uid://533g6wyyxxl3"
+max_health = 100
+max_speed = 200.0
+acceleration = 400.0
+turn_speed = 3.5
+length = 80.0
+width = 40.0
+weapon_offset = Vector2(0, 0)
+metadata/_custom_type_script = "uid://d2vcvaa1qp6xu"
