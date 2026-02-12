@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dqitcb6afhxmy"
-path="res://.godot/imported/Bullet.png-ee8f41b18d3bafc94e627e7de99f64b1.ctex"
+uid="uid://s2wxeq2rplbc"
+path="res://.godot/imported/Molton Core.png-61f6b4459fd0367dec36ecf1d22616bd.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/powers/Bullet.png"
-dest_files=["res://.godot/imported/Bullet.png-ee8f41b18d3bafc94e627e7de99f64b1.ctex"]
+source_file="res://assets/powers/Molton Core.png"
+dest_files=["res://.godot/imported/Molton Core.png-61f6b4459fd0367dec36ecf1d22616bd.ctex"]
 
 [params]
 

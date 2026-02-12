@@ -6,16 +6,36 @@ signal selected(power_def, node_ref)
 
 func _ready() -> void:
 	%Icon.texture = load("res://assets/powers/%s.png" % power.id)
+	%PowerType.text = power.type
 	%Name.text = power.id
 	%Type.text = str(power.projectile_behavior)
 	%Damage.text = str(power.damage)
 	%Speed.text = str(power.speed)
 	%Duration.text = str(power.duration)
 	%Cooldown.text = str(power.cooldown)
+	%Stat.text = power.stat_target
+	%Amount.text = str(power.amount)
 	
-	if power.projectile_behavior == "orbit":
-		%DurationBox.visible = true
-		%SpeedBox.visible = false
+	match power.type:
+		"Projectile":
+			%SpeedBox.visible = false
+			%DurationBox.visible = false
+			%StatBox.visible = false
+			%AmountBox.visible = false
+			if power.projectile_behavior == "Orbit":
+				%DurationBox.visible = true
+				%SpeedBox.visible = false
+		"Hazard":
+			%SpeedBox.visible = false
+			%DurationBox.visible = false
+			%StatBox.visible = false
+			%AmountBox.visible = false
+		"Buff":
+			%DurationBox.visible = false
+			%TypeBox.visible = false
+			%DamageBox.visible = false
+			%SpeedBox.visible = false
+		
 
 func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:

@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="PowerDef" load_steps=2 format=3 uid="uid://celwe5nun0dxh"]
+
+[ext_resource type="Script" uid="uid://bcbsm06swr0r8" path="res://src/Classes/PowerDef.gd" id="1_bjv26"]
+
+[resource]
+script = ExtResource("1_bjv26")
+id = "Heal"
+type = "Buff"
+cooldown = 3.0
+length = 20.0
+width = 20.0
+speed = 800.0
+damage = 10
+projectile_behavior = "Forward"
+turn_speed = 4.0
+detection_radius = 400.0
+stat_target = "health"
+amount = 50.0
+duration = 0.0
+metadata/_custom_type_script = "uid://bcbsm06swr0r8"

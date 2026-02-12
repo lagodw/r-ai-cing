@@ -1,15 +1,17 @@
 [gd_resource type="Resource" script_class="PowerDef" load_steps=2 format=3 uid="uid://lg1jeeu35y1c"]
 
-[ext_resource type="Script" uid="uid://bcbsm06swr0r8" path="res://src/Classes/PowerDef.gd" id="1_vapkx"]
+[ext_resource type="Script" uid="uid://bcbsm06swr0r8" path="res://src/Classes/PowerDef.gd" id="1_veln2"]
 
 [resource]
-script = ExtResource("1_vapkx")
-id = "rear_bullet"
-type = "projectile"
+script = ExtResource("1_veln2")
+id = "Frost Bolt"
+type = "Projectile"
 cooldown = 0.5
+length = 20.0
+width = 20.0
 speed = 400.0
 damage = 20
-projectile_behavior = "backward"
+projectile_behavior = "Backward"
 turn_speed = 4.0
 detection_radius = 400.0
 stat_target = ""

@@ -6,11 +6,11 @@ extends Node
 func activate_power(kart: Kart, power: PowerDef):
 	var type = power.type
 	match type:
-		"projectile":
+		"Projectile":
 			fire_projectile(kart, power)
-		"buff":
+		"Buff":
 			apply_buff(kart, power)
-		"hazard":
+		"Hazard":
 			drop_hazard(kart, power)
 
 func fire_projectile(kart: Kart, data: PowerDef):
@@ -35,7 +35,7 @@ func fire_projectile(kart: Kart, data: PowerDef):
 	var kart_length = sprite.texture.get_width() * sprite.scale.x
 	var forward_dist = (kart_length / 2.0) + (data.length / 2.0) + 10.0
 	
-	if data.projectile_behavior == "orbit":
+	if data.projectile_behavior == "Orbit":
 		proj.orbit_center = kart
 		proj.orbit_duration = data.duration
 		proj.orbit_radius = 100.0
@@ -43,7 +43,7 @@ func fire_projectile(kart: Kart, data: PowerDef):
 		proj.global_position = kart.global_position + offset
 		proj.rotation = kart.rotation + (PI / 2.0)
 		
-	elif data.projectile_behavior == "backward":
+	elif data.projectile_behavior == "Backward":
 		var offset = Vector2(-forward_dist, 0).rotated(kart.rotation)
 		proj.global_position = kart.global_position + offset
 		proj.rotation = kart.rotation + PI
@@ -71,7 +71,7 @@ func drop_hazard(kart: Kart, data: PowerDef):
 	sprite.texture = load("res://assets/powers/%s.png" % data.id)
 	
 	# Determine Deployment (Lob vs Drop)
-	if data.projectile_behavior == "straight":
+	if data.projectile_behavior == "Forward":
 		# Lob Forward
 		var forward_vector = Vector2.RIGHT.rotated(kart.rotation)
 		hazard.global_position = kart.global_position + (forward_vector * 60.0)

@@ -1,10 +1,10 @@
 [gd_scene load_steps=4 format=3 uid="uid://ds4i1xicjsovx"]
 
 [ext_resource type="Theme" uid="uid://crtg3dknqulx2" path="res://assets/UI/Theme.tres" id="1_2okhg"]
-[ext_resource type="Texture2D" uid="uid://dqitcb6afhxmy" path="res://assets/powers/bullet.png" id="1_g0xjb"]
+[ext_resource type="Texture2D" uid="uid://dqitcb6afhxmy" path="res://assets/powers/Bullet.png" id="1_g0xjb"]
 [ext_resource type="Script" uid="uid://iucot3idffyq" path="res://src/World/projectile_option.gd" id="2_ngqix"]
 
-[node name="ProjectileOption" type="MarginContainer"]
+[node name="PowerOption" type="MarginContainer"]
 offset_right = 233.0
 offset_bottom = 167.0
 theme = ExtResource("1_2okhg")
@@ -20,53 +20,112 @@ theme_override_font_sizes/font_size = 24
 text = "Power Name"
 horizontal_alignment = 1
 
-[node name="Icon" type="TextureRect" parent="VBoxContainer"]
+[node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="Control" type="Control" parent="VBoxContainer/HBoxContainer2"]
+custom_minimum_size = Vector2(0, 150)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Icon" type="TextureRect" parent="VBoxContainer/HBoxContainer2"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(150, 150)
 layout_mode = 2
 texture = ExtResource("1_g0xjb")
-expand_mode = 5
+expand_mode = 1
+
+[node name="Control2" type="Control" parent="VBoxContainer/HBoxContainer2"]
+custom_minimum_size = Vector2(0, 150)
+layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="HBoxContainer5" type="HBoxContainer" parent="VBoxContainer"]
 layout_mode = 2
 
-[node name="Label4" type="Label" parent="VBoxContainer/HBoxContainer5"]
+[node name="PowerType" type="Label" parent="VBoxContainer/HBoxContainer5"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 18
 text = "Projectile"
 horizontal_alignment = 1
 
-[node name="Type" type="HBoxContainer" parent="VBoxContainer"]
+[node name="Control" type="Control" parent="VBoxContainer"]
+custom_minimum_size = Vector2(0, 10)
 layout_mode = 2
 
-[node name="Label" type="Label" parent="VBoxContainer/Type"]
+[node name="TypeBox" type="HBoxContainer" parent="VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/TypeBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
 text = "Type:"
 
-[node name="Control" type="Control" parent="VBoxContainer/Type"]
+[node name="Control" type="Control" parent="VBoxContainer/TypeBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="Type" type="Label" parent="VBoxContainer/Type"]
+[node name="Type" type="Label" parent="VBoxContainer/TypeBox"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
 text = "Forward"
 
-[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
+[node name="DamageBox" type="HBoxContainer" parent="VBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 
-[node name="Label3" type="Label" parent="VBoxContainer/HBoxContainer"]
+[node name="Label3" type="Label" parent="VBoxContainer/DamageBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
 text = "Damage:"
 
-[node name="Control" type="Control" parent="VBoxContainer/HBoxContainer"]
+[node name="Control" type="Control" parent="VBoxContainer/DamageBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="Damage" type="Label" parent="VBoxContainer/HBoxContainer"]
+[node name="Damage" type="Label" parent="VBoxContainer/DamageBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "20"
+
+[node name="StatBox" type="HBoxContainer" parent="VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Label3" type="Label" parent="VBoxContainer/StatBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Stat:"
+
+[node name="Control" type="Control" parent="VBoxContainer/StatBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Stat" type="Label" parent="VBoxContainer/StatBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "20"
+
+[node name="AmountBox" type="HBoxContainer" parent="VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Label3" type="Label" parent="VBoxContainer/AmountBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Amount:"
+
+[node name="Control" type="Control" parent="VBoxContainer/AmountBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Amount" type="Label" parent="VBoxContainer/AmountBox"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
@@ -93,7 +152,6 @@ text = "500"
 
 [node name="DurationBox" type="HBoxContainer" parent="VBoxContainer"]
 unique_name_in_owner = true
-visible = false
 layout_mode = 2
 
 [node name="Label3" type="Label" parent="VBoxContainer/DurationBox"]

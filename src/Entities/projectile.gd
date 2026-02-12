@@ -5,7 +5,7 @@ extends Area2D
 var speed = 0
 var damage = 0
 var shooter_id = 0
-var behavior: String = "straight"
+var behavior: String = "Forward"
 
 # Dimensions
 var length: float = 40.0
@@ -29,7 +29,7 @@ func _ready():
 	# Apply dynamic size
 	_apply_dimensions()
 	
-	if behavior == "orbit" and orbit_center:
+	if behavior == "Orbit" and orbit_center:
 		orbit_angle = global_position.angle_to_point(orbit_center.global_position)
 
 func _apply_dimensions():
@@ -49,9 +49,9 @@ func _apply_dimensions():
 
 func _physics_process(delta):
 	match behavior:
-		"orbit":
+		"Orbit":
 			_process_orbit(delta)
-		"homing":
+		"Homing":
 			_process_homing(delta)
 			_move_forward(delta)
 		_:
@@ -105,7 +105,7 @@ func _find_target_in_front() -> Node2D:
 func _on_hit(body):
 	if body.name == str(shooter_id): return
 	
-	if not body.has_method("take_damage") and behavior != "orbit":
+	if not body.has_method("take_damage") and behavior != "Orbit":
 		queue_free()
 		return
 

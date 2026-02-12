@@ -102,7 +102,7 @@ func _parse_power_json(data: Dictionary) -> PowerDef:
 	def.cooldown = data.get("cooldown", 1.0)
 	def.damage = data.get("damage", 0)
 	def.speed = data.get("speed", 0.0)
-	def.projectile_behavior = data.get("projectile_behavior", "straight")
+	def.projectile_behavior = data.get("projectile_behavior", "Forward")
 	def.turn_speed = data.get("turn_speed", 4.0)
 	def.detection_radius = data.get("detection_radius", 400.0)
 	def.stat_target = data.get("stat_target", "")

@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="PowerDef" load_steps=2 format=3 uid="uid://dib585twxwdbw"]
+
+[ext_resource type="Script" uid="uid://bcbsm06swr0r8" path="res://src/Classes/PowerDef.gd" id="1_vfs2t"]
+
+[resource]
+script = ExtResource("1_vfs2t")
+id = "Nitrous"
+type = "Buff"
+cooldown = 2.0
+length = 20.0
+width = 20.0
+speed = 800.0
+damage = 10
+projectile_behavior = "Forward"
+turn_speed = 4.0
+detection_radius = 400.0
+stat_target = "max_speed"
+amount = 500.0
+duration = 1.0
+metadata/_custom_type_script = "uid://bcbsm06swr0r8"

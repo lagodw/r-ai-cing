@@ -1,15 +1,17 @@
 [gd_resource type="Resource" script_class="PowerDef" load_steps=2 format=3 uid="uid://d0varege5c6wb"]
 
-[ext_resource type="Script" uid="uid://bcbsm06swr0r8" path="res://src/Classes/PowerDef.gd" id="1_2dw60"]
+[ext_resource type="Script" uid="uid://bcbsm06swr0r8" path="res://src/Classes/PowerDef.gd" id="1_yanjy"]
 
 [resource]
-script = ExtResource("1_2dw60")
-id = "homing_bullet"
-type = "projectile"
+script = ExtResource("1_yanjy")
+id = "Missle"
+type = "Projectile"
 cooldown = 0.5
+length = 20.0
+width = 20.0
 speed = 500.0
 damage = 10
-projectile_behavior = "homing"
+projectile_behavior = "Homing"
 turn_speed = 4.0
 detection_radius = 300.0
 stat_target = ""
