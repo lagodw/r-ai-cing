@@ -1,6 +1,8 @@
 class_name Kart extends CharacterBody2D
 
+signal lap_finished(lap_num)
 signal race_finished(winner_name)
+signal cooldown_started(slot_index: int, duration: float)
 
 # --- Configuration & Resources ---
 @export var kart_id: String = "speedster" # Default ID, overwritten by Spawner
@@ -229,6 +231,7 @@ func use_power(slot_index: int):
 func activate_power_effect(slot_index: int):
 	var power = power_inventory[slot_index]
 	slot_on_cooldown[slot_index] = true
+	cooldown_started.emit(slot_index, power.cooldown)
 	
 	# Only the server spawns the actual projectile node
 	# The MultiplayerSpawner will handle replicating it to others
@@ -264,6 +267,7 @@ func _advance_waypoint(total_waypoints: int):
 	# Detect Lap Completion
 	if current_waypoint_index == total_waypoints - 1:
 		current_lap += 1
+		emit_signal("lap_finished", current_lap)
 		print(name, " started lap: ", current_lap + 1)
 		
 		if current_lap >= GameData.current_track.laps_required:

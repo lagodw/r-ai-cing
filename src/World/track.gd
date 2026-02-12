@@ -138,6 +138,7 @@ func _spawn_racers():
 			var remote = RemoteTransform2D.new()
 			remote.remote_path = camera.get_path()
 			kart.add_child(remote)
+			$UI.setup(kart)
 		else:
 			kart.name = "Bot_" + str(i)
 			kart.is_player_controlled = false
