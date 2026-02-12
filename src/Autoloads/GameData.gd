@@ -37,16 +37,25 @@ func _scan_folder(path: String, target_dict: Dictionary, json_parser_func: Calla
 	var file_name = dir.get_next()
 	
 	while file_name != "":
-		var full_path = path.path_join(file_name)
+		# If it is a directory, skip it immediately
+		if dir.current_is_dir():
+			file_name = dir.get_next()
+			continue
 		
-		# Ignore directories and temp files
-		if not dir.current_is_dir() and not file_name.begins_with("."):
+		# In exports, resources are often renamed to .remap. 
+		# We strip this so we can check the original extension and load it correctly.
+		var check_name = file_name
+		if check_name.ends_with(".remap"):
+			check_name = check_name.trim_suffix(".remap")
+			
+		# Ignore hidden files (now checking the stripped name)
+		if not check_name.begins_with("."):
+			var full_path = path.path_join(check_name)
 			
 			# OPTION A: Handle JSON Files
-			if file_name.ends_with(".json"):
+			if check_name.ends_with(".json"):
 				var data = _load_json_file(full_path)
 				if data:
-					# JSONs can contain a single object OR an array of objects
 					if data is Array:
 						for entry in data:
 							var res = json_parser_func.call(entry)
@@ -56,10 +65,10 @@ func _scan_folder(path: String, target_dict: Dictionary, json_parser_func: Calla
 						if res and "id" in res: target_dict[res.id] = res
 			
 			# OPTION B: Handle Godot Resources (.tres, .res)
-			# Note: We check extension to avoid loading scripts or pngs by accident
-			elif file_name.ends_with(".tres") or file_name.ends_with(".res"):
+			elif check_name.ends_with(".tres") or check_name.ends_with(".res"):
+				# Godot's load() expects the original path (e.g. .tres), 
+				# even if the actual file on disk is .remap
 				var res = load(full_path)
-				# Ensure it is the correct type and has an ID
 				if res and "id" in res:
 					target_dict[res.id] = res
 					

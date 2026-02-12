@@ -10,7 +10,7 @@ func new_game():
 	get_tree().change_scene_to_file("uid://dnd4ot45brbyk")
 	
 func settings():
-	pass
+	$Panel.visible = true
 	
 func quit():
 	get_tree().quit()
