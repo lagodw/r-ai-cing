@@ -30,7 +30,13 @@ var current_lap: int = 0
 var last_waypoint_index: int = -1
 var laps_finished: bool = false
 var current_waypoint_index: int = 0
-var wp_threshold: float = 500.0 # Increased threshold for wider roads
+var wp_threshold: float = 200.0 # Increased threshold for wider roads
+
+var weight: float = 1.0
+var bump_velocity: Vector2 = Vector2.ZERO
+var bump_decay: float = 800.0 # How fast the bump force fades
+var last_bump_time: float = 0.0
+var bump_cooldown: float = 0.5 # Seconds before you can bump again
 
 # --- Input Interface (Decoupled for AI/Multiplayer) ---
 var input_steer: float = 0.0    # -1.0 (Left) to 1.0 (Right)
@@ -76,6 +82,7 @@ func configure_from_id(id: String):
 	# Apply Visuals
 	sprite.texture = load(stats.sprite_path)
 	_apply_dimensions(stats.length, stats.width)
+	weight = max(stats.length * stats.width, 1.0)
 	
 	# Copy Stats so we can modify them (e.g. buffs) without changing the Resource
 	max_speed = stats.max_speed
@@ -152,8 +159,16 @@ func _apply_physics(delta):
 		current_speed = move_toward(current_speed, 0, friction * 500 * delta)
 
 	# D. Move
-	velocity = transform.x * current_speed
+	# 1. Decay the bump velocity (friction)
+	bump_velocity = bump_velocity.move_toward(Vector2.ZERO, bump_decay * delta)
+	
+	# 2. Add bump velocity to the standard engine velocity
+	velocity = (transform.x * current_speed) + bump_velocity
+	var impact_velocity = velocity
 	move_and_slide()
+	
+	# E. Collision Handling
+	_handle_collisions(impact_velocity)
 
 func _handle_stunned_physics(delta):
 	# Spin out or slide to a stop
@@ -196,33 +211,34 @@ func _respawn():
 
 # --- Abilities ---
 func use_power(slot_index: int):
-	# Check Bounds
 	if slot_index < 0 or slot_index >= power_inventory.size(): 
 		return
 	
-	# 2. Check if the slot is currently cooling down
 	if slot_on_cooldown[slot_index]:
 		return
 	
 	var power = power_inventory[slot_index]
 	if not power: 
 		return
-	
-	# 3. Activate the power and start the cooldown
+
+	# Only the local player (authority) can initiate the power use
+	if is_multiplayer_authority():
+		# Notify the server and all clients to play the effect
+		rpc("activate_power_effect", slot_index)
+
+@rpc("call_local", "reliable")
+func activate_power_effect(slot_index: int):
+	var power = power_inventory[slot_index]
 	slot_on_cooldown[slot_index] = true
 	
-	# Multiplayer: Execute on all clients
-	rpc("activate_power_effect", power)
+	# Only the server spawns the actual projectile node
+	# The MultiplayerSpawner will handle replicating it to others
+	if multiplayer.is_server():
+		PowerManager.activate_power(self, power)
 	
-	# 4. Handle the timer to reset the cooldown
-	# We use the cooldown value now defined in the PowerDef
+	# Start cooldown locally on all clients for UI/logic purposes
 	await get_tree().create_timer(power.cooldown).timeout
 	slot_on_cooldown[slot_index] = false
-
-@rpc("call_local")
-func activate_power_effect(power: PowerDef):
-	# Calls the global manager to spawn projectiles/hazards
-	PowerManager.activate_power(self, power)
 
 @rpc("call_local")
 func on_damaged_visual():
@@ -301,3 +317,39 @@ func _apply_dimensions(target_length: float, target_width: float):
 			# Assuming Sprite is oriented Right (X-axis)
 			sprite.scale.x = target_length / tex_size.x
 			sprite.scale.y = target_width / tex_size.y
+
+# This function is called by the aggressor via RPC
+@rpc("any_peer", "call_local")
+func receive_bump(force: Vector2):
+	bump_velocity += force
+	
+func _handle_collisions(my_impact_velocity: Vector2):
+	# 1. COOLDOWN CHECK
+	var current_time = Time.get_ticks_msec() / 1000.0
+	if current_time - last_bump_time < bump_cooldown:
+		return
+
+	for i in get_slide_collision_count():
+		var collision = get_slide_collision(i)
+		var body = collision.get_collider()
+		
+		if body is Kart:
+			_apply_bump_to_other(body, collision.get_normal(), my_impact_velocity)
+			
+			last_bump_time = current_time 
+			break
+
+func _apply_bump_to_other(other_kart: Kart, normal: Vector2, my_impact_velocity: Vector2):
+	var push_dir = -normal
+	
+	# Use the SNAPSHOTTED velocity for the check
+	var my_speed = my_impact_velocity.length()
+	
+	if my_speed > 100.0: 
+		var weight_ratio = weight / max(other_kart.weight, 1.0)
+		var impact_force = push_dir * my_speed * weight_ratio * 0.75
+		
+		other_kart.rpc("receive_bump", impact_force)
+		
+		# Apply recoil to ourselves
+		bump_velocity += normal * my_speed * 0.3

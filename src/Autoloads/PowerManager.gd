@@ -16,6 +16,7 @@ func activate_power(kart: Kart, power: PowerDef):
 
 func fire_projectile(kart: Kart, data: PowerDef):
 	var proj: Projectile = proj_scene.instantiate()
+	proj.shooter_id = kart.name.to_int()
 	
 	# Visuals
 	proj.get_node("Sprite2D").texture = load("res://assets/powers/%s.png"%data.id)
@@ -62,7 +63,7 @@ func fire_projectile(kart: Kart, data: PowerDef):
 		proj.global_position = kart.global_position + offset
 		proj.rotation = kart.rotation
 	
-	get_tree().current_scene.add_child(proj)
+	get_tree().current_scene.add_child(proj, true)
 
 func drop_hazard(kart: Kart, _data: PowerDef):
 	# Hazards spawn BEHIND the car

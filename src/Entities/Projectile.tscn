@@ -1,10 +1,18 @@
-[gd_scene load_steps=4 format=3 uid="uid://c3euljm7hekrx"]
+[gd_scene load_steps=5 format=3 uid="uid://c3euljm7hekrx"]
 
 [ext_resource type="Script" uid="uid://bn6q2kaoxfh8n" path="res://src/Entities/projectile.gd" id="1_ner6r"]
 [ext_resource type="Texture2D" uid="uid://dqitcb6afhxmy" path="res://assets/powers/bullet.png" id="2_g55tu"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ner6r"]
 size = Vector2(12, 4)
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_g55tu"]
+properties/0/path = NodePath(".:position")
+properties/0/spawn = true
+properties/0/replication_mode = 1
+properties/1/path = NodePath(".:rotation")
+properties/1/spawn = true
+properties/1/replication_mode = 1
 
 [node name="Projectile" type="Area2D"]
 script = ExtResource("1_ner6r")
@@ -16,3 +24,6 @@ texture = ExtResource("2_g55tu")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_ner6r")
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_g55tu")

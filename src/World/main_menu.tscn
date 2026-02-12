@@ -39,11 +39,18 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 25
 
-[node name="New" type="Button" parent="VBoxContainer"]
+[node name="Single" type="Button" parent="VBoxContainer"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 75)
 layout_mode = 2
-text = "New Game"
+text = "Single Player"
+
+[node name="Multi" type="Button" parent="VBoxContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 75)
+layout_mode = 2
+text = "Multi Player
+(placeholder)"
 
 [node name="Settings" type="Button" parent="VBoxContainer"]
 unique_name_in_owner = true
@@ -53,6 +60,7 @@ text = "Settings"
 
 [node name="Quit" type="Button" parent="VBoxContainer"]
 unique_name_in_owner = true
+visible = false
 custom_minimum_size = Vector2(0, 75)
 layout_mode = 2
 text = "Quit"

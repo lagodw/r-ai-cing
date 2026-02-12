@@ -16,3 +16,7 @@ position = Vector2(361, -434)
 
 [node name="Camera2D" type="Camera2D" parent="."]
 zoom = Vector2(2, 2)
+
+[node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("uid://ceh82rynpo7cg", "uid://c3euljm7hekrx")
+spawn_path = NodePath("..")
