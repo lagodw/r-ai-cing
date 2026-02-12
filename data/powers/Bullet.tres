@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="PowerDef" load_steps=2 format=3 uid="uid://oul85qrwiggj"]
 
-[ext_resource type="Script" uid="uid://bcbsm06swr0r8" path="res://data/Classes/PowerDef.gd" id="1_b5p2y"]
+[ext_resource type="Script" uid="uid://bcbsm06swr0r8" path="res://src/Classes/PowerDef.gd" id="1_b5p2y"]
 
 [resource]
 script = ExtResource("1_b5p2y")
@@ -9,7 +9,10 @@ type = "projectile"
 cooldown = 0.5
 speed = 750.0
 damage = 20
+projectile_behavior = "straight"
+turn_speed = 4.0
+detection_radius = 400.0
 stat_target = ""
 amount = 0.0
-duration = 0.0
+duration = 3.0
 metadata/_custom_type_script = "uid://bcbsm06swr0r8"

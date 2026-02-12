@@ -1,10 +1,10 @@
 [gd_resource type="Resource" script_class="KartDef" load_steps=2 format=3 uid="uid://ct3qka56af1ed"]
 
-[ext_resource type="Script" uid="uid://d2vcvaa1qp6xu" path="res://data/Classes/KartDef.gd" id="1_fppe5"]
+[ext_resource type="Script" uid="uid://d2vcvaa1qp6xu" path="res://src/Classes/KartDef.gd" id="1_fppe5"]
 
 [resource]
 script = ExtResource("1_fppe5")
-id = "Starter"
+id = "Starter_Kart"
 kart_name = "Starter"
 sprite_path = "uid://533g6wyyxxl3"
 max_health = 100

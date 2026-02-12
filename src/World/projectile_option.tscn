@@ -1,0 +1,136 @@
+[gd_scene load_steps=4 format=3 uid="uid://ds4i1xicjsovx"]
+
+[ext_resource type="Theme" uid="uid://crtg3dknqulx2" path="res://assets/UI/Theme.tres" id="1_2okhg"]
+[ext_resource type="Texture2D" uid="uid://dqitcb6afhxmy" path="res://assets/powers/bullet.png" id="1_g0xjb"]
+[ext_resource type="Script" uid="uid://iucot3idffyq" path="res://src/World/projectile_option.gd" id="2_ngqix"]
+
+[node name="ProjectileOption" type="MarginContainer"]
+offset_right = 233.0
+offset_bottom = 167.0
+theme = ExtResource("1_2okhg")
+script = ExtResource("2_ngqix")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="Name" type="Label" parent="VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Power Name"
+horizontal_alignment = 1
+
+[node name="TextureRect" type="TextureRect" parent="VBoxContainer"]
+layout_mode = 2
+texture = ExtResource("1_g0xjb")
+expand_mode = 5
+
+[node name="HBoxContainer5" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="Label4" type="Label" parent="VBoxContainer/HBoxContainer5"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 18
+text = "Projectile"
+horizontal_alignment = 1
+
+[node name="Type" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/Type"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Type:"
+
+[node name="Control" type="Control" parent="VBoxContainer/Type"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Type" type="Label" parent="VBoxContainer/Type"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Forward"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="Label3" type="Label" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Damage:"
+
+[node name="Control" type="Control" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Damage" type="Label" parent="VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "20"
+
+[node name="SpeedBox" type="HBoxContainer" parent="VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Label3" type="Label" parent="VBoxContainer/SpeedBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Speed:"
+
+[node name="Control" type="Control" parent="VBoxContainer/SpeedBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Speed" type="Label" parent="VBoxContainer/SpeedBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "500"
+
+[node name="DurationBox" type="HBoxContainer" parent="VBoxContainer"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+
+[node name="Label3" type="Label" parent="VBoxContainer/DurationBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Duration:"
+
+[node name="Control" type="Control" parent="VBoxContainer/DurationBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Duration" type="Label" parent="VBoxContainer/DurationBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "500"
+
+[node name="HBoxContainer4" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="Label3" type="Label" parent="VBoxContainer/HBoxContainer4"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Cooldown:"
+
+[node name="Control" type="Control" parent="VBoxContainer/HBoxContainer4"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Cooldown" type="Label" parent="VBoxContainer/HBoxContainer4"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "0.5"
+
+[node name="Highlight" type="ReferenceRect" parent="."]
+visible = false
+layout_mode = 2
+border_color = Color(0.704574, 0.68137, 0, 1)
+border_width = 4.0
+editor_only = false

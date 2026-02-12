@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=3 uid="uid://dnd4ot45brbyk"]
+[gd_scene load_steps=4 format=3 uid="uid://dnd4ot45brbyk"]
 
 [ext_resource type="Script" uid="uid://dhqvmde3vmpt3" path="res://src/World/track.gd" id="1_7nrbi"]
 [ext_resource type="Texture2D" uid="uid://cyg0bu5cqy8k2" path="res://assets/tracks/Starter_Track.png" id="2_imajx"]
+[ext_resource type="PackedScene" uid="uid://df8dfipyubll" path="res://src/World/selection.tscn" id="3_imajx"]
 
 [node name="Track" type="Node2D"]
 script = ExtResource("1_7nrbi")
@@ -16,3 +17,5 @@ position = Vector2(361, -434)
 
 [node name="Camera2D" type="Camera2D" parent="."]
 zoom = Vector2(2, 2)
+
+[node name="Selection" parent="." instance=ExtResource("3_imajx")]

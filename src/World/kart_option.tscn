@@ -1,0 +1,97 @@
+[gd_scene load_steps=5 format=3 uid="uid://cppo8q4w7blh2"]
+
+[ext_resource type="Theme" uid="uid://crtg3dknqulx2" path="res://assets/UI/Theme.tres" id="1_3d86p"]
+[ext_resource type="Script" uid="uid://c7xor85t724fe" path="res://src/World/kart_option.gd" id="2_ejd6b"]
+[ext_resource type="Texture2D" uid="uid://533g6wyyxxl3" path="res://assets/karts/Starter_Kart.png" id="2_ykenn"]
+[ext_resource type="Resource" uid="uid://ct3qka56af1ed" path="res://data/karts/Starter.tres" id="3_ejd6b"]
+
+[node name="KartOption" type="MarginContainer"]
+offset_right = 300.0
+offset_bottom = 450.0
+theme = ExtResource("1_3d86p")
+script = ExtResource("2_ejd6b")
+kart = ExtResource("3_ejd6b")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 25
+
+[node name="Name" type="Label" parent="VBoxContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Kart Name"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="TextureRect" type="TextureRect" parent="VBoxContainer"]
+layout_mode = 2
+texture = ExtResource("2_ykenn")
+expand_mode = 5
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="SpeedTxt" type="Label" parent="VBoxContainer/VBoxContainer2"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Speed"
+
+[node name="SpeedBar" type="ProgressBar" parent="VBoxContainer/VBoxContainer2"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+max_value = 1000.0
+step = 1.0
+value = 400.0
+show_percentage = false
+
+[node name="AccelerationTxt" type="Label" parent="VBoxContainer/VBoxContainer2"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Acceleration"
+
+[node name="AccelerationBar" type="ProgressBar" parent="VBoxContainer/VBoxContainer2"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+max_value = 500.0
+step = 1.0
+value = 200.0
+show_percentage = false
+
+[node name="HandlingTxt" type="Label" parent="VBoxContainer/VBoxContainer2"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Handling"
+
+[node name="HandlingBar" type="ProgressBar" parent="VBoxContainer/VBoxContainer2"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+max_value = 10.0
+step = 0.1
+value = 5.0
+show_percentage = false
+
+[node name="WeightTxt" type="Label" parent="VBoxContainer/VBoxContainer2"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Weight"
+
+[node name="WeightBar" type="ProgressBar" parent="VBoxContainer/VBoxContainer2"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+max_value = 5000.0
+step = 1.0
+value = 500.0
+show_percentage = false
+
+[node name="Highlight" type="ReferenceRect" parent="."]
+layout_mode = 2
+border_color = Color(0.704574, 0.68137, 0, 1)
+border_width = 4.0
+editor_only = false
