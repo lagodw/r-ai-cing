@@ -3,6 +3,8 @@ class_name PowerDef extends Resource
 @export var id: String
 @export_enum("projectile", "buff", "hazard") var type: String
 @export var cooldown: float
+@export var length: float = 20.0
+@export var width: float = 20.0
 
 # Projectile Stats
 @export var speed: float = 800.0

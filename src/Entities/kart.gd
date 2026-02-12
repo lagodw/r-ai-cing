@@ -52,6 +52,7 @@ func _enter_tree():
 	# Try to parse the name as a Player ID
 	var id_from_name = name.to_int()
 	power_inventory[0] = load("uid://oul85qrwiggj")
+	power_inventory[1] = load("uid://drd0qyctfi35c")
 	
 	if id_from_name > 0:
 		# It's a valid Player ID (e.g. "1", "2491")

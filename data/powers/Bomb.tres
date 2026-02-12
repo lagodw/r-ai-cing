@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="PowerDef" load_steps=2 format=3 uid="uid://drd0qyctfi35c"]
+
+[ext_resource type="Script" uid="uid://bcbsm06swr0r8" path="res://src/Classes/PowerDef.gd" id="1_o8nqm"]
+
+[resource]
+script = ExtResource("1_o8nqm")
+id = "Bomb"
+type = "hazard"
+cooldown = 2.0
+length = 20.0
+width = 20.0
+speed = 1000.0
+damage = 25
+projectile_behavior = "straight"
+turn_speed = 4.0
+detection_radius = 400.0
+stat_target = ""
+amount = 0.0
+duration = 5.0
+metadata/_custom_type_script = "uid://bcbsm06swr0r8"
