@@ -4,7 +4,7 @@
 [ext_resource type="Script" uid="uid://b33jv2vay4pj6" path="res://src/Entities/kart.gd" id="1_4um18"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_4um18"]
-size = Vector2(22, 12)
+size = Vector2(30, 18)
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_4um18"]
 properties/0/path = NodePath(".:position")
@@ -40,7 +40,8 @@ corner_radius_bottom_left = 2
 script = ExtResource("1_4um18")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
-scale = Vector2(0.0660569, 0.0660569)
+position = Vector2(4.76837e-07, 0)
+scale = Vector2(0.087229, 0.087229)
 texture = ExtResource("1_1f23y")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
@@ -53,9 +54,9 @@ replication_config = SubResource("SceneReplicationConfig_4um18")
 
 [node name="ProgressBar" type="ProgressBar" parent="HealthBarAnchor"]
 offset_left = -12.0
-offset_top = -17.0
+offset_top = -21.0
 offset_right = 12.0
-offset_bottom = -10.0
+offset_bottom = -14.0
 theme_override_styles/background = SubResource("StyleBoxFlat_4um18")
 theme_override_styles/fill = SubResource("StyleBoxFlat_4t204")
 step = 1.0

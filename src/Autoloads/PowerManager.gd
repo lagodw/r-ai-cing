@@ -22,10 +22,12 @@ func fire_projectile(kart: Kart, data: PowerDef):
 	proj.speed = data.speed
 	proj.damage = data.damage
 	
-	# Spawn at the front of the car
-	# transform.x is the Forward Vector of the car
-	var spawn_offset = kart.transform.x * 40 
-	proj.global_position = kart.global_position + spawn_offset
+	var sprite: Sprite2D = kart.get_node("Sprite2D")
+	var kart_length = sprite.texture.get_width() * sprite.scale.x
+	var forward_distance = (kart_length / 2.0) + 10.0
+	var local_offset = Vector2(forward_distance, 0)
+	var global_offset = local_offset.rotated(kart.rotation)
+	proj.global_position = kart.global_position + global_offset
 	
 	# Rotate to face the same way as the car
 	proj.rotation = kart.rotation

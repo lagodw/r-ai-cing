@@ -74,8 +74,8 @@ func configure_from_id(id: String):
 		return
 
 	# Apply Visuals
-	if ResourceLoader.exists(stats.sprite_path):
-		sprite.texture = load(stats.sprite_path)
+	sprite.texture = load(stats.sprite_path)
+	_apply_dimensions(stats.length, stats.width)
 	
 	# Copy Stats so we can modify them (e.g. buffs) without changing the Resource
 	max_speed = stats.max_speed
@@ -104,7 +104,7 @@ func _physics_process(delta):
 	if health_anchor:
 		health_anchor.global_rotation = 0
 		# Offset it above the kart
-		health_anchor.global_position = global_position + Vector2(0, -20)
+		#health_anchor.global_position = global_position + Vector2(0, -20)
 
 # --- Physics & Movement ---
 func _gather_input():
@@ -253,27 +253,11 @@ func _advance_waypoint(total_waypoints: int):
 		
 		if current_lap >= GameData.current_track.laps_required:
 			laps_finished = true
+			race_finished.emit(name)
 			_declare_victory()
 	
 	# Move to next index
 	current_waypoint_index = (current_waypoint_index + 1) % total_waypoints
-	#
-#func check_lap_progress(index: int, total_waypoints: int):
-	#if laps_finished: return
-	#
-	## Detect Lap Completion: 
-	## Moving from the last waypoint in the array back to index 0
-	#if last_waypoint_index == total_waypoints - 1 and index == 0:
-		#current_lap += 1
-		#print(name, " started lap: ", current_lap + 1)
-		#
-		#var required = GameData.current_track.laps_required
-		#if current_lap >= required:
-			#laps_finished = true
-			#race_finished.emit(name)
-			#_declare_victory()
-#
-	#last_waypoint_index = index
 
 func _declare_victory():
 	# Stop the kart
@@ -286,6 +270,7 @@ func update_health_bar():
 		return
 	
 	health_bar.value = current_health
+	health_bar.visible = (current_health < max_health)
 	
 	# Calculate percentage for color coding
 	var health_pct = float(current_health) / float(max_health)
@@ -300,3 +285,19 @@ func update_health_bar():
 	if style is StyleBoxFlat:
 		style.bg_color = new_color
 	health_bar.add_theme_stylebox_override("fill", style)
+
+func _apply_dimensions(target_length: float, target_width: float):
+	# A. Resize Collision Shape
+	# We duplicate the shape so we don't affect other instances sharing this resource
+	if collider.shape is RectangleShape2D:
+		collider.shape = collider.shape.duplicate()
+		collider.shape.size = Vector2(target_length, target_width)
+	
+	# B. Resize Sprite
+	if sprite.texture:
+		var tex_size = sprite.texture.get_size()
+		if tex_size.x > 0 and tex_size.y > 0:
+			# Scale = Target / Original
+			# Assuming Sprite is oriented Right (X-axis)
+			sprite.scale.x = target_length / tex_size.x
+			sprite.scale.y = target_width / tex_size.y
