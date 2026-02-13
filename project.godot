@@ -13,6 +13,7 @@ config_version=5
 config/name="R-AI-cing"
 run/main_scene="uid://b2ubxyf5grd67"
 config/features=PackedStringArray("4.4", "Forward Plus")
+boot_splash/image="uid://bjl756osejanv"
 config/icon="uid://d223gkv7hhpsw"
 
 [autoload]
@@ -23,7 +24,10 @@ MultiplayerManager="*res://src/Autoloads/MultiplayerManager.gd"
 
 [display]
 
+window/size/viewport_width=1920
+window/size/viewport_height=1080
 window/size/mode=2
+window/stretch/mode="canvas_items"
 
 [importer_defaults]
 
