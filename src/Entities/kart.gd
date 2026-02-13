@@ -273,17 +273,13 @@ func _advance_waypoint(total_waypoints: int):
 		
 		if current_lap >= GameData.current_track.laps_required:
 			laps_finished = true
-			race_finished.emit(name)
 			_declare_victory()
 	
 	# Move to next index
 	current_waypoint_index = (current_waypoint_index + 1) % total_waypoints
 
 func _declare_victory():
-	# Stop the kart
-	current_speed = 0
-	is_stunned = true # Reusing stun logic to disable input
-	print("WINNER: ", name)
+	race_finished.emit(name)
 
 func update_health_bar():
 	if not health_bar:

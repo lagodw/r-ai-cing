@@ -6,7 +6,7 @@
 script = ExtResource("1_3joag")
 id = "StarterTrack"
 background_path = "uid://cyg0bu5cqy8k2"
-laps_required = 3
+laps_required = 1
 start_position = Vector2(360, -430)
 waypoints = PackedVector2Array()
 walls = Array[PackedVector2Array]([])

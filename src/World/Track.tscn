@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3 uid="uid://dnd4ot45brbyk"]
+[gd_scene load_steps=16 format=3 uid="uid://dnd4ot45brbyk"]
 
 [ext_resource type="Script" uid="uid://dhqvmde3vmpt3" path="res://src/World/track.gd" id="1_7nrbi"]
 [ext_resource type="Texture2D" uid="uid://cyg0bu5cqy8k2" path="res://assets/tracks/Starter_Track.png" id="2_imajx"]
@@ -10,6 +10,7 @@
 [ext_resource type="Theme" uid="uid://crtg3dknqulx2" path="res://assets/UI/Theme.tres" id="8_o8aps"]
 [ext_resource type="Texture2D" uid="uid://d3vr80ghsnlnx" path="res://assets/UI/Menu.png" id="9_7wood"]
 [ext_resource type="Script" uid="uid://divvvcfvjgu3t" path="res://src/World/esacape.gd" id="9_o8aps"]
+[ext_resource type="Texture2D" uid="uid://btphdb068iw6x" path="res://assets/UI/Trophy.png" id="11_2f1gn"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_2f1gn"]
 
@@ -127,6 +128,99 @@ theme_override_styles/pressed = SubResource("StyleBoxEmpty_ckak7")
 theme_override_styles/normal = SubResource("StyleBoxEmpty_14sem")
 icon = ExtResource("9_7wood")
 expand_icon = true
+
+[node name="Victory" type="CanvasLayer" parent="."]
+process_mode = 3
+visible = false
+
+[node name="Panel" type="Panel" parent="Victory"]
+custom_minimum_size = Vector2(1000, 850)
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -501.0
+offset_top = -507.0
+offset_right = 502.0
+offset_bottom = 526.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("8_o8aps")
+
+[node name="TextureRect" type="TextureRect" parent="Victory/Panel"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -189.5
+offset_top = 64.0
+offset_right = 189.5
+offset_bottom = 568.0
+grow_horizontal = 2
+texture = ExtResource("11_2f1gn")
+
+[node name="Label" type="Label" parent="Victory/Panel"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -325.0
+offset_top = 592.0
+offset_right = 325.0
+offset_bottom = 641.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 64
+text = "The winner is"
+horizontal_alignment = 1
+
+[node name="Winner" type="Label" parent="Victory/Panel"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -325.0
+offset_top = 648.0
+offset_right = 325.0
+offset_bottom = 697.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 64
+text = "You!"
+horizontal_alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Victory/Panel"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -202.5
+offset_top = 222.5
+offset_right = 204.5
+offset_bottom = 472.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 50
+
+[node name="Again" type="Button" parent="Victory/Panel/VBoxContainer"]
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Play Again"
+
+[node name="Settings" type="Button" parent="Victory/Panel/VBoxContainer"]
+visible = false
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Settings"
+
+[node name="Main" type="Button" parent="Victory/Panel/VBoxContainer"]
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Main Menu"
 
 [node name="Escape" type="CanvasLayer" parent="."]
 process_mode = 3

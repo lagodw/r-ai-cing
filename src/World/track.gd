@@ -7,6 +7,8 @@ extends Node2D
 @onready var camera = $Camera2D
 
 func _ready():
+	$Victory/Panel/VBoxContainer/Again.pressed.connect(go_again)
+	$Victory/Panel/VBoxContainer/Main.pressed.connect(main_menu)
 	_generate_track_visuals()
 	
 	# 1. Instantiate Selection Screen
@@ -155,6 +157,7 @@ func _spawn_racers():
 			kart.power_inventory = config.powers.duplicate()
 			kart.add_child(brain)
 			
+		kart.race_finished.connect(winner_screen)
 		add_child(kart)
 #
 #func _draw():
@@ -179,3 +182,19 @@ func _spawn_racers():
 		## Index 0 is GREEN (Start), others are BLUE
 		#var color = Color.GREEN if i == 0 else Color.BLUE
 		#draw_circle(current_p, 10.0, color)
+
+func winner_screen(winner_name: String):
+	if winner_name == "1":
+		$Victory/Panel/Winner.text = "You!"
+	else:
+		$Victory/Panel/Winner.text = winner_name
+	$Victory.visible = true
+	get_tree().paused = true
+
+func go_again():
+	get_tree().paused = false
+	get_tree().change_scene_to_file("res://src/World/Track.tscn")
+	
+func main_menu():
+	get_tree().paused = false
+	get_tree().change_scene_to_file("res://src/World/main_menu.tscn")
