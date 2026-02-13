@@ -4,7 +4,7 @@ extends Control
 # Configuration
 @onready var base = $Base
 @onready var handle = $Base/Handle
-var max_distance = 75.0 # Pixels (Radius of the base)
+var max_distance = 150.0 # Pixels (Radius of the base)
 
 # State
 var touch_index = -1

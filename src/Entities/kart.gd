@@ -49,6 +49,7 @@ var input_throttle: float = 0.0 # -1.0 (Brake) to 1.0 (Gas)
 @onready var collider = $CollisionShape2D
 @onready var health_bar = $HealthBarAnchor/ProgressBar
 @onready var health_anchor = $HealthBarAnchor
+@onready var joystick: Control
 
 func _enter_tree():
 	# Try to parse the name as a Player ID
@@ -92,6 +93,8 @@ func configure_from_id(id: String):
 	turn_speed = stats.turn_speed
 	max_health = stats.max_health
 	current_health = max_health
+	
+	joystick = get_tree().current_scene.find_child("VirtualJoystick", true, false)
 
 # --- Main Loop ---
 func _physics_process(delta):
@@ -117,26 +120,25 @@ func _physics_process(delta):
 
 # --- Physics & Movement ---
 func _gather_input():
-	if is_player_controlled:
-		# PC / Console Input
-		var move_axis = Input.get_vector("move_left", "move_right", "move_up", "move_down")
-		input_steer = move_axis.x
-		input_throttle = -move_axis.y # Up is negative Y, but positive throttle
+	if not is_player_controlled: return
+	
+	# PC / Console Input
+	var move_axis = Input.get_vector("move_left", "move_right", "move_up", "move_down")
+	input_steer = move_axis.x
+	input_throttle = -move_axis.y # Up is negative Y, but positive throttle
+	
+	if joystick and joystick.is_active:
+		var joy_output = joystick.get_output() # Returns Vector2
+		input_steer = joy_output.x
+		# Use the Y axis for throttle, or use auto_gas
+		if auto_gas:
+			input_throttle = 1.0 if not Input.is_action_pressed("move_down") else -0.5
+		else:
+			input_throttle = -joy_output.y
 		
-		# Mobile Overrides (If Virtual Joystick is active)
-		# Assumes a global or easy way to access the joystick, or input actions mapped to buttons
-		if auto_gas and input_throttle == 0:
-			input_throttle = 1.0 # Always drive forward unless braking
-			
-		# Ability Inputs
-		if Input.is_action_just_pressed("activate_slot_0"): use_power(0)
-		if Input.is_action_just_pressed("activate_slot_1"): use_power(1)
-		if Input.is_action_just_pressed("activate_slot_2"): use_power(2)
-		
-	else:
-		# AI Input is handled by the AIController child node
-		# effectively writing to 'input_steer' and 'input_throttle' variables
-		pass
+	# Ability Inputs
+	if Input.is_action_just_pressed("activate_slot_0"): use_power(0)
+	if Input.is_action_just_pressed("activate_slot_1"): use_power(1)
 
 func _apply_physics(delta):
 	# A. Steering

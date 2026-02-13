@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3 uid="uid://dnd4ot45brbyk"]
+[gd_scene load_steps=18 format=3 uid="uid://dnd4ot45brbyk"]
 
 [ext_resource type="Script" uid="uid://dhqvmde3vmpt3" path="res://src/World/track.gd" id="1_7nrbi"]
 [ext_resource type="Texture2D" uid="uid://cyg0bu5cqy8k2" path="res://assets/tracks/Starter_Track.png" id="2_imajx"]
@@ -6,10 +6,12 @@
 [ext_resource type="Texture2D" uid="uid://dqitcb6afhxmy" path="res://assets/powers/Bullet.png" id="3_wx37m"]
 [ext_resource type="Texture2D" uid="uid://8h0lnrrxltsp" path="res://assets/powers/Bomb.png" id="4_hoyjw"]
 [ext_resource type="Texture2D" uid="uid://co0jv3l2io2nm" path="res://assets/UI/Gray_Circle.png" id="5_kxkim"]
+[ext_resource type="Texture2D" uid="uid://d5k3gk1e4u0k" path="res://assets/UI/TransparentSquare.png" id="6_ckak7"]
 [ext_resource type="Texture2D" uid="uid://0468nmwefl6o" path="res://assets/UI/Flag.png" id="7_c85wp"]
 [ext_resource type="Theme" uid="uid://crtg3dknqulx2" path="res://assets/UI/Theme.tres" id="8_o8aps"]
 [ext_resource type="Texture2D" uid="uid://d3vr80ghsnlnx" path="res://assets/UI/Menu.png" id="9_7wood"]
 [ext_resource type="Script" uid="uid://divvvcfvjgu3t" path="res://src/World/esacape.gd" id="9_o8aps"]
+[ext_resource type="PackedScene" uid="uid://5p4v7xvgvs4o" path="res://src/Entities/VirtualJoystick.tscn" id="10_jgmkd"]
 [ext_resource type="Texture2D" uid="uid://btphdb068iw6x" path="res://assets/UI/Trophy.png" id="11_2f1gn"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_2f1gn"]
@@ -39,7 +41,6 @@ _spawnable_scenes = PackedStringArray("uid://ceh82rynpo7cg", "uid://c3euljm7hekr
 spawn_path = NodePath("..")
 
 [node name="UI" type="CanvasLayer" parent="."]
-visible = false
 script = ExtResource("3_kehdh")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="UI"]
@@ -49,21 +50,22 @@ anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = -507.0
-offset_top = -200.0
-offset_right = -104.0
+offset_top = -240.0
+offset_right = -157.0
 offset_bottom = -90.0
 grow_horizontal = 0
 grow_vertical = 0
 theme_override_constants/separation = 50
 
-[node name="Icon1" type="TextureRect" parent="UI/HBoxContainer"]
+[node name="Power1" type="Button" parent="UI/HBoxContainer"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(150, 150)
 layout_mode = 2
-texture = ExtResource("3_wx37m")
-expand_mode = 1
+theme_override_colors/icon_disabled_color = Color(1, 1, 1, 1)
+icon = ExtResource("3_wx37m")
+expand_icon = true
 
-[node name="Slot1Bar" type="TextureProgressBar" parent="UI/HBoxContainer/Icon1"]
+[node name="Slot1Bar" type="TextureProgressBar" parent="UI/HBoxContainer/Power1"]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
@@ -75,14 +77,30 @@ fill_mode = 5
 nine_patch_stretch = true
 texture_progress = ExtResource("5_kxkim")
 
-[node name="Icon2" type="TextureRect" parent="UI/HBoxContainer"]
+[node name="TouchScreenButton" type="TouchScreenButton" parent="UI/HBoxContainer/Power1"]
+texture_normal = ExtResource("6_ckak7")
+texture_pressed = ExtResource("6_ckak7")
+action = "activate_slot_0"
+
+[node name="Label1" type="Label" parent="UI/HBoxContainer/Power1"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 23.0
+theme = ExtResource("8_o8aps")
+theme_override_font_sizes/font_size = 24
+text = "O"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Power2" type="Button" parent="UI/HBoxContainer"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(150, 150)
 layout_mode = 2
-texture = ExtResource("4_hoyjw")
-expand_mode = 1
+theme_override_colors/icon_disabled_color = Color(1, 1, 1, 1)
+icon = ExtResource("4_hoyjw")
+expand_icon = true
 
-[node name="Slot2Bar" type="TextureProgressBar" parent="UI/HBoxContainer/Icon2"]
+[node name="Slot2Bar" type="TextureProgressBar" parent="UI/HBoxContainer/Power2"]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
@@ -93,6 +111,20 @@ grow_vertical = 2
 fill_mode = 5
 nine_patch_stretch = true
 texture_progress = ExtResource("5_kxkim")
+
+[node name="TouchScreenButton" type="TouchScreenButton" parent="UI/HBoxContainer/Power2"]
+texture_normal = ExtResource("6_ckak7")
+texture_pressed = ExtResource("6_ckak7")
+action = "activate_slot_1"
+
+[node name="Label2" type="Label" parent="UI/HBoxContainer/Power2"]
+offset_right = 40.0
+offset_bottom = 23.0
+theme = ExtResource("8_o8aps")
+theme_override_font_sizes/font_size = 24
+text = "P"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="UI"]
 anchors_preset = 1
@@ -118,16 +150,22 @@ theme_override_font_sizes/font_size = 64
 text = "0 / 3"
 
 [node name="Menu" type="Button" parent="UI"]
-offset_left = 120.0
-offset_top = 830.0
-offset_right = 270.0
-offset_bottom = 980.0
+offset_left = 58.0
+offset_top = 37.0
+offset_right = 170.0
+offset_bottom = 149.0
 theme_override_styles/focus = SubResource("StyleBoxEmpty_2f1gn")
 theme_override_styles/hover = SubResource("StyleBoxEmpty_jgmkd")
 theme_override_styles/pressed = SubResource("StyleBoxEmpty_ckak7")
 theme_override_styles/normal = SubResource("StyleBoxEmpty_14sem")
 icon = ExtResource("9_7wood")
 expand_icon = true
+
+[node name="VirtualJoystick" parent="UI" instance=ExtResource("10_jgmkd")]
+offset_left = 91.0
+offset_top = 703.0
+offset_right = 391.0
+offset_bottom = 1003.0
 
 [node name="Victory" type="CanvasLayer" parent="."]
 process_mode = 3
