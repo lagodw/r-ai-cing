@@ -31,38 +31,43 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -51.0
-offset_top = -33.5
-offset_right = 147.0
-offset_bottom = 241.5
+offset_left = -125.0
+offset_top = -40.0
+offset_right = 296.0
+offset_bottom = 385.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 25
 
 [node name="Single" type="Button" parent="VBoxContainer"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 75)
+custom_minimum_size = Vector2(0, 125)
 layout_mode = 2
-text = "Single Player"
+theme_override_font_sizes/font_size = 40
+text = "Singleplayer"
 
 [node name="Multi" type="Button" parent="VBoxContainer"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 75)
+custom_minimum_size = Vector2(0, 125)
 layout_mode = 2
-text = "Multi Player
+theme_override_font_sizes/font_size = 40
+text = "Multiplayer
 (placeholder)"
 
 [node name="Settings" type="Button" parent="VBoxContainer"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(0, 75)
+visible = false
+custom_minimum_size = Vector2(0, 125)
 layout_mode = 2
+theme_override_font_sizes/font_size = 40
 text = "Settings"
 
 [node name="Quit" type="Button" parent="VBoxContainer"]
 unique_name_in_owner = true
 visible = false
-custom_minimum_size = Vector2(0, 75)
+custom_minimum_size = Vector2(0, 125)
 layout_mode = 2
+theme_override_font_sizes/font_size = 40
 text = "Quit"
 
 [node name="Panel" type="Panel" parent="."]

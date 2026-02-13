@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://dnd4ot45brbyk"]
+[gd_scene load_steps=15 format=3 uid="uid://dnd4ot45brbyk"]
 
 [ext_resource type="Script" uid="uid://dhqvmde3vmpt3" path="res://src/World/track.gd" id="1_7nrbi"]
 [ext_resource type="Texture2D" uid="uid://cyg0bu5cqy8k2" path="res://assets/tracks/Starter_Track.png" id="2_imajx"]
@@ -8,6 +8,16 @@
 [ext_resource type="Texture2D" uid="uid://co0jv3l2io2nm" path="res://assets/UI/Gray_Circle.png" id="5_kxkim"]
 [ext_resource type="Texture2D" uid="uid://0468nmwefl6o" path="res://assets/UI/Flag.png" id="7_c85wp"]
 [ext_resource type="Theme" uid="uid://crtg3dknqulx2" path="res://assets/UI/Theme.tres" id="8_o8aps"]
+[ext_resource type="Texture2D" uid="uid://d3vr80ghsnlnx" path="res://assets/UI/Menu.png" id="9_7wood"]
+[ext_resource type="Script" uid="uid://divvvcfvjgu3t" path="res://src/World/esacape.gd" id="9_o8aps"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_2f1gn"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_jgmkd"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ckak7"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_14sem"]
 
 [node name="Track" type="Node2D"]
 script = ExtResource("1_7nrbi")
@@ -105,3 +115,66 @@ layout_mode = 2
 theme = ExtResource("8_o8aps")
 theme_override_font_sizes/font_size = 64
 text = "0 / 3"
+
+[node name="Menu" type="Button" parent="UI"]
+offset_left = 120.0
+offset_top = 830.0
+offset_right = 270.0
+offset_bottom = 980.0
+theme_override_styles/focus = SubResource("StyleBoxEmpty_2f1gn")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_jgmkd")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_ckak7")
+theme_override_styles/normal = SubResource("StyleBoxEmpty_14sem")
+icon = ExtResource("9_7wood")
+expand_icon = true
+
+[node name="Escape" type="CanvasLayer" parent="."]
+process_mode = 3
+visible = false
+script = ExtResource("9_o8aps")
+
+[node name="Panel" type="Panel" parent="Escape"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 773.0
+offset_top = 303.0
+offset_right = -486.0
+offset_bottom = -172.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("8_o8aps")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Escape/Panel"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -202.5
+offset_top = -177.5
+offset_right = 204.5
+offset_bottom = 177.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 50
+
+[node name="Resume" type="Button" parent="Escape/Panel/VBoxContainer"]
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Resume"
+
+[node name="Settings" type="Button" parent="Escape/Panel/VBoxContainer"]
+visible = false
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Settings"
+
+[node name="Main" type="Button" parent="Escape/Panel/VBoxContainer"]
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Main Menu"

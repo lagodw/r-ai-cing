@@ -12,6 +12,7 @@ func setup(kart: Kart) -> void:
 	%Icon2.texture = load("res://assets/powers/%s.png" % GameData.selected_powers[1].id)
 	update_lap(0)
 	visible = true
+	$Menu.pressed.connect(show_menu)
 
 func update_lap(laps_completed):
 	%Laps.text = "%s / %s" % [laps_completed + 1, GameData.current_track.laps_required]
@@ -33,3 +34,7 @@ func _on_cooldown_started(slot_index: int, duration: float):
 		var tween = create_tween()
 		# Tween value from Max to 0 over 'duration' seconds
 		tween.tween_property(progress_bar, "value", 0, duration)
+
+func show_menu():
+	get_tree().current_scene.get_node("Escape").visible = true
+	get_tree().paused = true
