@@ -20,8 +20,10 @@ func _ready():
 	# 2. Wait for player to finish selecting
 	await selection.race_started
 	
+	get_tree().paused = true
 	# 3. NOW we spawn everyone
 	_spawn_racers()
+	start_countdown()
 
 func _generate_track_visuals():
 	var track = GameData.current_track
@@ -198,3 +200,18 @@ func go_again():
 func main_menu():
 	get_tree().paused = false
 	get_tree().change_scene_to_file("res://src/World/main_menu.tscn")
+
+func start_countdown():
+	$Start.visible = true
+	await get_tree().create_timer(1).timeout
+	%Countdown.text = str(2)
+	await get_tree().create_timer(1).timeout
+	%Countdown.text = str(1)
+	await get_tree().create_timer(1).timeout
+	%Countdown.text = "Start!"
+	await get_tree().create_timer(1).timeout
+	$Start.visible = false
+	get_tree().paused = false
+	
+	
+	
