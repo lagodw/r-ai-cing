@@ -14,76 +14,132 @@ func activate_power(kart: Kart, power: PowerDef):
 			drop_hazard(kart, power)
 
 func fire_projectile(kart: Kart, data: PowerDef):
-	var proj: Projectile = proj_scene.instantiate()
-	proj.shooter_id = kart.name.to_int()
+	# Determine how many to shoot
+	var count = max(1, data.projectile_count)
 	
-	# Visuals & Dimensions
-	proj.get_node("Sprite2D").texture = load("res://assets/powers/%s.png" % data.id)
-	proj.length = data.length
-	proj.width = data.width
+	# Configuration for the arc (90 degrees total)
+	var spread_angle_deg = 90.0
+	var spread_rad = deg_to_rad(spread_angle_deg)
 	
-	# Stats
-	proj.speed = data.speed
-	proj.damage = data.damage
-	proj.shooter_id = kart.name
-	proj.behavior = data.projectile_behavior
-	proj.homing_turn_speed = data.turn_speed
-	proj.detection_radius = data.detection_radius
+	# Calculate the starting offset angle so the arc is centered
+	var start_angle_offset = 0.0
+	var angle_step = 0.0
 	
-	# Position Logic
+	if count > 1:
+		start_angle_offset = -spread_rad / 2.0
+		angle_step = spread_rad / (count - 1)
+
+	# Pre-calculate kart dimensions
 	var sprite: Sprite2D = kart.get_node("Sprite2D")
 	var kart_length = sprite.texture.get_width() * sprite.scale.x
 	var forward_dist = (kart_length / 2.0) + (data.length / 2.0) + 10.0
-	
-	if data.projectile_behavior == "Orbit":
-		proj.orbit_center = kart
-		proj.orbit_duration = data.duration
-		proj.orbit_radius = 100.0
-		var offset = Vector2(proj.orbit_radius, 0).rotated(kart.rotation)
-		proj.global_position = kart.global_position + offset
-		proj.rotation = kart.rotation + (PI / 2.0)
+
+	for i in range(count):
+		var proj: Projectile = proj_scene.instantiate()
+		proj.shooter_id = kart.name.to_int()
 		
-	elif data.projectile_behavior == "Backward":
-		var offset = Vector2(-forward_dist, 0).rotated(kart.rotation)
-		proj.global_position = kart.global_position + offset
-		proj.rotation = kart.rotation + PI
+		# Visuals & Dimensions
+		proj.get_node("Sprite2D").texture = load("res://assets/powers/%s.png" % data.id)
+		proj.length = data.length
+		proj.width = data.width
 		
-	else:
-		var offset = Vector2(forward_dist, 0).rotated(kart.rotation)
-		proj.global_position = kart.global_position + offset
-		proj.rotation = kart.rotation
-	
-	get_tree().current_scene.add_child(proj, true)
+		# Stats
+		proj.speed = data.speed
+		proj.damage = data.damage
+		proj.shooter_id = kart.name
+		proj.behavior = data.projectile_behavior
+		proj.homing_turn_speed = data.turn_speed
+		proj.detection_radius = data.detection_radius
+		proj.can_bounce = data.can_bounce # Pass the new capability
+		
+		# --- Rotation & Position Logic ---
+		
+		# 1. Determine base rotation (Forward or Backward)
+		var base_rotation = kart.rotation
+		if data.projectile_behavior == "Backward":
+			base_rotation += PI
+			
+		# 2. Apply spread offset
+		var current_angle = base_rotation
+		if count > 1 and data.projectile_behavior != "Orbit":
+			current_angle += start_angle_offset + (angle_step * i)
+		
+		# 3. Apply to Projectile
+		if data.projectile_behavior == "Orbit":
+			# Orbit logic handles its own position, but we pass data
+			proj.orbit_center = kart
+			proj.orbit_duration = data.duration
+			proj.orbit_radius = 100.0
+			# If we have multiple orbits, this logic creates them stacked. 
+			# (Orbit spacing would require offsetting the initial orbit_angle in Projectile.gd)
+			var offset = Vector2(proj.orbit_radius, 0).rotated(kart.rotation)
+			proj.global_position = kart.global_position + offset
+			proj.rotation = kart.rotation + (PI / 2.0)
+			
+		else:
+			# Standard Forward/Backward/Homing logic
+			var offset_vector = Vector2(forward_dist, 0).rotated(current_angle)
+			proj.global_position = kart.global_position + offset_vector
+			proj.rotation = current_angle
+		
+		get_tree().current_scene.add_child(proj, true)
 
 func drop_hazard(kart: Kart, data: PowerDef):
 	var hazard_scene = load("res://src/Entities/Hazard.tscn")
-	var hazard = hazard_scene.instantiate()
 	
-	# Stats & Dimensions
-	hazard.damage = data.damage
-	hazard.duration = data.duration
-	hazard.shooter_id = kart.name
-	hazard.length = data.length
-	hazard.width = data.width
+	# Logic similar to projectiles for spread
+	var count = max(1, data.projectile_count)
+	var spread_angle_deg = 90.0
+	var spread_rad = deg_to_rad(spread_angle_deg)
 	
-	# Visuals
-	var sprite: Sprite2D = hazard.get_node("Sprite2D")
-	sprite.texture = load("res://assets/powers/%s.png" % data.id)
+	var start_angle_offset = 0.0
+	var angle_step = 0.0
 	
-	# Determine Deployment (Lob vs Drop)
-	if data.projectile_behavior == "Forward":
-		# Lob Forward
-		var forward_vector = Vector2.RIGHT.rotated(kart.rotation)
-		hazard.global_position = kart.global_position + (forward_vector * 60.0)
-		hazard.target_pos = kart.global_position + (forward_vector * 300.0)
+	if count > 1:
+		start_angle_offset = -spread_rad / 2.0
+		angle_step = spread_rad / (count - 1)
+	
+	for i in range(count):
+		var hazard = hazard_scene.instantiate()
+		
+		# Stats & Dimensions
+		hazard.damage = data.damage
+		hazard.duration = data.duration
+		hazard.shooter_id = kart.name
+		hazard.length = data.length
+		hazard.width = data.width
 		hazard.lob_speed = data.speed
-	else:
-		# Drop Behind
-		var backward_vector = Vector2.LEFT.rotated(kart.rotation)
-		hazard.global_position = kart.global_position + (backward_vector * 60.0)
-		hazard.target_pos = Vector2.ZERO # Active immediately
-	
-	get_tree().current_scene.add_child(hazard, true)
+		
+		# Visuals
+		var sprite: Sprite2D = hazard.get_node("Sprite2D")
+		sprite.texture = load("res://assets/powers/%s.png" % data.id)
+		
+		# Determine Base Direction
+		var base_rotation = kart.rotation
+		if data.projectile_behavior != "Forward":
+			base_rotation += PI # Backward
+			
+		# Apply Spread
+		var current_angle = base_rotation
+		if count > 1:
+			current_angle += start_angle_offset + (angle_step * i)
+		
+		var move_vector = Vector2.RIGHT.rotated(current_angle)
+		
+		# Initial Spawn Position (Offset from kart)
+		hazard.global_position = kart.global_position + (move_vector * 60.0)
+		
+		# Determine Deployment (Lob vs Drop)
+		if data.projectile_behavior == "Forward":
+			# Lob Forward
+			hazard.travel_dir = move_vector
+			hazard.max_travel_dist = 300.0
+		else:
+			# Drop Behind
+			hazard.travel_dir = Vector2.ZERO # No movement
+			hazard.max_travel_dist = 0.0
+		
+		get_tree().current_scene.add_child(hazard, true)
 
 func apply_buff(kart: Kart, data: PowerDef):
 	if data.stat_target == "max_speed":

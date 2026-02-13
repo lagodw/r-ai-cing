@@ -7,6 +7,11 @@ var damage = 0
 var shooter_id = 0
 var behavior: String = "Forward"
 
+# New Config
+var can_bounce: bool = false
+var max_lifetime: float = 0.0 # 0 means infinite (until hit)
+var current_lifetime: float = 0.0
+
 # Dimensions
 var length: float = 40.0
 var width: float = 40.0
@@ -48,6 +53,13 @@ func _apply_dimensions():
 			col.shape.radius = max(length, width) / 2.0
 
 func _physics_process(delta):
+	# Handle Lifetime for Bouncing Projectiles
+	if max_lifetime > 0:
+		current_lifetime += delta
+		if current_lifetime >= max_lifetime:
+			queue_free()
+			return
+
 	match behavior:
 		"Orbit":
 			_process_orbit(delta)
@@ -58,7 +70,29 @@ func _physics_process(delta):
 			_move_forward(delta)
 
 func _move_forward(delta):
-	position += Vector2.RIGHT.rotated(rotation) * speed * delta
+	var move_vec = Vector2.RIGHT.rotated(rotation) * speed * delta
+	
+	# --- Bouncing Logic ---
+	if can_bounce:
+		var space_state = get_world_2d().direct_space_state
+		# Raycast forward to detect walls before we move into them
+		var query = PhysicsRayQueryParameters2D.create(global_position, global_position + move_vec * 1.5)
+		query.collide_with_areas = false
+		query.collide_with_bodies = true
+		
+		var result = space_state.intersect_ray(query)
+		if result and result.collider is StaticBody2D: # Assuming walls are StaticBody2D
+			var normal = result.normal
+			var direction = Vector2.RIGHT.rotated(rotation)
+			var new_dir = direction.bounce(normal)
+			
+			rotation = new_dir.angle()
+			# Slightly nudge away from wall to prevent sticking
+			global_position = result.position + (normal * 5.0)
+			return
+	# ----------------------
+
+	position += move_vec
 
 func _process_orbit(delta):
 	orbit_timer += delta
@@ -105,10 +139,18 @@ func _find_target_in_front() -> Node2D:
 func _on_hit(body):
 	if body.name == str(shooter_id): return
 	
-	if not body.has_method("take_damage") and behavior != "Orbit":
+	# Hit a Wall (or non-damageable object)
+	if not body.has_method("take_damage"):
+		if behavior == "Orbit": return
+		
+		# If we can bounce, we ignore this collision (physics raycast handles the bounce)
+		if can_bounce:
+			return
+			
 		queue_free()
 		return
 
+	# Hit a Kart
 	if body.has_method("take_damage"):
 		body.take_damage(damage)
 		queue_free()

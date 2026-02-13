@@ -13,6 +13,7 @@ func _ready() -> void:
 	%Speed.text = str(power.speed)
 	%Duration.text = str(power.duration)
 	%Cooldown.text = str(power.cooldown)
+	%Count.text = str(power.projectile_count)
 	%Stat.text = power.stat_target
 	%Amount.text = str(power.amount)
 	
@@ -31,6 +32,7 @@ func _ready() -> void:
 			%StatBox.visible = false
 			%AmountBox.visible = false
 		"Buff":
+			%CountBox.visible = false
 			%DurationBox.visible = false
 			%TypeBox.visible = false
 			%DamageBox.visible = false

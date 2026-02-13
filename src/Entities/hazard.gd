@@ -11,8 +11,12 @@ var width: float = 40.0
 
 # Lobbing / Movement variables
 var is_active: bool = false
-var target_pos: Vector2 = Vector2.ZERO
 var lob_speed: float = 800.0
+
+# New Movement Logic
+var travel_dir: Vector2 = Vector2.ZERO
+var max_travel_dist: float = 0.0
+var distance_traveled: float = 0.0
 
 func _ready() -> void:
 	body_entered.connect(_on_hit)
@@ -20,7 +24,8 @@ func _ready() -> void:
 	# Apply dynamic size
 	_apply_dimensions()
 	
-	if target_pos != Vector2.ZERO:
+	# If we have a direction and distance, we are lobbing. Otherwise active.
+	if max_travel_dist > 0 and travel_dir != Vector2.ZERO:
 		is_active = false
 	else:
 		_activate()
@@ -46,13 +51,28 @@ func _apply_dimensions():
 
 func _physics_process(delta: float) -> void:
 	if not is_active:
-		var dir = (target_pos - global_position).normalized()
-		var motion = dir * lob_speed * delta
+		var step_dist = lob_speed * delta
 		
-		global_position += motion
+		# --- Bounce Logic ---
+		# Check ahead for walls
+		var space_state = get_world_2d().direct_space_state
+		var query = PhysicsRayQueryParameters2D.create(global_position, global_position + (travel_dir * step_dist * 2.0))
+		query.collide_with_areas = false
+		query.collide_with_bodies = true
 		
-		# Check walls or arrival
-		if global_position.distance_to(target_pos) < 10.0:
+		var result = space_state.intersect_ray(query)
+		if result and result.collider is StaticBody2D:
+			# Bounce!
+			var normal = result.normal
+			travel_dir = travel_dir.bounce(normal)
+			# Nudge slightly to prevent sticking?
+		# --------------------
+
+		global_position += travel_dir * step_dist
+		distance_traveled += step_dist
+		
+		# Check arrival
+		if distance_traveled >= max_travel_dist:
 			_activate()
 
 func _activate() -> void:
@@ -63,8 +83,8 @@ func _activate() -> void:
 
 func _on_hit(body: Node) -> void:
 	if not is_active:
-		if body is StaticBody2D: # Hit a wall while lobbing
-			_activate()
+		# If we hit a wall while lobbing, we ignore it here 
+		# because the RayCast in _physics_process handles the bounce.
 		return
 
 	#if body.name == shooter_id:
