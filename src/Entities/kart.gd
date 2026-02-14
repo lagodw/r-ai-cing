@@ -142,24 +142,48 @@ func _physics_process(delta):
 func _gather_input():
 	if not is_player_controlled: return
 	
-	# PC / Console Input
+	# --- Keyboard Input (Keep this for debugging/PC play) ---
 	var move_axis = Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	input_steer = move_axis.x
-	input_throttle = -move_axis.y # Up is negative Y, but positive throttle
+	input_throttle = -move_axis.y 
 	
+	# --- Joystick Input (New Directional Logic) ---
 	if joystick and joystick.is_active:
-		var joy_output = joystick.get_output() # Returns Vector2
-		input_steer = joy_output.x
-		# Use the Y axis for throttle, or use auto_gas
-		if auto_gas:
-			input_throttle = 1.0 if not Input.is_action_pressed("move_down") else -0.5
-		else:
-			input_throttle = -joy_output.y
+		var joy_output = joystick.get_output() # Returns normalized Vector2
 		
+		# Define a small deadzone to prevent jitter when the stick is centered
+		if joy_output.length() > 0.1:
+			# 1. Get the direction the kart is currently facing
+			var current_dir = Vector2.RIGHT.rotated(rotation)
+			
+			# 2. Get the direction the player wants to go (Joystick vector)
+			var target_dir = joy_output
+			
+			# 3. Calculate the angle difference between them
+			# angle_to returns the shortest angle in radians (Clockwise is positive)
+			var angle_diff = current_dir.angle_to(target_dir)
+			
+			# 4. Apply to Steering
+			# We clamp the value between -1 and 1. 
+			# Multiplying by 2.0 makes it steer harder/faster to correct the angle.
+			input_steer = clamp(angle_diff * 2.0, -1.0, 1.0)
+			
+			# 5. Apply Throttle
+			# If the stick is pushed, we accelerate.
+			# Optional: Reduce throttle if the turn is too sharp (e.g. > 90 degrees) to simulate cornering
+			if abs(angle_diff) > PI / 2.0:
+				input_throttle = 0.5 # Slow down for U-turns
+			else:
+				input_throttle = 1.0
+		else:
+			# If joystick is released/in deadzone, stop input
+			input_steer = 0.0
+			input_throttle = 0.0
+	
 	# Ability Inputs
 	if Input.is_action_just_pressed("activate_slot_0"): use_power(0)
 	if Input.is_action_just_pressed("activate_slot_1"): use_power(1)
-
+	
 func _apply_physics(delta):
 	# A. Steering
 	if input_steer != 0 and current_speed != 0:
