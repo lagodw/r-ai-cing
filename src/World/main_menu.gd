@@ -13,7 +13,7 @@ func single_player():
 	get_tree().change_scene_to_file("uid://dnd4ot45brbyk")
 	
 func multi_player():
-	pass
+	MultiplayerManager._start_server()
 	
 func settings():
 	$Settings.visible = true

@@ -11,11 +11,11 @@ const PORT = 8080
 # 1. For local testing, use "ws://127.0.0.1:8080"
 # 2. For Production (Render/VPS), use "wss://your-app-name.onrender.com"
 # Note: Android REQUIRES "wss://" (Secure) if you are not on a local network!
-const LIVE_SERVER_URL = "wss://your-game-name.onrender.com"
+const LIVE_SERVER_URL = "wss://r-ai-cing.onrender.com"
 const LOCAL_SERVER_URL = "ws://127.0.0.1:8080"
 
 # Set this to true when you are ready to publish!
-const IS_PROD_BUILD = false 
+const IS_PROD_BUILD = true 
 
 func _ready():
 	# If this is the specialized "Headless Server" build, start listening
