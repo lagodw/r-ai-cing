@@ -5,12 +5,9 @@
 [resource]
 script = ExtResource("1_6ohl8")
 id = "Thin_Kart"
-sprite_path = "uid://533g6wyyxxl3"
 max_health = 100
-max_speed = 200.0
-acceleration = 400.0
+max_speed = 550.0
+acceleration = 650.0
 turn_speed = 3.5
-length = 80.0
-width = 40.0
-weapon_offset = Vector2(0, 0)
+width_percent = 0.15
 metadata/_custom_type_script = "uid://d2vcvaa1qp6xu"

@@ -9,6 +9,7 @@ signal cooldown_started(slot_index: int, duration: float)
 @export var is_player_controlled: bool = false
 @export var auto_gas: bool = false # Set true for simple mobile mode
 
+var track_width_ref: float = 200.0
 # The Resource containing base stats (Loaded from JSON)
 var stats: KartDef 
 
@@ -77,19 +78,38 @@ func _ready():
 func configure_from_id(id: String):
 	stats = GameData.karts.get(id)
 	
-	max_health = stats.max_health
-	current_health = max_health
-	
 	if not stats:
 		printerr("Kart ID not found: ", id)
 		return
 
-	# Apply Visuals
-	sprite.texture = load("res://assets/karts/%s.png" % stats.id)
-	_apply_dimensions(stats.length, stats.width)
-	weight = max(stats.length * stats.width, 1.0)
+	max_health = stats.max_health
+	current_health = max_health
 	
-	# Copy Stats so we can modify them (e.g. buffs) without changing the Resource
+	# 1. Load Sprite
+	var tex = load("res://assets/karts/%s.png" % stats.id)
+	sprite.texture = tex
+	
+	# 2. Calculate Dimensions based on Track Width % and Sprite Aspect Ratio
+	var final_width = 40.0 # Fallback
+	var final_length = 80.0
+	
+	if track_width_ref > 0 and stats.width_percent > 0:
+		# Width is calculated from track size
+		final_width = track_width_ref * (stats.width_percent)
+		
+		# Length is calculated from Aspect Ratio to keep sprite not distorted
+		if tex:
+			var tex_size = tex.get_size()
+			if tex_size.x > 0 and tex_size.y > 0:
+				# Aspect Ratio = Width(X) / Height(Y) (Relative to sprite texture space)
+				var aspect = tex_size.x / tex_size.y
+				final_length = final_width * aspect
+
+	printt(final_length, final_width, track_width_ref, stats.width_percent)
+	_apply_dimensions(final_length, final_width)
+	weight = max(final_length * final_width, 1.0)
+	
+	# Copy Stats
 	max_speed = stats.max_speed
 	acceleration = stats.acceleration
 	turn_speed = stats.turn_speed

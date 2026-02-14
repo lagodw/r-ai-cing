@@ -51,6 +51,7 @@ func fire_projectile(kart: Kart, data: PowerDef):
 		proj.homing_turn_speed = data.turn_speed
 		proj.detection_radius = data.detection_radius
 		proj.can_bounce = data.can_bounce # Pass the new capability
+		proj.max_lifetime = data.duration
 		
 		# --- Rotation & Position Logic ---
 		

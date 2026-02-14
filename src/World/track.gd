@@ -15,6 +15,7 @@ func _ready():
 	# Add it to the CanvasLayer (Track.tscn doesn't have one, so we add it as child)
 	# Since Selection is a CanvasLayer, it will render on top.
 	add_child(selection)
+	move_child(selection, 0)
 	
 	# 2. Wait for player to finish selecting
 	#selection.race_started.connect(start_game)
@@ -31,36 +32,34 @@ func _generate_track_visuals():
 	var track = GameData.current_track
 	if not track: return
 	
-	#var path = "res://assets/tracks/%s.png"%track.id
-	var path = "uid://cyg0bu5cqy8k2"
+	var path = "res://assets/tracks/%s.png"%track.id
 	if ResourceLoader.exists(path):
 		var tex = load(path)
 		background.texture = tex
 		await get_tree().process_frame
 	
-		# 1. Generate Walls (Red Outline)
+		# 1. Generate Walls
 		TrackBuilder.generate_walls_from_texture(tex, walls, true)
 		
 		var detected_start = TrackBuilder.find_start_position_from_texture(tex, true)
-		
-		# If we found a green mark, update the track data
 		if detected_start != Vector2.INF:
 			track.start_position = detected_start
-			print("Auto-detected start position at: ", detected_start)
 		
-		# 2. Generate Path (Auto-Walk)
+		# Wait for Physics
 		await get_tree().physics_frame
 		await get_tree().physics_frame 
 
-	# Now generate path
-		var auto_path = TrackBuilder.generate_path_automatically(self, track.start_position)
-		track.waypoints = auto_path
+		# 2. Generate Path AND Get Angle (UPDATED)
+		var result = TrackBuilder.generate_path_automatically(self, track.start_position)
 		
-		# Draw path for debug (optional)
+		track.waypoints = result["path"]
+		track.start_angle = result["angle"] # Store the angle
+		
+		# 3. Measure Width using the angle we just found (NEW)
+		track.track_width = TrackBuilder.measure_track_width(self, track.start_position, track.start_angle)
+		
 		queue_redraw()
-				
-		# 3. Fit everything to the screen
-		#_fit_track_to_screen(tex.get_size())
+	
 	start_game()
 
 func _fit_track_to_screen(_image_size: Vector2):
@@ -148,6 +147,7 @@ func _spawn_racers():
 		var final_offset = grid_offset * walls.scale
 		
 		kart.scale = walls.scale
+		kart.track_width_ref = track.track_width
 		kart.global_position = final_start + final_offset
 		kart.rotation = forward_dir.angle()
 		

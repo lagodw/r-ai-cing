@@ -89,10 +89,7 @@ func _parse_kart_json(data: Dictionary) -> KartDef:
 	def.max_speed = data.get("max_speed", 500)
 	def.acceleration = data.get("acceleration", 800)
 	def.turn_speed = data.get("turn_speed", 3.5)
-	
-	# Sprite path inference
-	var sprite_name = data.get("sprite_file", def.id + ".png")
-	def.sprite_path = "res://assets/sprites/" + sprite_name
+	def.width_percent = data.get("width_percent", 0.0)
 	
 	return def
 
@@ -109,9 +106,6 @@ func _parse_power_json(data: Dictionary) -> PowerDef:
 	def.stat_target = data.get("stat_target", "")
 	def.amount = data.get("amount", 0.0)
 	def.duration = data.get("duration", 0.0)
-	
-	var sprite_name = data.get("sprite_file", "power_default.png")
-	def.sprite_path = "res://assets/sprites/" + sprite_name
 	
 	return def
 

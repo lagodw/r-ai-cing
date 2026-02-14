@@ -6,11 +6,13 @@
 script = ExtResource("1_vfs2t")
 id = "Nitrous"
 type = "Buff"
-cooldown = 2.0
+cooldown = 4.0
 length = 20.0
 width = 20.0
+projectile_count = 1
 speed = 800.0
 damage = 10
+can_bounce = false
 projectile_behavior = "Forward"
 turn_speed = 4.0
 detection_radius = 400.0

@@ -48,24 +48,21 @@ static func generate_walls_from_texture(texture: Texture2D, parent_node: Node, c
 		collider.build_mode = CollisionPolygon2D.BUILD_SEGMENTS
 		parent_node.add_child(collider)
 
-static func generate_path_automatically(context: Node2D, start_pos: Vector2, look_ahead: float = 200.0, collision_mask: int = 1) -> Array[Vector2]:
+static func generate_path_automatically(context: Node2D, start_pos: Vector2, look_ahead: float = 200.0, collision_mask: int = 1) -> Dictionary:
 	var path: Array[Vector2] = []
 	path.append(start_pos)
 	
-	# Access the Physics State
 	var space_state = context.get_world_2d().direct_space_state
-	
 	var current_pos = start_pos
-	var current_angle = 0.0 # We will auto-detect start angle below
+	var current_angle = 0.0
 	
 	# --- CONFIG ---
 	var step_size = 40.0
 	var max_steps = 3000
-	var steering_speed = 0.4 # Smooth turning
+	var steering_speed = 0.4 
 	# --------------
 
-	# 1. AUTO-DETECT START ROTATION (Physics Version)
-	# Scan 360 degrees to find the longest open path
+	# 1. AUTO-DETECT START ROTATION
 	var max_start_dist = -1.0
 	
 	for d in range(0, 360, 10):
@@ -73,7 +70,6 @@ static func generate_path_automatically(context: Node2D, start_pos: Vector2, loo
 		var dir = Vector2.RIGHT.rotated(rad)
 		var target = current_pos + (dir * look_ahead)
 		
-		# Create Ray Query
 		var query = PhysicsRayQueryParameters2D.create(current_pos, target, collision_mask)
 		var result = space_state.intersect_ray(query)
 		
@@ -86,13 +82,15 @@ static func generate_path_automatically(context: Node2D, start_pos: Vector2, loo
 			current_angle = rad
 			
 	print("Physics Pathfinding: Start Angle ", rad_to_deg(current_angle))
+	
+	# SAVE THE DETECTED ANGLE
+	var found_start_angle = current_angle
 
-	# 2. MAIN LOOP
+	# 2. MAIN LOOP (Rest of the function remains mostly the same)
 	for i in range(max_steps):
 		var weighted_vector_sum = Vector2.ZERO
 		var total_weight = 0.0
 		
-		# Fan Scan (-90 to +90 degrees)
 		for angle_offset in range(-90, 91, 10):
 			var radians = current_angle + deg_to_rad(angle_offset)
 			var dir = Vector2.RIGHT.rotated(radians)
@@ -105,42 +103,64 @@ static func generate_path_automatically(context: Node2D, start_pos: Vector2, loo
 			if result:
 				dist = current_pos.distance_to(result.position)
 			
-			# WEIGHTING: Squared distance rewards open paths heavily
 			var weight = pow(dist, 2)
-			
 			weighted_vector_sum += dir * weight
 			total_weight += weight
 			
 		if total_weight > 0:
-			# Calculate Best Direction
 			var target_dir = (weighted_vector_sum / total_weight).normalized()
 			var target_angle = target_dir.angle()
 			
-			# Smooth Steering
 			current_angle = lerp_angle(current_angle, target_angle, steering_speed)
 			
-			# Move
 			var move_dir = Vector2.RIGHT.rotated(current_angle)
 			var next_pos = current_pos + (move_dir * step_size)
 			
-			# Safety Check: Did we just drive INSIDE a wall?
-			# We cast a tiny ray from current to next to ensure we don't phase through thin walls
+			# Safety check
 			var safety_query = PhysicsRayQueryParameters2D.create(current_pos, next_pos, collision_mask)
 			if space_state.intersect_ray(safety_query):
-				print("Pathfinding blocked at step ", i)
 				break
 				
 			path.append(next_pos)
 			current_pos = next_pos
 			
-			# Loop Complete Check
 			if i > 20 and current_pos.distance_to(start_pos) < step_size * 1.5:
-				print("Track Loop Closed!")
 				break
 		else:
 			break
 			
-	return path
+	# Return both the path and the angle we found at the start
+	return {
+		"path": path,
+		"angle": found_start_angle
+	}
+
+static func measure_track_width(context: Node2D, start_pos: Vector2, forward_angle: float, collision_mask: int = 1) -> float:
+	var space_state = context.get_world_2d().direct_space_state
+	
+	# Calculate vectors perpendicular to the track direction
+	var right_dir = Vector2.RIGHT.rotated(forward_angle + PI/2)
+	var left_dir = -right_dir
+	
+	var scan_dist = 2000.0 # Far enough to hit walls
+	
+	# Raycast Right
+	var dist_r = scan_dist
+	var query_r = PhysicsRayQueryParameters2D.create(start_pos, start_pos + (right_dir * scan_dist), collision_mask)
+	var res_r = space_state.intersect_ray(query_r)
+	if res_r:
+		dist_r = start_pos.distance_to(res_r.position)
+		
+	# Raycast Left
+	var dist_l = scan_dist
+	var query_l = PhysicsRayQueryParameters2D.create(start_pos, start_pos + (left_dir * scan_dist), collision_mask)
+	var res_l = space_state.intersect_ray(query_l)
+	if res_l:
+		dist_l = start_pos.distance_to(res_l.position)
+		
+	var total = dist_r + dist_l
+	print("Track Width Measured: ", total)
+	return total
 
 static func find_start_position_from_texture(texture: Texture2D, centered: bool = false) -> Vector2:
 	var image: Image = texture.get_image()

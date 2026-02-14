@@ -9,7 +9,7 @@ func _ready() -> void:
 	%SpeedBar.value = kart.max_speed
 	%AccelerationBar.value = kart.acceleration
 	%HandlingBar.value = kart.turn_speed
-	%WeightBar.value = kart.length * kart.width
+	%WeightBar.value = kart.width_percent
 	%Name.text = kart.id.replace("_", " ")
 
 func _gui_input(event: InputEvent) -> void:

@@ -86,9 +86,8 @@ text = "Weight"
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 20)
 layout_mode = 2
-max_value = 5000.0
-step = 1.0
-value = 500.0
+max_value = 0.5
+value = 0.2
 show_percentage = false
 
 [node name="Highlight" type="ReferenceRect" parent="."]
