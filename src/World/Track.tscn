@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3 uid="uid://dnd4ot45brbyk"]
+[gd_scene load_steps=25 format=3 uid="uid://dnd4ot45brbyk"]
 
 [ext_resource type="Script" uid="uid://dhqvmde3vmpt3" path="res://src/World/track.gd" id="1_7nrbi"]
 [ext_resource type="Texture2D" uid="uid://cyg0bu5cqy8k2" path="res://assets/tracks/Palm.png" id="2_imajx"]
@@ -13,6 +13,9 @@
 [ext_resource type="Script" uid="uid://divvvcfvjgu3t" path="res://src/World/esacape.gd" id="9_o8aps"]
 [ext_resource type="PackedScene" uid="uid://5p4v7xvgvs4o" path="res://src/Entities/VirtualJoystick.tscn" id="10_jgmkd"]
 [ext_resource type="Texture2D" uid="uid://btphdb068iw6x" path="res://assets/UI/Trophy.png" id="11_2f1gn"]
+[ext_resource type="Texture2D" uid="uid://bb3k0k5ff0tfk" path="res://assets/UI/VolumeOn.png" id="12_85pjj"]
+[ext_resource type="Texture2D" uid="uid://cq5npkpluvfyy" path="res://assets/UI/VolumeMuted.png" id="13_aeb16"]
+[ext_resource type="PackedScene" uid="uid://pwqh4vxogv46" path="res://src/World/Settings.tscn" id="14_14sem"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_2f1gn"]
 
@@ -21,6 +24,14 @@
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ckak7"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_14sem"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_u2e6d"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_u85o6"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_l3pkv"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_cbhdq"]
 
 [node name="Track" type="Node2D"]
 script = ExtResource("1_7nrbi")
@@ -166,6 +177,31 @@ offset_top = 703.0
 offset_right = 391.0
 offset_bottom = 1003.0
 
+[node name="VolumeOff" type="Button" parent="UI"]
+offset_left = 180.0
+offset_top = 20.0
+offset_right = 320.0
+offset_bottom = 157.0
+theme_override_styles/focus = SubResource("StyleBoxEmpty_u2e6d")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_u85o6")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_l3pkv")
+theme_override_styles/normal = SubResource("StyleBoxEmpty_cbhdq")
+icon = ExtResource("12_85pjj")
+expand_icon = true
+
+[node name="VolumeOn" type="Button" parent="UI"]
+visible = false
+offset_left = 180.0
+offset_top = 20.0
+offset_right = 320.0
+offset_bottom = 157.0
+theme_override_styles/focus = SubResource("StyleBoxEmpty_u2e6d")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_u85o6")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_l3pkv")
+theme_override_styles/normal = SubResource("StyleBoxEmpty_cbhdq")
+icon = ExtResource("13_aeb16")
+expand_icon = true
+
 [node name="Victory" type="CanvasLayer" parent="."]
 process_mode = 3
 visible = false
@@ -301,7 +337,6 @@ theme_override_font_sizes/font_size = 32
 text = "Resume"
 
 [node name="Settings" type="Button" parent="Escape/Panel/VBoxContainer"]
-visible = false
 custom_minimum_size = Vector2(0, 100)
 layout_mode = 2
 theme_override_font_sizes/font_size = 32
@@ -312,6 +347,10 @@ custom_minimum_size = Vector2(0, 100)
 layout_mode = 2
 theme_override_font_sizes/font_size = 32
 text = "Main Menu"
+
+[node name="Settings" parent="Escape" instance=ExtResource("14_14sem")]
+layer = 2
+visible = false
 
 [node name="Start" type="CanvasLayer" parent="."]
 process_mode = 3

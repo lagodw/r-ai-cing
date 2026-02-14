@@ -4,7 +4,7 @@
 [ext_resource type="Script" uid="uid://bqfr6e451mati" path="res://src/World/track_option.gd" id="2_jq8u1"]
 
 [node name="TextureRect" type="TextureRect"]
-custom_minimum_size = Vector2(0, 200)
+custom_minimum_size = Vector2(0, 150)
 offset_right = 40.0
 offset_bottom = 40.0
 texture = ExtResource("1_fp5rv")

@@ -16,7 +16,7 @@ func multi_player():
 	pass
 	
 func settings():
-	$Panel.visible = true
+	$Settings.visible = true
 	
 func quit():
 	get_tree().quit()

@@ -1,9 +1,12 @@
-[gd_resource type="Theme" load_steps=9 format=3 uid="uid://crtg3dknqulx2"]
+[gd_resource type="Theme" load_steps=15 format=3 uid="uid://crtg3dknqulx2"]
 
 [ext_resource type="Texture2D" uid="uid://bo7c60sjkryff" path="res://assets/UI/Tire_Button_hover.png" id="1_61878"]
 [ext_resource type="Texture2D" uid="uid://b24j0crrmqlsy" path="res://assets/UI/Tire_Button_normal.png" id="2_yogud"]
 [ext_resource type="Texture2D" uid="uid://bg466w0wd5phe" path="res://assets/UI/Tire_Button_pressed.png" id="3_3iukl"]
+[ext_resource type="Texture2D" uid="uid://y7oi54outq5g" path="res://assets/UI/Slider.png" id="4_3o65w"]
 [ext_resource type="FontFile" uid="uid://dpyupvs5314th" path="res://assets/UI/Pro Racing Slant.otf" id="4_m3ome"]
+[ext_resource type="Texture2D" uid="uid://m2ywrc4mset1" path="res://assets/UI/Options_slider_line_red_small.png" id="5_psycl"]
+[ext_resource type="Texture2D" uid="uid://bfwga8vs00med" path="res://assets/UI/Options_slider.png" id="6_6vv75"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_24c5i"]
 
@@ -28,6 +31,23 @@ texture_margin_top = 15.0
 texture_margin_right = 15.0
 texture_margin_bottom = 15.0
 
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_aqqmw"]
+texture = ExtResource("5_psycl")
+expand_margin_top = 20.0
+expand_margin_bottom = 20.0
+axis_stretch_horizontal = 1
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_hjsrh"]
+texture = ExtResource("5_psycl")
+expand_margin_top = 20.0
+expand_margin_bottom = 20.0
+axis_stretch_horizontal = 1
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_my450"]
+texture = ExtResource("6_6vv75")
+expand_margin_top = 24.0
+expand_margin_bottom = 24.0
+
 [resource]
 default_font = ExtResource("4_m3ome")
 Button/colors/font_color = Color(0, 0, 0, 1)
@@ -35,3 +55,8 @@ Button/styles/focus = SubResource("StyleBoxEmpty_24c5i")
 Button/styles/hover = SubResource("StyleBoxTexture_nxs6j")
 Button/styles/normal = SubResource("StyleBoxTexture_j6kig")
 Button/styles/pressed = SubResource("StyleBoxTexture_a6j6x")
+HSlider/icons/grabber = ExtResource("4_3o65w")
+HSlider/icons/grabber_highlight = ExtResource("4_3o65w")
+HSlider/styles/grabber_area = SubResource("StyleBoxTexture_aqqmw")
+HSlider/styles/grabber_area_highlight = SubResource("StyleBoxTexture_hjsrh")
+HSlider/styles/slider = SubResource("StyleBoxTexture_my450")

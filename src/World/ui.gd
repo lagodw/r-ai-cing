@@ -5,6 +5,8 @@ extends CanvasLayer
 var player_kart: Kart
 
 func _ready() -> void:
+	$VolumeOff.pressed.connect(mute_volume)
+	$VolumeOn.pressed.connect(volume_on)
 	var is_mobile = OS.has_feature("mobile") or \
 						OS.has_feature("web_android") or \
 						OS.has_feature("web_ios")
@@ -12,6 +14,8 @@ func _ready() -> void:
 	if not is_mobile:
 		$VirtualJoystick.queue_free()
 		$Menu.visible = false
+		$VolumeOff.visible = false
+		$VolumeOn.visible = false
 	else:
 		# have competing TouchScreenButton
 		$HBoxContainer/Power1.disabled = true
@@ -55,3 +59,10 @@ func _on_cooldown_started(slot_index: int, duration: float):
 func show_menu():
 	get_tree().current_scene.get_node("Escape").visible = true
 	get_tree().paused = true
+
+
+func mute_volume():
+	AudioManager.set_bus_volume("Master", 0)
+
+func volume_on():
+	AudioManager.set_bus_volume("Master", 0.5)

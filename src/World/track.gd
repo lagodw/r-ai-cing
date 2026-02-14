@@ -232,5 +232,3 @@ func start_countdown():
 	$Start.visible = false
 	get_tree().paused = false
 	
-	
-	

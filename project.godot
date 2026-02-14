@@ -16,11 +16,16 @@ config/features=PackedStringArray("4.4", "Forward Plus")
 boot_splash/image="uid://bjl756osejanv"
 config/icon="uid://d223gkv7hhpsw"
 
+[audio]
+
+buses/default_bus_layout="uid://bmmvhn3jtwdm2"
+
 [autoload]
 
 GameData="*res://src/Autoloads/GameData.gd"
 PowerManager="*res://src/Autoloads/PowerManager.gd"
 MultiplayerManager="*res://src/Autoloads/MultiplayerManager.gd"
+AudioManager="*res://src/Autoloads/AudioManager.gd"
 
 [display]
 
@@ -86,6 +91,11 @@ activate_slot_1={
 activate_slot_2={
 "deadzone": 0.2,
 "events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":77,"key_label":0,"unicode":109,"location":0,"echo":false,"script":null)
+]
+}
+drift={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":32,"key_label":0,"unicode":32,"location":0,"echo":false,"script":null)
 ]
 }
 

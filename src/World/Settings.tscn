@@ -1,0 +1,115 @@
+[gd_scene load_steps=4 format=3 uid="uid://pwqh4vxogv46"]
+
+[ext_resource type="Script" uid="uid://42j1b4ecd72r" path="res://src/World/settings.gd" id="1_cnstx"]
+[ext_resource type="Theme" uid="uid://crtg3dknqulx2" path="res://assets/UI/Theme.tres" id="2_37feg"]
+[ext_resource type="Texture2D" uid="uid://ceeeptpj3a0g2" path="res://assets/UI/Panel.png" id="2_ekqft"]
+
+[node name="Settings" type="CanvasLayer"]
+script = ExtResource("1_cnstx")
+
+[node name="Background" type="TextureRect" parent="."]
+anchors_preset = -1
+anchor_left = 0.1
+anchor_top = 0.1
+anchor_right = 0.9
+anchor_bottom = 0.9
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_37feg")
+texture = ExtResource("2_ekqft")
+expand_mode = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Background"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -446.0
+offset_top = 128.0
+offset_right = 446.0
+offset_bottom = 328.0
+grow_horizontal = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Background/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Background/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 48
+text = "Master Volume"
+
+[node name="Control" type="Control" parent="Background/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="MasterSlider" type="HSlider" parent="Background/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(250, 0)
+layout_mode = 2
+max_value = 1.0
+step = 0.05
+value = 0.5
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="Background/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Background/VBoxContainer/HBoxContainer2"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 48
+text = "Music Volume"
+
+[node name="Control" type="Control" parent="Background/VBoxContainer/HBoxContainer2"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="MusicSlider" type="HSlider" parent="Background/VBoxContainer/HBoxContainer2"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(250, 0)
+layout_mode = 2
+max_value = 1.0
+step = 0.05
+value = 0.5
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="Background/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Background/VBoxContainer/HBoxContainer3"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 48
+text = "Sound Volume"
+
+[node name="Control" type="Control" parent="Background/VBoxContainer/HBoxContainer3"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="SfxSlider" type="HSlider" parent="Background/VBoxContainer/HBoxContainer3"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(250, 0)
+layout_mode = 2
+max_value = 1.0
+step = 0.05
+value = 0.5
+
+[node name="ActionList" type="GridContainer" parent="Background"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -437.0
+offset_top = 344.0
+offset_right = 437.0
+offset_bottom = 644.0
+grow_horizontal = 2
+theme_override_constants/h_separation = 50
+theme_override_constants/v_separation = 0
+columns = 2
+
+[node name="Close" type="Button" parent="Background"]
+layout_mode = 0
+offset_left = 654.0
+offset_top = 782.0
+offset_right = 902.0
+offset_bottom = 852.0
+theme_override_font_sizes/font_size = 40
+text = "Close"

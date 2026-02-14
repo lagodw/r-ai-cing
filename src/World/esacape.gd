@@ -16,7 +16,7 @@ func resume():
 	visible = false
 	
 func settings():
-	pass
+	$Settings.visible = true
 	
 func main_menu():
 	get_tree().paused = false
