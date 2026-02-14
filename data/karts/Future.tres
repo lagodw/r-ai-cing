@@ -8,6 +8,6 @@ id = "Future_Kart"
 max_health = 100
 max_speed = 500.0
 acceleration = 400.0
-turn_speed = 3.5
+traction = 5.0
 width_percent = 0.2
 metadata/_custom_type_script = "uid://d2vcvaa1qp6xu"

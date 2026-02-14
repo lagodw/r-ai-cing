@@ -17,7 +17,8 @@ var stats: KartDef
 var max_speed: float = 500.0
 var acceleration: float = 800.0
 var turn_speed: float = 3.5
-var friction: float = 0.95
+var friction: float = 1.0
+var traction: float = 5.0  # High = snappy grip, Low = drift/ice
 var max_health: int = 100
 var current_health: int = 100:
 	set(val):
@@ -111,7 +112,7 @@ func configure_from_id(id: String):
 	# Copy Stats
 	max_speed = stats.max_speed
 	acceleration = stats.acceleration
-	turn_speed = stats.turn_speed
+	traction = stats.traction
 	max_health = stats.max_health
 	current_health = max_health
 	
@@ -207,12 +208,25 @@ func _apply_physics(delta):
 		current_speed = move_toward(current_speed, 0, friction * 500 * delta)
 
 	# D. Move
-	# 1. Decay the bump velocity (friction)
+	# 1. Decay the bump velocity (existing logic)
 	bump_velocity = bump_velocity.move_toward(Vector2.ZERO, bump_decay * delta)
 	
-	# 2. Add bump velocity to the standard engine velocity
-	velocity = (transform.x * current_speed) + bump_velocity
-	var impact_velocity = velocity
+	# 2. Calculate where the engine WANTS to go (Heading * Speed)
+	var target_velocity = transform.x * current_speed
+	
+	# 3. Get the car's actual momentum from the previous frame (excluding bump forces)
+	var current_motion = velocity - bump_velocity
+	
+	# 4. DRIFT LOGIC:
+	# Smoothly blend the current motion towards the target velocity.
+	# 'traction' controls how fast we align. 
+	# If traction is low, the old velocity persists longer (sliding).
+	current_motion = current_motion.lerp(target_velocity, traction * delta)
+	
+	# 5. Apply the final velocity
+	velocity = current_motion + bump_velocity
+	
+	var impact_velocity = velocity # Snapshot for collision logic
 	move_and_slide()
 	
 	# E. Collision Handling

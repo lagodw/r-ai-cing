@@ -8,6 +8,6 @@ id = "Thin_Kart"
 max_health = 100
 max_speed = 550.0
 acceleration = 650.0
-turn_speed = 3.5
+traction = 10.0
 width_percent = 0.15
 metadata/_custom_type_script = "uid://d2vcvaa1qp6xu"

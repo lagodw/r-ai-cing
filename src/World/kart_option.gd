@@ -8,7 +8,7 @@ func _ready() -> void:
 	$VBoxContainer/TextureRect.texture = load("res://assets/karts/%s.png"%kart.id)
 	%SpeedBar.value = kart.max_speed
 	%AccelerationBar.value = kart.acceleration
-	%HandlingBar.value = kart.turn_speed
+	%HandlingBar.value = kart.traction
 	%WeightBar.value = kart.width_percent
 	%Name.text = kart.id.replace("_", " ")
 
