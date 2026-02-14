@@ -9,7 +9,6 @@ extends Node2D
 func _ready():
 	$Victory/Panel/VBoxContainer/Again.pressed.connect(go_again)
 	$Victory/Panel/VBoxContainer/Main.pressed.connect(main_menu)
-	_generate_track_visuals()
 	
 	# 1. Instantiate Selection Screen
 	var selection = load("res://src/World/selection.tscn").instantiate()
@@ -18,8 +17,11 @@ func _ready():
 	add_child(selection)
 	
 	# 2. Wait for player to finish selecting
+	#selection.race_started.connect(start_game)
 	await selection.race_started
+	_generate_track_visuals()
 	
+func start_game():
 	get_tree().paused = true
 	# 3. NOW we spawn everyone
 	_spawn_racers()
@@ -29,11 +31,22 @@ func _generate_track_visuals():
 	var track = GameData.current_track
 	if not track: return
 	
-	if ResourceLoader.exists(track.background_path):
-		var tex = load(track.background_path)
+	#var path = "res://assets/tracks/%s.png"%track.id
+	var path = "uid://cyg0bu5cqy8k2"
+	if ResourceLoader.exists(path):
+		var tex = load(path)
+		background.texture = tex
+		await get_tree().process_frame
 	
 		# 1. Generate Walls (Red Outline)
 		TrackBuilder.generate_walls_from_texture(tex, walls, true)
+		
+		var detected_start = TrackBuilder.find_start_position_from_texture(tex, true)
+		
+		# If we found a green mark, update the track data
+		if detected_start != Vector2.INF:
+			track.start_position = detected_start
+			print("Auto-detected start position at: ", detected_start)
 		
 		# 2. Generate Path (Auto-Walk)
 		await get_tree().physics_frame
@@ -48,6 +61,7 @@ func _generate_track_visuals():
 				
 		# 3. Fit everything to the screen
 		#_fit_track_to_screen(tex.get_size())
+	start_game()
 
 func _fit_track_to_screen(_image_size: Vector2):
 	pass
@@ -100,14 +114,13 @@ func _spawn_racers():
 	# 2. Bots (Indices 1-7)
 	var all_kart_ids = GameData.karts.keys()
 	var all_powers = GameData.powers.values() # Get all available PowerDef resources
-	for i in range(1):
+	for i in range(GameData.num_bots):
 		var bot_powers: Array[PowerDef] = []
 		if all_powers.size() >= 2:
 			var shuffled_powers = all_powers.duplicate()
 			shuffled_powers.shuffle()
 			bot_powers = [shuffled_powers[0], shuffled_powers[1]]
 		
-		printt(bot_powers[0].id, bot_powers[1].id)
 		racer_configs.append({
 			"id": all_kart_ids.pick_random(),
 			"is_player": false,
@@ -129,7 +142,7 @@ func _spawn_racers():
 		
 		# Grid Position Logic
 		var lane_index = i % 2 
-		var dist_back = float(i) * (gap_depth * 0.5)
+		var dist_back = float(i) * (gap_depth)
 		var lane_offset = (float(lane_index) - 0.5) * gap_width
 		var grid_offset = (-forward_dir * dist_back) + (right_dir * lane_offset)
 		var final_offset = grid_offset * walls.scale
@@ -154,36 +167,41 @@ func _spawn_racers():
 		else:
 			kart.name = "Bot_" + str(i)
 			kart.is_player_controlled = false
-			var brain = load("res://src/Entities/AIController.gd").new()
+			
+			# It is safer to load the script as a resource
+			var ai_script = load("res://src/Entities/AIController.gd")
+			var brain = Node.new()
+			brain.set_script(ai_script)
 			brain.name = "AIController"
+			
 			kart.power_inventory = config.powers.duplicate()
-			kart.add_child(brain)
+			kart.add_child(brain) # This triggers _ready()
 			
 		kart.race_finished.connect(winner_screen)
 		add_child(kart)
 #
-#func _draw():
-	#var track = GameData.current_track
-	#if not track or track.waypoints.is_empty():
-		#return
-#
-	#var points = track.waypoints
-	#var num_points = points.size()
-	#
-	## We must use the same scaling as the walls/background
-	#var s = walls.scale 
-#
-	#for i in range(num_points):
-		#var current_p = points[i] * s
-		#var next_p = points[(i + 1) % num_points] * s # Wrap around for loop
-		#
-		## Draw a line to the next waypoint
-		#draw_line(current_p, next_p, Color.CYAN, 4.0)
-		#
-		## Draw a circle at the waypoint
-		## Index 0 is GREEN (Start), others are BLUE
-		#var color = Color.GREEN if i == 0 else Color.BLUE
-		#draw_circle(current_p, 10.0, color)
+func _draw():
+	var track = GameData.current_track
+	if not track or track.waypoints.is_empty():
+		return
+
+	var points = track.waypoints
+	var num_points = points.size()
+	
+	# We must use the same scaling as the walls/background
+	var s = walls.scale 
+
+	for i in range(num_points):
+		var current_p = points[i] * s
+		var next_p = points[(i + 1) % num_points] * s # Wrap around for loop
+		
+		# Draw a line to the next waypoint
+		draw_line(current_p, next_p, Color.CYAN, 4.0)
+		
+		# Draw a circle at the waypoint
+		# Index 0 is GREEN (Start), others are BLUE
+		var color = Color.GREEN if i == 0 else Color.BLUE
+		draw_circle(current_p, 10.0, color)
 
 func winner_screen(winner_name: String):
 	if winner_name == "1":

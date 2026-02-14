@@ -3,10 +3,12 @@ extends CanvasLayer
 # Signal to tell the Track scene we are done
 signal race_started
 
+@onready var track_option_scene = preload("res://src/World/track_option.tscn")
 @onready var kart_option_scene = preload("res://src/World/kart_option.tscn")
 @onready var projectile_option_scene = preload("res://src/World/projectile_option.tscn")
 
 # State
+var current_track_node: Control = null
 var current_kart_node: Control = null
 var current_power_nodes: Array[Control] = []
 var temp_selected_kart_id: String = ""
@@ -15,6 +17,17 @@ var temp_selected_powers: Array[PowerDef] = []
 func _ready() -> void:
 	$KartSelection/ConfirmKart.pressed.connect(confirm_kart)
 	$PowerSelection/ConfirmPower.pressed.connect(confirm_power)
+	%ConfirmTrack.pressed.connect(confirm_track)
+	%Minus.pressed.connect(change_num_bots.bind(-1))
+	%Plus.pressed.connect(change_num_bots.bind(1))
+	
+	for track in GameData.tracks.keys():
+		var path = "res://assets/tracks/%s.png" % GameData.tracks[track].id
+		var option = track_option_scene.instantiate()
+		option.texture = load(path)
+		option.track_id = track
+		option.selected.connect(on_track_selected)
+		%TrackGrid.add_child(option)
 	
 	# --- 1. Load Random Karts ---
 	var karts = GameData.karts.keys().duplicate()
@@ -83,3 +96,19 @@ func confirm_power():
 	
 	race_started.emit()
 	queue_free()
+	
+func on_track_selected(node: Control):
+	if current_track_node and current_track_node != node:
+		current_track_node.set_highlight(false)
+		
+	current_track_node = node
+	current_track_node.set_highlight(true)
+		
+func change_num_bots(change: int):
+	GameData.num_bots = clamp(GameData.num_bots + change, 0, 7)
+	%NumBots.text = str(GameData.num_bots)
+
+func confirm_track():
+	GameData.current_track = GameData.tracks[current_track_node.track_id]
+	$TrackSelection.visible = false
+	$KartSelection.visible = true

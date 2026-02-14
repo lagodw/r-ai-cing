@@ -1,7 +1,7 @@
 [gd_scene load_steps=18 format=3 uid="uid://dnd4ot45brbyk"]
 
 [ext_resource type="Script" uid="uid://dhqvmde3vmpt3" path="res://src/World/track.gd" id="1_7nrbi"]
-[ext_resource type="Texture2D" uid="uid://cyg0bu5cqy8k2" path="res://assets/tracks/Starter_Track.png" id="2_imajx"]
+[ext_resource type="Texture2D" uid="uid://cyg0bu5cqy8k2" path="res://assets/tracks/Palm.png" id="2_imajx"]
 [ext_resource type="Script" uid="uid://b7o1b0rqh288s" path="res://src/World/ui.gd" id="3_kehdh"]
 [ext_resource type="Texture2D" uid="uid://dqitcb6afhxmy" path="res://assets/powers/Bullet.png" id="3_wx37m"]
 [ext_resource type="Texture2D" uid="uid://8h0lnrrxltsp" path="res://assets/powers/Bomb.png" id="4_hoyjw"]
@@ -27,9 +27,6 @@ script = ExtResource("1_7nrbi")
 
 [node name="Background" type="Sprite2D" parent="."]
 texture = ExtResource("2_imajx")
-
-[node name="Marker2D" type="Marker2D" parent="Background"]
-position = Vector2(361, -434)
 
 [node name="Walls" type="StaticBody2D" parent="."]
 
@@ -118,6 +115,7 @@ texture_pressed = ExtResource("6_ckak7")
 action = "activate_slot_1"
 
 [node name="Label2" type="Label" parent="UI/HBoxContainer/Power2"]
+layout_mode = 0
 offset_right = 40.0
 offset_bottom = 23.0
 theme = ExtResource("8_o8aps")

@@ -2,6 +2,8 @@ class_name TrackBuilder extends Node
 
 const RED_THRESHOLD = 0.5
 const GREEN_BLUE_LIMIT = 0.2
+const MAGENTA_THRESHOLD = 0.8
+const GREEN_LIMIT = 0.2       
 const SIMPLIFICATION = 2.0
 
 static func generate_walls_from_texture(texture: Texture2D, parent_node: Node, centered: bool = false):
@@ -139,3 +141,35 @@ static func generate_path_automatically(context: Node2D, start_pos: Vector2, loo
 			break
 			
 	return path
+
+static func find_start_position_from_texture(texture: Texture2D, centered: bool = false) -> Vector2:
+	var image: Image = texture.get_image()
+	# Ensure image is in a format we can read easily
+	if image.is_compressed():
+		image.decompress()
+	
+	var total_pos = Vector2.ZERO
+	var pixel_count = 0
+	
+	# Scan the image for Magenta pixels
+	for y in range(image.get_height()):
+		for x in range(image.get_width()):
+			var color = image.get_pixel(x, y)
+			
+			# Check for Magenta: High Red, High Blue, Low Green
+			if color.r > MAGENTA_THRESHOLD and color.b > MAGENTA_THRESHOLD and color.g < GREEN_LIMIT:
+				total_pos += Vector2(x, y)
+				pixel_count += 1
+	
+	# Calculate the center (average) of all found pixels
+	if pixel_count > 0:
+		var avg_pos = total_pos / pixel_count
+		
+		if centered:
+			var offset = -Vector2(image.get_width(), image.get_height()) / 2.0
+			avg_pos += offset
+			
+		return avg_pos
+	
+	return Vector2.INF
+	

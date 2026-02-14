@@ -42,7 +42,10 @@ func _add_whisker(target: Vector2) -> RayCast2D:
 
 func _physics_process(delta):
 	waypoints = GameData.current_track.waypoints
-	if waypoints.is_empty(): return
+	if waypoints.is_empty(): 
+		kart.input_throttle = 0.0
+		kart.input_steer = 0.0
+		return
 	
 	# --- 1. TARGETING ---
 	var target = waypoints[current_wp_index]
@@ -78,7 +81,7 @@ func _physics_process(delta):
 	if is_reversing:
 		_handle_reverse_maneuver(delta)
 		return # Skip normal steering
-
+	
 	# --- 4. STEERING LOGIC ---
 	if is_wrong_way:
 		# EMERGENCY MODE: Ignore walls, just turn around

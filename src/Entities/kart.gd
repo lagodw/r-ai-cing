@@ -52,16 +52,18 @@ var input_throttle: float = 0.0 # -1.0 (Brake) to 1.0 (Gas)
 @onready var joystick: Control
 
 func _enter_tree():
-	# Try to parse the name as a Player ID
-	var id_from_name = name.to_int()
-	
-	if id_from_name > 0:
-		# It's a valid Player ID (e.g. "1", "2491")
-		set_multiplayer_authority(id_from_name)
-	else:
-		# It's a Bot (e.g. "Bot_1") or invalid.
-		# Default to Server Authority (1) so the host runs the physics.
-		set_multiplayer_authority(1)
+	# STRICT CHECK: Only treat the name as an Authority ID if it is a pure integer.
+	# This handles "1" (Player) correctly, but forces "Bot_1", "Bot_2" etc. to fail this check.
+	if name.is_valid_int():
+		var id_from_name = name.to_int()
+		if id_from_name > 0:
+			# It's a valid Player ID (e.g. "1", "2491")
+			set_multiplayer_authority(id_from_name)
+			return
+
+	# It's a Bot (e.g. "Bot_0", "Bot_1") or an invalid name.
+	# Default to Server Authority (1) so the host (you) always runs the physics for bots.
+	set_multiplayer_authority(1)
 
 func _ready():
 	# Load the stats defined in JSON via the GameData factory
@@ -101,7 +103,6 @@ func _physics_process(delta):
 	# 1. Multiplayer Check: Only the owner controls the physics
 	if not is_multiplayer_authority():
 		return 
-		# The MultiplayerSynchronizer node handles position updates for non-owners
 
 	# 2. Status Check
 	if is_stunned:
@@ -197,10 +198,8 @@ func _break_down():
 	is_stunned = true
 	current_health = 0
 	
-	print(name + " has broken down!")
-	
 	# Respawn Timer
-	await get_tree().create_timer(3.0).timeout
+	await get_tree().create_timer(1.5).timeout
 	_respawn()
 
 func _respawn():

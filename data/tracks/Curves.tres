@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="TrackDef" load_steps=2 format=3 uid="uid://bmtqynydti86f"]
+
+[ext_resource type="Script" uid="uid://dhjvq86mspwaj" path="res://src/Classes/TrackDef.gd" id="1_buaxk"]
+
+[resource]
+script = ExtResource("1_buaxk")
+id = "Curves"
+laps_required = 3
+start_position = Vector2(0, 0)
+waypoints = PackedVector2Array()
+walls = Array[PackedVector2Array]([])
+hazards = Array[Dictionary]([])
+metadata/_custom_type_script = "uid://dhjvq86mspwaj"

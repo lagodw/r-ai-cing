@@ -1,0 +1,23 @@
+[gd_scene load_steps=3 format=3 uid="uid://ovhrafkctf3i"]
+
+[ext_resource type="Texture2D" uid="uid://dbcrjc575mmdu" path="res://assets/UI/Random.png" id="1_fp5rv"]
+[ext_resource type="Script" uid="uid://bqfr6e451mati" path="res://src/World/track_option.gd" id="2_jq8u1"]
+
+[node name="TextureRect" type="TextureRect"]
+custom_minimum_size = Vector2(0, 200)
+offset_right = 40.0
+offset_bottom = 40.0
+texture = ExtResource("1_fp5rv")
+expand_mode = 3
+script = ExtResource("2_jq8u1")
+
+[node name="Highlight" type="ReferenceRect" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+border_width = 4.0
+editor_only = false
