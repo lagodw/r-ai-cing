@@ -38,6 +38,7 @@ _spawnable_scenes = PackedStringArray("uid://ceh82rynpo7cg", "uid://c3euljm7hekr
 spawn_path = NodePath("..")
 
 [node name="UI" type="CanvasLayer" parent="."]
+visible = false
 script = ExtResource("3_kehdh")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="UI"]

@@ -220,6 +220,7 @@ func main_menu():
 	get_tree().change_scene_to_file("res://src/World/main_menu.tscn")
 
 func start_countdown():
+	$UI.visible = true
 	$Start.visible = true
 	await get_tree().create_timer(1).timeout
 	%Countdown.text = str(2)

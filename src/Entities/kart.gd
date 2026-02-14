@@ -105,7 +105,6 @@ func configure_from_id(id: String):
 				var aspect = tex_size.x / tex_size.y
 				final_length = final_width * aspect
 
-	printt(final_length, final_width, track_width_ref, stats.width_percent)
 	_apply_dimensions(final_length, final_width)
 	weight = max(final_length * final_width, 1.0)
 	
