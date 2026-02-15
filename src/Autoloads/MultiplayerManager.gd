@@ -66,8 +66,6 @@ func register_player(player_name, code):
 
 @rpc("authority", "call_local")
 func update_player_list(new_players):
-	print("Received player list from server: ", new_players) # DEBUG LOG
-	
 	# 1. CLEANUP: Force all keys to be Integers
 	# This fixes the "String Key" bug if it occurs
 	players = {}
@@ -79,16 +77,10 @@ func update_player_list(new_players):
 	var my_id = multiplayer.get_unique_id()
 	if my_id in players:
 		room_code = players[my_id]["room"]
-		print("My room code is: ", room_code) # DEBUG LOG
 	else:
 		print("ERROR: I am not in the player list!")
 	
 	emit_signal("player_list_updated")
-
-# --- Gameplay Start ---
-func start_game():
-	# Only the host (or anyone in the room) can call this
-	emit_signal("game_started")
 
 # --- Standard boilerplate ---
 func _on_connection_success(): emit_signal("connection_succeeded")
@@ -97,3 +89,32 @@ func _on_peer_disconnected(id):
 	if multiplayer.is_server():
 		players.erase(id)
 		rpc("update_player_list", players)
+
+# 1. Client calls this when clicking "Start"
+func request_start_game():
+	# Verify we are actually in a room
+	if room_code == "": return
+	
+	print("Requesting server to start game for Room: ", room_code)
+	# Tell the Server (ID 1) to start the game for our room
+	rpc_id(1, "server_handle_start_game", room_code)
+
+# 2. Server runs this to process the request
+@rpc("any_peer")
+func server_handle_start_game(code):
+	# Only the Server runs this!
+	var sender_id = multiplayer.get_remote_sender_id()
+	print("Server received Start Request from ", sender_id, " for Room ", code)
+	
+	# Loop through ALL players on the server
+	for p_id in players:
+		# Check if this player is in the requested room
+		if players[p_id]["room"] == code:
+			# Send the "GO!" command specific to this player
+			rpc_id(p_id, "client_begin_game")
+
+# 3. Client receives this and actually switches scenes
+@rpc("authority")
+func client_begin_game():
+	print("Game Start signal received from Server!")
+	emit_signal("game_started")

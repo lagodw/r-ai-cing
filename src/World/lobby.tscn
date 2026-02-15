@@ -1,9 +1,11 @@
-[gd_scene load_steps=7 format=3 uid="uid://bnkjcu40q1kyo"]
+[gd_scene load_steps=9 format=3 uid="uid://bnkjcu40q1kyo"]
 
 [ext_resource type="Theme" uid="uid://crtg3dknqulx2" path="res://assets/UI/Theme.tres" id="1_a1sdr"]
 [ext_resource type="Script" uid="uid://dt3t0pijtu5ik" path="res://src/World/lobby.gd" id="2_e14pc"]
 [ext_resource type="Texture2D" uid="uid://bjl756osejanv" path="res://assets/UI/RogueRacingTitle.png" id="2_uwex0"]
 [ext_resource type="Texture2D" uid="uid://0n3prx1hpcp8" path="res://assets/UI/Panel2.png" id="3_e14pc"]
+[ext_resource type="Texture2D" uid="uid://sfumfd8bxprp" path="res://assets/UI/Minus.png" id="5_6445k"]
+[ext_resource type="Texture2D" uid="uid://ccan7pc3rgw5b" path="res://assets/UI/Plus.png" id="6_ey5wi"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6445k"]
 
@@ -33,29 +35,6 @@ grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("2_uwex0")
 expand_mode = 1
-
-[node name="StatusLabel" type="Label" parent="Background"]
-unique_name_in_owner = true
-layout_mode = 2
-offset_left = 49.0
-offset_top = 49.0
-offset_right = 476.0
-offset_bottom = 98.0
-theme_override_font_sizes/font_size = 64
-text = "Status"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="NameInput" type="LineEdit" parent="Background"]
-unique_name_in_owner = true
-layout_mode = 0
-offset_left = 70.0
-offset_top = 118.0
-offset_right = 522.0
-offset_bottom = 213.0
-theme_override_font_sizes/font_size = 40
-placeholder_text = "PLayer Name"
-alignment = 1
 
 [node name="HostButton" type="Button" parent="Background"]
 unique_name_in_owner = true
@@ -125,10 +104,10 @@ anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -191.0
-offset_top = -213.0
-offset_right = 192.0
-offset_bottom = -106.0
+offset_left = -197.0
+offset_top = -121.0
+offset_right = 186.0
+offset_bottom = -35.0
 grow_horizontal = 2
 grow_vertical = 0
 theme_override_font_sizes/font_size = 64
@@ -153,6 +132,7 @@ vertical_alignment = 1
 [node name="LobbyName" type="Label" parent="Background/HostPanel/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
+theme_override_colors/font_color = Color(0.105506, 0.310888, 0.661162, 1)
 theme_override_font_sizes/font_size = 64
 text = "ABCD"
 horizontal_alignment = 1
@@ -192,8 +172,149 @@ layout_mode = 0
 offset_left = 131.0
 offset_top = 331.0
 offset_right = 1079.0
-offset_bottom = 756.0
+offset_bottom = 686.0
 
 [node name="Panel" type="Panel" parent="Background/HostPanel/MarginContainer"]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_ey5wi")
+
+[node name="BotBox" type="HBoxContainer" parent="Background/HostPanel"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -492.0
+offset_top = 696.0
+offset_right = 482.0
+offset_bottom = 850.0
+grow_horizontal = 2
+theme_override_constants/separation = 50
+
+[node name="Label" type="Label" parent="Background/HostPanel/BotBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Number of Bots:"
+
+[node name="Minus" type="Button" parent="Background/HostPanel/BotBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(150, 150)
+layout_mode = 2
+icon = ExtResource("5_6445k")
+expand_icon = true
+
+[node name="NumBots" type="Label" parent="Background/HostPanel/BotBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(130, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 120
+text = "0"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Plus" type="Button" parent="Background/HostPanel/BotBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(150, 150)
+layout_mode = 2
+icon = ExtResource("6_ey5wi")
+expand_icon = true
+
+[node name="NamePanel" type="MarginContainer" parent="Background"]
+visible = false
+layout_mode = 0
+offset_left = 341.0
+offset_top = 48.0
+offset_right = 1606.0
+offset_bottom = 1036.0
+
+[node name="TextureRect" type="TextureRect" parent="Background/NamePanel"]
+layout_mode = 2
+texture = ExtResource("3_e14pc")
+expand_mode = 1
+
+[node name="Label" type="Label" parent="Background/NamePanel/TextureRect"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 328.0
+offset_bottom = 377.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 64
+text = "Enter your name"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="NameInput" type="LineEdit" parent="Background/NamePanel/TextureRect"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -317.5
+offset_top = 456.0
+offset_right = 317.5
+offset_bottom = 603.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 40
+placeholder_text = "PLayer Name"
+alignment = 1
+max_length = 20
+
+[node name="ConfirmName" type="Button" parent="Background/NamePanel/TextureRect"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -137.0
+offset_top = -251.0
+offset_right = 137.0
+offset_bottom = -160.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_font_sizes/font_size = 32
+text = "Confirm"
+
+[node name="ConnectingPanel" type="MarginContainer" parent="Background"]
+visible = false
+layout_mode = 0
+offset_left = 341.0
+offset_top = 48.0
+offset_right = 1606.0
+offset_bottom = 1036.0
+
+[node name="TextureRect" type="TextureRect" parent="Background/ConnectingPanel"]
+layout_mode = 2
+texture = ExtResource("3_e14pc")
+expand_mode = 1
+
+[node name="StatusLabel" type="Label" parent="Background/ConnectingPanel/TextureRect"]
+unique_name_in_owner = true
+layout_mode = 2
+offset_top = 205.0
+offset_right = 1265.0
+offset_bottom = 254.0
+theme_override_font_sizes/font_size = 64
+text = "Status"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Label" type="Label" parent="Background/ConnectingPanel/TextureRect"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -473.0
+offset_top = -37.5
+offset_right = 473.0
+offset_bottom = 37.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 48
+text = "Connecting to server. 
+This may take a minute"
+autowrap_mode = 3
