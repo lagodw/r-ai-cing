@@ -32,6 +32,7 @@ func join_server():
 	multiplayer.connected_to_server.connect(_on_connection_success)
 
 func _start_server():
+	GameData.is_singleplayer = false
 	var port = int(OS.get_environment("PORT")) if OS.get_environment("PORT") != "" else PORT
 	peer.create_server(port, "0.0.0.0")
 	multiplayer.multiplayer_peer = peer
@@ -110,7 +111,7 @@ func server_handle_start_game(code):
 	var sender_id = multiplayer.get_remote_sender_id()
 	print("Server received Start Request from ", sender_id, " for Room ", code)
 	
-	# 1. NEW: Force the Server to also enter the game scene so it can spawn entities
+	# 1. Force the Server to also enter the game scene so it can spawn entities
 	# Note: If you plan to have multiple rooms later, the server architecture will need to change (e.g., instantiating rooms).
 	# For now, this fixes the single-match dedicated server issue.
 	get_tree().change_scene_to_file("res://src/World/Track.tscn")
