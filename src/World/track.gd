@@ -10,6 +10,7 @@ extends Node2D
 func _ready():
 	$Victory/Panel/VBoxContainer/Again.pressed.connect(go_again)
 	$Victory/Panel/VBoxContainer/Main.pressed.connect(main_menu)
+	multiplayer_spawner.spawn_function = _spawn_kart_custom
 	
 	# 1. Instantiate Selection Screen
 	var selection = load("res://src/World/selection.tscn").instantiate()
@@ -38,14 +39,12 @@ func _ready():
 		_generate_track_visuals()
 		_spawn_racers(all_loadouts)
 		$MultiplayerWaiting.visible = false
-		
-		# E. Remove selection screen now that we are actually starting
-		selection.queue_free()
-		
+		start_countdown()
 	else:
 		# --- SINGLE PLAYER FLOW ---
 		_generate_track_visuals()
 		_spawn_racers(null) # Pass null to indicate Single Player generation
+		start_countdown()
 	
 func start_game():
 	get_tree().paused = true
@@ -85,10 +84,11 @@ func _generate_track_visuals():
 		
 		queue_redraw()
 	
-	start_game()
+	#start_game()
 
 # This runs on BOTH Server and Clients to build the exact same node
 func _spawn_kart_custom(data: Dictionary) -> Node:
+	printt('spawning', data)
 	var kart = kart_scene.instantiate()
 	
 	# 1. Apply Transform (Position & Rotation) immediately
