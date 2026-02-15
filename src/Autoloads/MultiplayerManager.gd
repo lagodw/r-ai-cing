@@ -110,11 +110,14 @@ func server_handle_start_game(code):
 	var sender_id = multiplayer.get_remote_sender_id()
 	print("Server received Start Request from ", sender_id, " for Room ", code)
 	
-	# Loop through ALL players on the server
+	# 1. NEW: Force the Server to also enter the game scene so it can spawn entities
+	# Note: If you plan to have multiple rooms later, the server architecture will need to change (e.g., instantiating rooms).
+	# For now, this fixes the single-match dedicated server issue.
+	get_tree().change_scene_to_file("res://src/World/Track.tscn")
+	
+	# 2. Tell all players in the room to start
 	for p_id in players:
-		# Check if this player is in the requested room
 		if players[p_id]["room"] == code:
-			# Send the "GO!" command specific to this player
 			rpc_id(p_id, "client_begin_game")
 
 # 3. Client receives this and actually switches scenes
@@ -147,14 +150,19 @@ func server_receive_selection(kart_id: String, power_ids: Array):
 	var player_room_code = players[sender_id]["room"]
 	if _are_all_players_ready(player_room_code):
 		print("All players in room ", player_room_code, " are ready! Starting race...")
+		
 		# Get only the loadouts for this room
 		var room_loadouts = {}
 		for id in player_loadouts:
 			if player_loadouts[id]["room"] == player_room_code:
 				room_loadouts[id] = player_loadouts[id]
 				
-		# Tell everyone in the room to spawn the karts
+		# 1. Tell clients to start
 		rpc_to_room(player_room_code, "client_start_race", room_loadouts)
+		
+		# 2. NEW: Tell the Server (Self) to start
+		# The server instance needs this signal to trigger _spawn_racers in track.gd
+		emit_signal("game_started_with_loadouts", room_loadouts)
 
 # Helper function to check readiness
 func _are_all_players_ready(player_room_code):

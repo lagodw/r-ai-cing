@@ -12,6 +12,22 @@ func _ready():
 	$Victory/Panel/VBoxContainer/Main.pressed.connect(main_menu)
 	multiplayer_spawner.spawn_function = _spawn_kart_custom
 	
+	# --- NEW SERVER CHECK ---
+	# If we are the Dedicated Server (ID 1) AND NOT playing locally (headless/render):
+	if multiplayer.is_server():
+		print("Server loaded Track. Waiting for loadouts...")
+		# The server skips UI and just waits for the signal from MultiplayerManager
+		var all_loadouts = await MultiplayerManager.game_started_with_loadouts
+		
+		# Generate visuals (needed for collision walls)
+		_generate_track_visuals()
+		
+		# Spawn the racers (Server is the only one who can do this via Spawner)
+		_spawn_racers(all_loadouts)
+		return
+	# ------------------------
+
+	# --- CLIENT LOGIC (Original) ---
 	# 1. Instantiate Selection Screen
 	var selection = load("res://src/World/selection.tscn").instantiate()
 	add_child(selection)
@@ -23,6 +39,7 @@ func _ready():
 	# --- MULTIPLAYER HANDSHAKE ---
 	if not GameData.is_singleplayer:
 		$MultiplayerWaiting.visible = true
+		
 		# A. Convert Power Objects to IDs for network transmission
 		var power_ids = []
 		for p in GameData.selected_powers:
@@ -31,19 +48,19 @@ func _ready():
 		# B. Send selection to server
 		MultiplayerManager.send_player_selection(GameData.selected_kart_id, power_ids)
 		
-		
 		# C. Wait for Server to say "Everyone is ready"
-		# This signal brings back the dictionary of all players and their choices
 		var all_loadouts = await MultiplayerManager.game_started_with_loadouts
-		# D. Generate visuals and spawn with SPECIFIC loadouts
+		
+		# D. Clients generate visuals but DO NOT spawn karts (Spawner handles it)
 		_generate_track_visuals()
-		_spawn_racers(all_loadouts)
+		_spawn_racers(all_loadouts) 
+		
 		$MultiplayerWaiting.visible = false
 		start_countdown()
 	else:
 		# --- SINGLE PLAYER FLOW ---
 		_generate_track_visuals()
-		_spawn_racers(null) # Pass null to indicate Single Player generation
+		_spawn_racers(null)
 		start_countdown()
 	
 func start_game():
