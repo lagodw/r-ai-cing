@@ -1,108 +1,99 @@
 extends Node
 
-signal connection_failed
+#signal connection_failed
 signal connection_succeeded
-signal server_disconnected
+signal game_started # Signal to tell UI to switch to the game scene
+signal player_list_updated # Signal to update the lobby UI list
 
 var peer = WebSocketMultiplayerPeer.new()
-var port = 8080
-
-# START HERE:
-# 1. For local testing, use "ws://127.0.0.1:8080"
-# 2. For Production (Render/VPS), use "wss://your-app-name.onrender.com"
-# Note: Android REQUIRES "wss://" (Secure) if you are not on a local network!
+const PORT = 8080
 const LIVE_SERVER_URL = "wss://r-ai-cing.onrender.com"
 const LOCAL_SERVER_URL = "ws://127.0.0.1:8080"
-
-# Set to true when exporting for Web/Android
 const IS_PROD_BUILD = true 
 
-# Connection State
-var _is_connecting = false
-var _connection_timer = 0.0
-const MAX_WAIT_TIME = 60.0 # Wait up to 60 seconds for server to wake up
+# --- Lobby Variables ---
+var room_code = ""
+var players = {} # Dictionary: { peer_id: { "name": "Player1", "room": "ABCD" } }
 
 func _ready():
-	# Check if we are on the server
 	if "--server" in OS.get_cmdline_args() or OS.has_feature("dedicated_server"):
 		_start_server()
 
-func _process(delta):
-	peer.poll() # Keep the connection alive
-	
-	if _is_connecting:
-		_connection_timer += delta
-		if _connection_timer >= MAX_WAIT_TIME:
-			_is_connecting = false
-			print("Connection timed out completely.")
-			emit_signal("connection_failed")
-			peer.close()
+# --- Connection Logic (Keep as is, but simplified for brevity) ---
+func join_server():
+	# This connects to the "Hotel" (Render), but doesn't join a room yet
+	var target_url = LIVE_SERVER_URL if IS_PROD_BUILD else LOCAL_SERVER_URL
+	peer.create_client(target_url)
+	multiplayer.multiplayer_peer = peer
+	multiplayer.connected_to_server.connect(_on_connection_success)
 
 func _start_server():
-	# 1. Get the PORT from Render's Environment Variable
-	var env_port = OS.get_environment("PORT")
-	if env_port != "":
-		port = int(env_port)
-	
-	print("Starting Server on Port " + str(port))
-	
-	# 2. Bind specifically to "0.0.0.0" (IPv4)
-	# This is CRITICAL for Render to detect the app!
-	var error = peer.create_server(port, "0.0.0.0")
-	if error != OK:
-		print("FAILED to start server: " + str(error))
-		return
-		
+	var port = int(OS.get_environment("PORT")) if OS.get_environment("PORT") != "" else PORT
+	peer.create_server(port, "0.0.0.0")
 	multiplayer.multiplayer_peer = peer
 	multiplayer.peer_connected.connect(_on_peer_connected)
 	multiplayer.peer_disconnected.connect(_on_peer_disconnected)
 	print("Server listening on " + str(port))
+
+# --- LOBBY SYSTEM (New Stuff) ---
+
+# Called by UI when player clicks "Host Game"
+func request_create_room(player_name):
+	# Generate a random 4-letter code locally
+	var code = ""
+	var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	for i in range(4):
+		code += chars[randi() % chars.length()]
 	
-func join_game():
-	_is_connecting = true
-	_connection_timer = 0.0
+	# Tell the server we want to join this room
+	rpc_id(1, "register_player", player_name, code)
+
+# Called by UI when player clicks "Join Game" with a code
+func request_join_room(player_name, code):
+	# Tell the server we want to join this specific room
+	rpc_id(1, "register_player", player_name, code.to_upper())
+
+@rpc("any_peer")
+func register_player(player_name, code):
+	var id = multiplayer.get_remote_sender_id()
 	
-	var target_url = LIVE_SERVER_URL if IS_PROD_BUILD else LOCAL_SERVER_URL
-	print("Attempting to connect to: " + target_url)
+	# If this is the Server, store the info
+	if multiplayer.is_server():
+		players[id] = { "name": player_name, "room": code }
+		# Sync this list to everyone
+		rpc("update_player_list", players)
+		print("Player " + str(id) + " joined room " + code)
+
+@rpc("authority", "call_local")
+func update_player_list(new_players):
+	print("Received player list from server: ", new_players) # DEBUG LOG
 	
-	var error = peer.create_client(target_url)
-	if error != OK:
-		print("Client creation failed: " + str(error))
-		emit_signal("connection_failed")
-		_is_connecting = false
-		return
-		
-	multiplayer.multiplayer_peer = peer
+	# 1. CLEANUP: Force all keys to be Integers
+	# This fixes the "String Key" bug if it occurs
+	players = {}
+	for key in new_players:
+		var int_key = int(str(key)) # Convert "123" -> 123
+		players[int_key] = new_players[key]
+
+	# 2. UPDATE LOCAL ROOM
+	var my_id = multiplayer.get_unique_id()
+	if my_id in players:
+		room_code = players[my_id]["room"]
+		print("My room code is: ", room_code) # DEBUG LOG
+	else:
+		print("ERROR: I am not in the player list!")
 	
-	# Connect signals to detect when we actually succeed/fail
-	multiplayer.connected_to_server.connect(_on_connection_success)
-	multiplayer.connection_failed.connect(_on_connection_failure)
-	multiplayer.server_disconnected.connect(_on_server_disconnected)
+	emit_signal("player_list_updated")
 
-func _on_connection_success():
-	print("Connected successfully!")
-	_is_connecting = false # Stop the timer
-	emit_signal("connection_succeeded")
+# --- Gameplay Start ---
+func start_game():
+	# Only the host (or anyone in the room) can call this
+	emit_signal("game_started")
 
-func _on_connection_failure():
-	# This usually happens if the server is unreachable or refuses connection
-	print("Connection failed.")
-	_is_connecting = false
-	emit_signal("connection_failed")
-
-func _on_server_disconnected():
-	print("Disconnected from server.")
-	emit_signal("server_disconnected")
-
-# --- Player Handling ---
-func _on_peer_connected(id):
-	print("Player connected: " + str(id))
-	_spawn_player(id)
-
+# --- Standard boilerplate ---
+func _on_connection_success(): emit_signal("connection_succeeded")
+func _on_peer_connected(_id): pass # We handle this in register_player now
 func _on_peer_disconnected(id):
-	if get_node_or_null(str(id)):
-		get_node(str(id)).queue_free()
-
-func _spawn_player(_id):
-	# Your spawn logic
-	pass
+	if multiplayer.is_server():
+		players.erase(id)
+		rpc("update_player_list", players)

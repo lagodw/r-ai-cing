@@ -34,7 +34,31 @@ grow_vertical = 2
 texture = ExtResource("2_uwex0")
 expand_mode = 1
 
-[node name="Host" type="Button" parent="Background"]
+[node name="StatusLabel" type="Label" parent="Background"]
+unique_name_in_owner = true
+layout_mode = 2
+offset_left = 49.0
+offset_top = 49.0
+offset_right = 476.0
+offset_bottom = 98.0
+theme_override_font_sizes/font_size = 64
+text = "Status"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="NameInput" type="LineEdit" parent="Background"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 70.0
+offset_top = 118.0
+offset_right = 522.0
+offset_bottom = 213.0
+theme_override_font_sizes/font_size = 40
+placeholder_text = "PLayer Name"
+alignment = 1
+
+[node name="HostButton" type="Button" parent="Background"]
+unique_name_in_owner = true
 layout_mode = 0
 offset_left = 777.0
 offset_top = 219.0
@@ -55,7 +79,8 @@ offset_bottom = 743.0
 grow_horizontal = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_6445k")
 
-[node name="Join" type="Button" parent="Background/Panel"]
+[node name="JoinButton" type="Button" parent="Background/Panel"]
+unique_name_in_owner = true
 layout_mode = 0
 offset_left = 530.0
 offset_top = 42.0
@@ -64,14 +89,15 @@ offset_bottom = 161.0
 theme_override_font_sizes/font_size = 64
 text = "Join"
 
-[node name="Lobby" type="LineEdit" parent="Background/Panel"]
+[node name="CodeInput" type="LineEdit" parent="Background/Panel"]
+unique_name_in_owner = true
 layout_mode = 0
 offset_left = 41.0
 offset_top = 57.0
 offset_right = 440.0
 offset_bottom = 152.0
 theme_override_font_sizes/font_size = 40
-placeholder_text = "Lobby Name"
+placeholder_text = "Lobby Code"
 alignment = 1
 
 [node name="HostPanel" type="TextureRect" parent="Background"]
@@ -92,6 +118,7 @@ texture = ExtResource("3_e14pc")
 expand_mode = 1
 
 [node name="Start" type="Button" parent="Background/HostPanel"]
+unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 7
 anchor_left = 0.5
@@ -123,7 +150,8 @@ text = "Lobby Name:"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Label2" type="Label" parent="Background/HostPanel/HBoxContainer"]
+[node name="LobbyName" type="Label" parent="Background/HostPanel/HBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_font_sizes/font_size = 64
 text = "ABCD"
@@ -141,7 +169,18 @@ text = "Players"
 horizontal_alignment = 1
 vertical_alignment = 1
 
+[node name="PlayerListLabel" type="Label" parent="Background/HostPanel"]
+unique_name_in_owner = true
+layout_mode = 2
+offset_left = 156.0
+offset_top = 355.0
+offset_right = 1047.0
+offset_bottom = 723.0
+theme_override_font_sizes/font_size = 64
+horizontal_alignment = 1
+
 [node name="VBoxContainer" type="VBoxContainer" parent="Background/HostPanel"]
+visible = false
 layout_mode = 0
 offset_left = 96.0
 offset_top = 324.0
