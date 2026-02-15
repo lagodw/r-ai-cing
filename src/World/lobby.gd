@@ -3,6 +3,7 @@ extends Control
 func _ready():
 	GameData.num_bots = 0
 	# 1. Initialize UI State
+	$Background/ConnectingPanel.visible = true
 	%HostButton.disabled = true
 	%JoinButton.disabled = true
 	%StatusLabel.text = "Connecting to Server..."

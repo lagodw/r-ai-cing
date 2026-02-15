@@ -5,6 +5,7 @@ extends Node2D
 @onready var background = $Background
 @onready var walls = $Walls
 @onready var camera = $Camera2D
+@onready var multiplayer_spawner = $MultiplayerSpawner
 
 func _ready():
 	$Victory/Panel/VBoxContainer/Again.pressed.connect(go_again)
@@ -12,15 +13,37 @@ func _ready():
 	
 	# 1. Instantiate Selection Screen
 	var selection = load("res://src/World/selection.tscn").instantiate()
-	# Add it to the CanvasLayer (Track.tscn doesn't have one, so we add it as child)
-	# Since Selection is a CanvasLayer, it will render on top.
 	add_child(selection)
 	move_child(selection, 0)
 	
-	# 2. Wait for player to finish selecting
-	#selection.race_started.connect(start_game)
+	# 2. Wait for player to finish selecting locally
 	await selection.race_started
-	_generate_track_visuals()
+	
+	# --- MULTIPLAYER HANDSHAKE ---
+	if not GameData.is_singleplayer:
+		# A. Convert Power Objects to IDs for network transmission
+		var power_ids = []
+		for p in GameData.selected_powers:
+			power_ids.append(p.id)
+			
+		# B. Send selection to server
+		MultiplayerManager.send_player_selection(GameData.selected_kart_id, power_ids)
+		
+		# C. Wait for Server to say "Everyone is ready"
+		# This signal brings back the dictionary of all players and their choices
+		var all_loadouts = await MultiplayerManager.game_started_with_loadouts
+		
+		# D. Generate visuals and spawn with SPECIFIC loadouts
+		_generate_track_visuals()
+		_spawn_racers(all_loadouts)
+		
+		# E. Remove selection screen now that we are actually starting
+		selection.queue_free()
+		
+	else:
+		# --- SINGLE PLAYER FLOW ---
+		_generate_track_visuals()
+		_spawn_racers(null) # Pass null to indicate Single Player generation
 	
 func start_game():
 	get_tree().paused = true
@@ -62,123 +85,130 @@ func _generate_track_visuals():
 	
 	start_game()
 
-func _fit_track_to_screen(_image_size: Vector2):
-	pass
-	# Get the game's resolution (project settings)
-	#var screen_size = get_viewport_rect().size
+# This runs on BOTH Server and Clients to build the exact same node
+func _spawn_kart_custom(data: Dictionary) -> Node:
+	var kart = kart_scene.instantiate()
 	
-	# Calculate how much we need to shrink/grow the image to fit
-	#var scale_factor = Vector2.ONE
+	# 1. Apply Transform (Position & Rotation) immediately
+	# This ensures it doesn't "flicker" from 0,0
+	kart.global_position = data["position"]
+	kart.rotation = data["rotation"]
+	kart.scale = data["scale"]
 	
-	# Option A: Stretch to fill (might distort aspect ratio)
-	#scale_factor = screen_size / image_size
+	# 2. Set Network Identity
+	# The name MUST match on all clients for RPCs to work
+	kart.name = str(data["name"]) 
+	kart.set_multiplayer_authority(data["peer_id"])
 	
-	# Option B: Fit to screen (maintain aspect ratio) - RECOMMENDED
-	#var aspect = min(screen_size.x / image_size.x, screen_size.y / image_size.y)
-	#scale_factor = Vector2(aspect, aspect)
+	# 3. Apply Kart Settings
+	kart.kart_id = data["kart_id"]
+	kart.track_width_ref = data["track_width"]
+	kart.is_player_controlled = data["is_player"]
 	
-	# Apply scale to Visuals
-	#background.scale = scale_factor
+	# 4. Reconstruct Powers (Convert IDs back to Resources)
+	var reconstructed_powers: Array[PowerDef] = []
+	for pid in data["power_ids"]:
+		if pid in GameData.powers:
+			reconstructed_powers.append(GameData.powers[pid])
+	kart.power_inventory = reconstructed_powers
 	
-	# Apply scale to Physics (Matches the visual perfectly)
-	#walls.scale = scale_factor
+	# 5. Setup Local Player Specifics (Camera, UI)
+	# We check if *this specific client instance* owns this kart
+	if kart.is_multiplayer_authority() and data["is_player"]:
+		# Ensure we only attach camera for the local player
+		if multiplayer.get_unique_id() == data["peer_id"]:
+			camera.position = kart.position
+			var remote = RemoteTransform2D.new()
+			remote.remote_path = camera.get_path()
+			kart.add_child(remote)
+			$UI.setup(kart)
+	
+	# 6. Signal Connect
+	kart.race_finished.connect(winner_screen)
+	
+	return kart
 
-func _spawn_racers():
+func _spawn_racers(mp_loadouts = null):
 	var track = GameData.current_track
 	
-	# --- Grid Calculation Setup (Same as before) ---
+	# --- Grid Calculation Setup ---
 	var raw_start = Vector2(200, 200) 
 	var forward_dir = Vector2.RIGHT
-	
 	if track: 
 		raw_start = track.start_position
 		if track.waypoints.size() > 1:
 			var p0 = track.waypoints[0]
 			var p1 = track.waypoints[1]
 			forward_dir = (p1 - p0).normalized()
-	
 	var right_dir = forward_dir.rotated(PI / 2)
 	var final_start = raw_start * walls.scale
 	
-	# --- PREPARE RACER LIST ---
+	# --- PREPARE DATA LIST (Same as before) ---
 	var racer_configs = []
 	
-	# 1. Player (Index 0)
-	racer_configs.append({
-		"id": GameData.selected_kart_id,
-		"is_player": true,
-		"powers": GameData.selected_powers
-	})
-	
-	# 2. Bots (Indices 1-7)
-	var all_kart_ids = GameData.karts.keys()
-	var all_powers = GameData.powers.values() # Get all available PowerDef resources
-	for i in range(GameData.num_bots):
-		var bot_powers: Array[PowerDef] = []
-		if all_powers.size() >= 2:
-			var shuffled_powers = all_powers.duplicate()
-			shuffled_powers.shuffle()
-			bot_powers = [shuffled_powers[0], shuffled_powers[1]]
-		
-		racer_configs.append({
-			"id": all_kart_ids.pick_random(),
-			"is_player": false,
-			"powers": bot_powers
-		})
-	
+	if GameData.is_singleplayer:
+		# ... (Single Player Config Logic - Same as previous turn) ...
+		# See "Single Player Logic" block below for refresher if needed
+		racer_configs.append({ "id": GameData.selected_kart_id, "is_player": true, "name": "1", "powers": GameData.selected_powers, "peer_id": 1 })
+		# (Add bots logic here if needed...)
+	else:
+		# Multiplayer Logic
+		for peer_id in mp_loadouts:
+			var data = mp_loadouts[peer_id]
+			# Convert powers to actual objects or keep IDs? 
+			# For the CONFIG list, let's keep them as objects or IDs.
+			# But for the SPAWNER, we need IDs.
+			racer_configs.append({
+				"id": data["kart"],
+				"is_player": true, # In MP, everyone in the list is a player
+				"name": str(peer_id),
+				"power_ids": data["powers"], # These are already IDs from MPManager
+				"peer_id": peer_id
+			})
+
 	# --- SPAWN LOOP ---
-	# Calculate spacing constants
-	var max_len = 40.0
-	var max_wid = 20.0
-	# (Assuming standard size, or you can loop configs to find max)
+	# Constants
+	var gap_depth = 40.0 * 2.5
+	var gap_width = 20.0 * 2.0 
 	
-	var gap_depth = max_len * 2.5 # Spacing
-	var gap_width = max_wid * 2.0 
-	
+	# IMPORTANT: Only the Server (or Singleplayer) runs the loop to create karts
+	if not GameData.is_singleplayer and not multiplayer.is_server():
+		return 
+
 	for i in range(racer_configs.size()):
 		var config = racer_configs[i]
-		var kart = kart_scene.instantiate()
 		
-		# Grid Position Logic
+		# Calculate Grid Position
 		var lane_index = i % 2 
 		var dist_back = float(i) * (gap_depth)
 		var lane_offset = (float(lane_index) - 0.5) * gap_width
 		var grid_offset = (-forward_dir * dist_back) + (right_dir * lane_offset)
-		var final_offset = grid_offset * walls.scale
+		var final_pos = final_start + (grid_offset * walls.scale)
+		var final_rot = forward_dir.angle()
 		
-		kart.scale = walls.scale
-		kart.track_width_ref = track.track_width
-		kart.global_position = final_start + final_offset
-		kart.rotation = forward_dir.angle()
+		# --- PREPARE DATA FOR SPAWNER ---
+		var spawn_data = {
+			"position": final_pos,
+			"rotation": final_rot,
+			"scale": walls.scale,
+			"name": config.name,
+			"peer_id": config.peer_id,
+			"kart_id": config.id,
+			"is_player": config.is_player,
+			"track_width": track.track_width,
+			# Handle power IDs: if config.powers is Objects (SP), convert to IDs. If IDs (MP), use as is.
+			"power_ids": [] 
+		}
 		
-		# Configure Kart
-		kart.kart_id = config.id
-		
-		if config.is_player:
-			kart.name = "1" # Authority
-			kart.is_player_controlled = true
-			kart.power_inventory = config.powers.duplicate() # Inject selected powers
-			
-			camera.position = kart.position
-			var remote = RemoteTransform2D.new()
-			remote.remote_path = camera.get_path()
-			kart.add_child(remote)
-			$UI.setup(kart)
+		if GameData.is_singleplayer:
+			for p in config.powers: spawn_data["power_ids"].append(p.id)
+			# Singleplayer: Spawn Manually (Spawner often requires MP peer)
+			var kart_node = _spawn_kart_custom(spawn_data)
+			add_child(kart_node)
 		else:
-			kart.name = "Bot_" + str(i)
-			kart.is_player_controlled = false
-			
-			# It is safer to load the script as a resource
-			var ai_script = load("res://src/Entities/AIController.gd")
-			var brain = Node.new()
-			brain.set_script(ai_script)
-			brain.name = "AIController"
-			
-			kart.power_inventory = config.powers.duplicate()
-			kart.add_child(brain) # This triggers _ready()
-			
-		kart.race_finished.connect(winner_screen)
-		add_child(kart)
+			spawn_data["power_ids"] = config.power_ids
+			# Multiplayer: Server calls spawn() -> Replicates to all
+			multiplayer_spawner.spawn(spawn_data)
 #
 func _draw():
 	var track = GameData.current_track

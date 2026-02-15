@@ -7,12 +7,14 @@ func _ready() -> void:
 	%Quit.pressed.connect(quit)
 	
 func single_player():
+	GameData.is_singleplayer = true
 	var tracks: Array = GameData.tracks.keys()
 	var track = tracks.pick_random()
 	GameData.current_track = GameData.tracks[track]
 	get_tree().change_scene_to_file("uid://dnd4ot45brbyk")
 	
 func multi_player():
+	GameData.is_singleplayer = false
 	get_tree().change_scene_to_file("res://src/World/lobby.tscn")
 	
 func settings():

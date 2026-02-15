@@ -14,6 +14,9 @@ const IS_PROD_BUILD = true
 # --- Lobby Variables ---
 var room_code = ""
 var players = {} # Dictionary: { peer_id: { "name": "Player1", "room": "ABCD" } }
+# Dictionary to store what kart/power each player chose
+# Format: { player_id: { "kart": "speedster", "power": "missile", "name": "Bob" } }
+var player_loadouts = {}
 
 func _ready():
 	if "--server" in OS.get_cmdline_args() or OS.has_feature("dedicated_server"):
@@ -118,3 +121,56 @@ func server_handle_start_game(code):
 func client_begin_game():
 	print("Game Start signal received from Server!")
 	emit_signal("game_started")
+
+# 1. Client sends their choice to the server
+func send_player_selection(kart_id, power_id):
+	rpc_id(1, "server_receive_selection", kart_id, power_id)
+
+# 2. Server stores it and checks if everyone is ready
+@rpc("any_peer")
+func server_receive_selection(kart_id, power_id):
+	var sender_id = multiplayer.get_remote_sender_id()
+	
+	# Store the loadout
+	if sender_id in players:
+		player_loadouts[sender_id] = {
+			"name": players[sender_id]["name"],
+			"kart": kart_id,
+			"power": power_id,
+			"room": players[sender_id]["room"]
+		}
+	
+	print("Player ", sender_id, " is ready with ", kart_id)
+	
+	# CHECK: Are all players in this room ready?
+	var player_room_code = players[sender_id]["room"]
+	if _are_all_players_ready(player_room_code):
+		print("All players in room ", player_room_code, " are ready! Starting race...")
+		# Get only the loadouts for this room
+		var room_loadouts = {}
+		for id in player_loadouts:
+			if player_loadouts[id]["room"] == player_room_code:
+				room_loadouts[id] = player_loadouts[id]
+				
+		# Tell everyone in the room to spawn the karts
+		rpc_to_room(player_room_code, "client_start_race", room_loadouts)
+
+# Helper function to check readiness
+func _are_all_players_ready(player_room_code):
+	for id in players:
+		if players[id]["room"] == player_room_code:
+			if not id in player_loadouts:
+				return false # This person hasn't chosen yet
+	return true
+
+# Helper to send RPC only to people in a specific room
+func rpc_to_room(player_room_code, function_name, data):
+	for id in players:
+		if players[id]["room"] == player_room_code:
+			rpc_id(id, function_name, data)
+
+# 3. Client receives the full list and starts
+@rpc("authority")
+func client_start_race(all_loadouts):
+	# We emit a signal with the data so track.gd can use it
+	emit_signal("game_started_with_loadouts", all_loadouts)

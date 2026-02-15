@@ -7,6 +7,7 @@ var powers: Dictionary[String, PowerDef] = {}  # { id: PowerDef }
 var tracks: Dictionary[String, TrackDef] = {}  # { id: TrackDef }
 var current_track: TrackDef = null
 var num_bots: int = 3
+var is_singleplayer: bool = true
 
 var selected_kart_id: String = ""
 var selected_powers: Array[PowerDef] = []
