@@ -1,4 +1,4 @@
-[gd_scene load_steps=25 format=3 uid="uid://dnd4ot45brbyk"]
+[gd_scene load_steps=26 format=3 uid="uid://dnd4ot45brbyk"]
 
 [ext_resource type="Script" uid="uid://dhqvmde3vmpt3" path="res://src/World/track.gd" id="1_7nrbi"]
 [ext_resource type="Texture2D" uid="uid://cyg0bu5cqy8k2" path="res://assets/tracks/Palm.png" id="2_imajx"]
@@ -16,6 +16,7 @@
 [ext_resource type="Texture2D" uid="uid://bb3k0k5ff0tfk" path="res://assets/UI/VolumeOn.png" id="12_85pjj"]
 [ext_resource type="Texture2D" uid="uid://cq5npkpluvfyy" path="res://assets/UI/VolumeMuted.png" id="13_aeb16"]
 [ext_resource type="PackedScene" uid="uid://pwqh4vxogv46" path="res://src/World/Settings.tscn" id="14_14sem"]
+[ext_resource type="Texture2D" uid="uid://bjl756osejanv" path="res://assets/UI/RogueRacingTitle.png" id="17_aeb16"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_2f1gn"]
 
@@ -374,3 +375,26 @@ theme_override_font_sizes/font_size = 240
 text = "3"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="MultiplayerWaiting" type="CanvasLayer" parent="."]
+visible = false
+
+[node name="TextureRect" type="TextureRect" parent="MultiplayerWaiting"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("8_o8aps")
+texture = ExtResource("17_aeb16")
+expand_mode = 1
+
+[node name="Label" type="Label" parent="MultiplayerWaiting/TextureRect"]
+layout_mode = 0
+offset_left = 614.0
+offset_top = 231.0
+offset_right = 1457.0
+offset_bottom = 356.0
+theme_override_font_sizes/font_size = 70
+text = "Waiting for 
+other players"

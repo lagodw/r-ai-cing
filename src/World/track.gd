@@ -21,6 +21,7 @@ func _ready():
 	
 	# --- MULTIPLAYER HANDSHAKE ---
 	if not GameData.is_singleplayer:
+		$MultiplayerWaiting.visible = true
 		# A. Convert Power Objects to IDs for network transmission
 		var power_ids = []
 		for p in GameData.selected_powers:
@@ -29,13 +30,14 @@ func _ready():
 		# B. Send selection to server
 		MultiplayerManager.send_player_selection(GameData.selected_kart_id, power_ids)
 		
+		
 		# C. Wait for Server to say "Everyone is ready"
 		# This signal brings back the dictionary of all players and their choices
 		var all_loadouts = await MultiplayerManager.game_started_with_loadouts
-		
 		# D. Generate visuals and spawn with SPECIFIC loadouts
 		_generate_track_visuals()
 		_spawn_racers(all_loadouts)
+		$MultiplayerWaiting.visible = false
 		
 		# E. Remove selection screen now that we are actually starting
 		selection.queue_free()

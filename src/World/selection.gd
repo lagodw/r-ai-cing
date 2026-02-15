@@ -21,13 +21,21 @@ func _ready() -> void:
 	%Minus.pressed.connect(change_num_bots.bind(-1))
 	%Plus.pressed.connect(change_num_bots.bind(1))
 	
-	for track in GameData.tracks.keys():
-		var path = "res://assets/tracks/%s.png" % GameData.tracks[track].id
+	if GameData.is_singleplayer:
+		for track in GameData.tracks.keys():
+			var path = "res://assets/tracks/%s.png" % GameData.tracks[track].id
+			var option = track_option_scene.instantiate()
+			option.texture = load(path)
+			option.track_id = track
+			option.selected.connect(on_track_selected)
+			%TrackGrid.add_child(option)
+	else:
+		var track_id = GameData.tracks.keys().pick_random()
 		var option = track_option_scene.instantiate()
-		option.texture = load(path)
-		option.track_id = track
-		option.selected.connect(on_track_selected)
+		option.track_id = track_id
 		%TrackGrid.add_child(option)
+		current_track_node = option
+		confirm_track()
 	
 	# --- 1. Load Random Karts ---
 	var karts = GameData.karts.keys().duplicate()

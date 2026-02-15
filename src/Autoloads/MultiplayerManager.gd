@@ -4,6 +4,7 @@ extends Node
 signal connection_succeeded
 signal game_started # Signal to tell UI to switch to the game scene
 signal player_list_updated # Signal to update the lobby UI list
+signal game_started_with_loadouts
 
 var peer = WebSocketMultiplayerPeer.new()
 const PORT = 8080
@@ -123,12 +124,12 @@ func client_begin_game():
 	emit_signal("game_started")
 
 # 1. Client sends their choice to the server
-func send_player_selection(kart_id, power_id):
-	rpc_id(1, "server_receive_selection", kart_id, power_id)
+func send_player_selection(kart_id: String, power_ids: Array):
+	rpc_id(1, "server_receive_selection", kart_id, power_ids)
 
 # 2. Server stores it and checks if everyone is ready
 @rpc("any_peer")
-func server_receive_selection(kart_id, power_id):
+func server_receive_selection(kart_id: String, power_ids: Array):
 	var sender_id = multiplayer.get_remote_sender_id()
 	
 	# Store the loadout
@@ -136,7 +137,7 @@ func server_receive_selection(kart_id, power_id):
 		player_loadouts[sender_id] = {
 			"name": players[sender_id]["name"],
 			"kart": kart_id,
-			"power": power_id,
+			"powers": power_ids,
 			"room": players[sender_id]["room"]
 		}
 	

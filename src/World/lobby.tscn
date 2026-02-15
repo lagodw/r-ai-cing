@@ -172,7 +172,7 @@ layout_mode = 0
 offset_left = 131.0
 offset_top = 331.0
 offset_right = 1079.0
-offset_bottom = 686.0
+offset_bottom = 826.0
 
 [node name="Panel" type="Panel" parent="Background/HostPanel/MarginContainer"]
 layout_mode = 2
@@ -180,6 +180,7 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_ey5wi")
 
 [node name="BotBox" type="HBoxContainer" parent="Background/HostPanel"]
 unique_name_in_owner = true
+visible = false
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
