@@ -45,8 +45,12 @@ texture = ExtResource("2_imajx")
 [node name="Camera2D" type="Camera2D" parent="."]
 zoom = Vector2(2, 2)
 
+[node name="ProjectileSpawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("uid://c3euljm7hekrx")
+spawn_path = NodePath("..")
+
 [node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
-_spawnable_scenes = PackedStringArray("uid://ceh82rynpo7cg", "uid://c3euljm7hekrx")
+_spawnable_scenes = PackedStringArray("uid://ceh82rynpo7cg")
 spawn_path = NodePath("..")
 
 [node name="UI" type="CanvasLayer" parent="."]

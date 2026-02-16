@@ -14,6 +14,10 @@ func activate_power(kart: Kart, power: PowerDef):
 			drop_hazard(kart, power)
 
 func fire_projectile(kart: Kart, data: PowerDef):
+	# 1. Only the Server spawns networked objects
+	if not multiplayer.is_server():
+		return
+
 	# Determine how many to shoot
 	var count = max(1, data.projectile_count)
 	
@@ -34,25 +38,18 @@ func fire_projectile(kart: Kart, data: PowerDef):
 	var kart_length = sprite.texture.get_width() * sprite.scale.x
 	var forward_dist = (kart_length / 2.0) + (data.length / 2.0) + 10.0
 
+	# Find the Spawner
+	# We assume the Kart is inside the Track scene
+	var track = kart.get_tree().current_scene
+	if not track.has_node("ProjectileSpawner"):
+		printerr("PowerManager: ProjectileSpawner not found!")
+		return
+	var spawner = track.get_node("ProjectileSpawner")
+
 	for i in range(count):
-		var proj: Projectile = proj_scene.instantiate()
-		
-		# Visuals & Dimensions
-		proj.get_node("Sprite2D").texture = load("res://assets/powers/%s.png" % data.id)
-		proj.length = data.length
-		proj.width = data.width
-		
-		# Stats
-		proj.speed = data.speed
-		proj.damage = data.damage
-		proj.shooter_id = kart.name
-		proj.behavior = data.projectile_behavior
-		proj.homing_turn_speed = data.turn_speed
-		proj.detection_radius = data.detection_radius
-		proj.can_bounce = data.can_bounce # Pass the new capability
-		proj.max_lifetime = data.duration
-		
-		# --- Rotation & Position Logic ---
+		# --- Calculate Transform Logic (No Instantiation) ---
+		var spawn_pos = Vector2.ZERO
+		var spawn_rot = 0.0
 		
 		# 1. Determine base rotation (Forward or Backward)
 		var base_rotation = kart.rotation
@@ -64,25 +61,43 @@ func fire_projectile(kart: Kart, data: PowerDef):
 		if count > 1 and data.projectile_behavior != "Orbit":
 			current_angle += start_angle_offset + (angle_step * i)
 		
-		# 3. Apply to Projectile
+		# 3. Calculate Final Position/Rotation
 		if data.projectile_behavior == "Orbit":
-			# Orbit logic handles its own position, but we pass data
-			proj.orbit_center = kart
-			proj.orbit_duration = data.duration
-			proj.orbit_radius = 100.0
-			# If we have multiple orbits, this logic creates them stacked. 
-			# (Orbit spacing would require offsetting the initial orbit_angle in Projectile.gd)
-			var offset = Vector2(proj.orbit_radius, 0).rotated(kart.rotation)
-			proj.global_position = kart.global_position + offset
-			proj.rotation = kart.rotation + (PI / 2.0)
-			
+			var orbit_radius = 100.0 # From your original code
+			var offset = Vector2(orbit_radius, 0).rotated(kart.rotation)
+			spawn_pos = kart.global_position + offset
+			spawn_rot = kart.rotation + (PI / 2.0)
 		else:
 			# Standard Forward/Backward/Homing logic
 			var offset_vector = Vector2(forward_dist, 0).rotated(current_angle)
-			proj.global_position = kart.global_position + offset_vector
-			proj.rotation = current_angle
+			spawn_pos = kart.global_position + offset_vector
+			spawn_rot = current_angle
 		
-		get_tree().current_scene.add_child(proj, true)
+		# --- Prepare Network Data ---
+		var spawn_data = {
+			"position": spawn_pos,
+			"rotation": spawn_rot,
+			"shooter_id": kart.name,
+			"behavior": data.projectile_behavior,
+			"speed": data.speed,
+			"damage": data.damage,
+			"length": data.length,
+			"width": data.width,
+			"texture_path": "res://assets/powers/%s.png" % data.id,
+			
+			# Extra Properties
+			"homing_turn_speed": data.turn_speed,
+			"detection_radius": data.detection_radius,
+			"can_bounce": data.can_bounce,
+			"max_lifetime": data.duration,
+			"orbit_duration": data.duration
+		}
+		
+		if data.projectile_behavior == "Orbit":
+			spawn_data["orbit_center_path"] = kart.get_path()
+			
+		# --- Spawn ---
+		spawner.spawn(spawn_data)
 
 func drop_hazard(kart: Kart, data: PowerDef):
 	var hazard_scene = load("res://src/Entities/Hazard.tscn")

@@ -7,58 +7,58 @@ extends Node2D
 @onready var camera = $Camera2D
 @onready var multiplayer_spawner = $MultiplayerSpawner
 @onready var ui_layer = $UI
+@onready var projectile_spawner = $ProjectileSpawner
 
 func _ready():
 	$Victory/Panel/VBoxContainer/Again.pressed.connect(go_again)
 	$Victory/Panel/VBoxContainer/Main.pressed.connect(main_menu)
 	multiplayer_spawner.spawn_function = _spawn_kart_custom
+	projectile_spawner.spawn_function = _spawn_projectile_custom
 	
-	# --- NEW SERVER CHECK ---
-	# If we are the Dedicated Server (ID 1) AND NOT playing locally (headless/render):
-	if multiplayer.is_server() and not GameData.is_singleplayer:
+	# --- SERVER LOGIC ---
+	if multiplayer.is_server():
 		print("Server loaded Track. Waiting for loadouts...")
-		# The server skips UI and just waits for the signal from MultiplayerManager
 		var all_loadouts = await MultiplayerManager.game_started_with_loadouts
 		
-		# Generate visuals (needed for collision walls)
-		_generate_track_visuals()
+		# FIX: Calculate track data (Start Pos, Waypoints) BEFORE spawning
+		await _initialize_track_data() 
 		
-		# Spawn the racers (Server is the only one who can do this via Spawner)
+		# Server doesn't need to draw sprites to know physics, 
+		# but _initialize_track_data handles the logic.
+		# If you want visuals on server for debug, you can call _generate_visuals too.
+		_generate_track_visuals() 
+		
 		_spawn_racers(all_loadouts)
 		return
-	# ------------------------
-	
-	# --- CLIENT LOGIC (Original) ---
-	# 1. Instantiate Selection Screen
+
+	# --- CLIENT LOGIC ---
 	var selection = load("res://src/World/selection.tscn").instantiate()
 	ui_layer.add_child(selection)
 	
-	# 2. Wait for player to finish selecting locally
 	await selection.race_started
 	
-	# --- MULTIPLAYER HANDSHAKE ---
 	if not GameData.is_singleplayer:
 		$MultiplayerWaiting.visible = true
 		
-		# A. Convert Power Objects to IDs for network transmission
 		var power_ids = []
 		for p in GameData.selected_powers:
 			power_ids.append(p.id)
 			
-		# B. Send selection to server
 		MultiplayerManager.send_player_selection(GameData.selected_kart_id, power_ids)
 		
-		# C. Wait for Server to say "Everyone is ready"
-		var all_loadouts = await MultiplayerManager.game_started_with_loadouts
+		var _all_loadouts = await MultiplayerManager.game_started_with_loadouts
 		
-		# D. Clients generate visuals but DO NOT spawn karts (Spawner handles it)
+		# FIX: Client also calculates data to ensure sync (and for visuals)
+		await _initialize_track_data()
 		_generate_track_visuals()
-		_spawn_racers(all_loadouts) 
+		
+		# Client doesn't spawn (Spawner does), but needs to know track data for camera/prediction
 		
 		$MultiplayerWaiting.visible = false
 		start_countdown()
 	else:
-		# --- SINGLE PLAYER FLOW ---
+		# Singleplayer
+		await _initialize_track_data()
 		_generate_track_visuals()
 		_spawn_racers(null)
 		start_countdown()
@@ -69,39 +69,46 @@ func start_game():
 	_spawn_racers()
 	start_countdown()
 
+func _initialize_track_data():
+	var track = GameData.current_track
+	if not track: return
+	
+	var path = "res://assets/tracks/%s.png" % track.id
+	if ResourceLoader.exists(path):
+		var tex = load(path)
+		
+		# 1. Setup Walls (Needed for Physics Raycasts)
+		# We must do this first so raycasts in TrackBuilder work
+		TrackBuilder.generate_walls_from_texture(tex, walls, true)
+		
+		# Wait for physics to update so walls are "real"
+		await get_tree().physics_frame
+		await get_tree().physics_frame 
+		
+		# 2. Find Start Position
+		var detected_start = TrackBuilder.find_start_position_from_texture(tex, true)
+		if detected_start != Vector2.INF:
+			track.start_position = detected_start
+		else:
+			print("WARNING: No start position found (Magenta pixel). Defaulting to 0,0")
+			track.start_position = Vector2.ZERO
+			
+		# 3. Generate Waypoints & Width (Requires Walls & Start Pos)
+		var result = TrackBuilder.generate_path_automatically(self, track.start_position)
+		track.waypoints = result["path"]
+		track.start_angle = result["angle"] 
+		track.track_width = TrackBuilder.measure_track_width(self, track.start_position, track.start_angle)
+
 func _generate_track_visuals():
 	var track = GameData.current_track
 	if not track: return
 	
-	var path = "res://assets/tracks/%s.png"%track.id
+	# Visuals only (Texture)
+	var path = "res://assets/tracks/%s.png" % track.id
 	if ResourceLoader.exists(path):
 		var tex = load(path)
 		background.texture = tex
-		await get_tree().process_frame
-	
-		# 1. Generate Walls
-		TrackBuilder.generate_walls_from_texture(tex, walls, true)
-		
-		var detected_start = TrackBuilder.find_start_position_from_texture(tex, true)
-		if detected_start != Vector2.INF:
-			track.start_position = detected_start
-		
-		# Wait for Physics
-		await get_tree().physics_frame
-		await get_tree().physics_frame 
-
-		# 2. Generate Path AND Get Angle (UPDATED)
-		var result = TrackBuilder.generate_path_automatically(self, track.start_position)
-		
-		track.waypoints = result["path"]
-		track.start_angle = result["angle"] # Store the angle
-		
-		# 3. Measure Width using the angle we just found (NEW)
-		track.track_width = TrackBuilder.measure_track_width(self, track.start_position, track.start_angle)
-		
 		queue_redraw()
-	
-	#start_game()
 
 # This runs on BOTH Server and Clients to build the exact same node
 func _spawn_kart_custom(data: Dictionary) -> Node:
@@ -146,7 +153,7 @@ func _spawn_racers(mp_loadouts = null):
 	var track = GameData.current_track
 	
 	# --- Grid Calculation Setup ---
-	var raw_start = Vector2(200, 200) 
+	var raw_start = track.start_position
 	var forward_dir = Vector2.RIGHT
 	if track: 
 		raw_start = track.start_position
@@ -223,29 +230,65 @@ func _spawn_racers(mp_loadouts = null):
 			spawn_data["power_ids"] = config.power_ids
 			# Multiplayer: Server calls spawn() -> Replicates to all
 			multiplayer_spawner.spawn(spawn_data)
-#
-func _draw():
-	var track = GameData.current_track
-	if not track or track.waypoints.is_empty():
-		return
 
-	var points = track.waypoints
-	var num_points = points.size()
+func _spawn_projectile_custom(data: Dictionary) -> Node:
+	var proj_scene = load("res://src/Entities/Projectile.tscn")
+	var proj = proj_scene.instantiate()
 	
-	# We must use the same scaling as the walls/background
-	var s = walls.scale 
-
-	for i in range(num_points):
-		var current_p = points[i] * s
-		var next_p = points[(i + 1) % num_points] * s # Wrap around for loop
+	# 1. Apply Transform
+	proj.global_position = data["position"]
+	proj.rotation = data["rotation"]
+	
+	# 2. Apply Base Stats
+	proj.shooter_id = data["shooter_id"]
+	proj.behavior = data["behavior"]
+	proj.speed = data["speed"]
+	proj.damage = data["damage"]
+	proj.length = data["length"]
+	proj.width = data["width"]
+	
+	# 3. Apply Texture
+	if data.has("texture_path") and data["texture_path"] != "":
+		var sprite = proj.get_node_or_null("Sprite2D")
+		if sprite:
+			sprite.texture = load(data["texture_path"])
+	
+	# 4. Apply Advanced Behavior Stats (New)
+	if data.has("homing_turn_speed"): proj.homing_turn_speed = data["homing_turn_speed"]
+	if data.has("detection_radius"): proj.detection_radius = data["detection_radius"]
+	if data.has("can_bounce"): proj.can_bounce = data["can_bounce"]
+	if data.has("max_lifetime"): proj.max_lifetime = data["max_lifetime"]
+	
+	# 5. Orbit Specifics
+	if data.has("orbit_center_path"):
+		proj.orbit_center = get_node_or_null(data["orbit_center_path"])
+	if data.has("orbit_duration"):
+		proj.orbit_duration = data["orbit_duration"]
 		
-		# Draw a line to the next waypoint
-		draw_line(current_p, next_p, Color.CYAN, 4.0)
-		
-		# Draw a circle at the waypoint
-		# Index 0 is GREEN (Start), others are BLUE
-		var color = Color.GREEN if i == 0 else Color.BLUE
-		draw_circle(current_p, 10.0, color)
+	return proj
+	
+#func _draw():
+	#var track = GameData.current_track
+	#if not track or track.waypoints.is_empty():
+		#return
+#
+	#var points = track.waypoints
+	#var num_points = points.size()
+	#
+	## We must use the same scaling as the walls/background
+	#var s = walls.scale 
+#
+	#for i in range(num_points):
+		#var current_p = points[i] * s
+		#var next_p = points[(i + 1) % num_points] * s # Wrap around for loop
+		#
+		## Draw a line to the next waypoint
+		#draw_line(current_p, next_p, Color.CYAN, 4.0)
+		#
+		## Draw a circle at the waypoint
+		## Index 0 is GREEN (Start), others are BLUE
+		#var color = Color.GREEN if i == 0 else Color.BLUE
+		#draw_circle(current_p, 10.0, color)
 
 func winner_screen(winner_name: String):
 	if winner_name == "1":

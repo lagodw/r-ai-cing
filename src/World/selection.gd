@@ -29,6 +29,8 @@ func _ready() -> void:
 			option.track_id = track
 			option.selected.connect(on_track_selected)
 			%TrackGrid.add_child(option)
+	else:
+		confirm_track()
 	
 	# --- 1. Load Random Karts ---
 	var karts = GameData.karts.keys().duplicate()

@@ -20,10 +20,18 @@ var turn_speed: float = 3.5
 var friction: float = 1.0
 var traction: float = 5.0  # High = snappy grip, Low = drift/ice
 var max_health: int = 100
-var current_health: int = 100:
-	set(val):
-		current_health = val
-		update_health_bar()
+@export var current_health: int = 100:
+	set(value):
+		var previous = current_health
+		current_health = value
+		
+		# If we just died (and weren't dead before), break down
+		if current_health <= 0 and previous > 0:
+			_break_down()
+			
+		# Update UI if this is the local player
+		if name == str(multiplayer.get_unique_id()):
+			update_health_bar()
 
 # --- State Variables ---
 var current_speed: float = 0.0
