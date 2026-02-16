@@ -36,7 +36,6 @@ func fire_projectile(kart: Kart, data: PowerDef):
 
 	for i in range(count):
 		var proj: Projectile = proj_scene.instantiate()
-		proj.shooter_id = kart.name.to_int()
 		
 		# Visuals & Dimensions
 		proj.get_node("Sprite2D").texture = load("res://assets/powers/%s.png" % data.id)

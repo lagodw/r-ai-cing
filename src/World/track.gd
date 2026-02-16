@@ -108,14 +108,12 @@ func _spawn_kart_custom(data: Dictionary) -> Node:
 	printt('spawning', data)
 	var kart = kart_scene.instantiate()
 	
-	# 1. Apply Transform (Position & Rotation) immediately
-	# This ensures it doesn't "flicker" from 0,0
+	# 1. Apply Transform
 	kart.global_position = data["position"]
 	kart.rotation = data["rotation"]
 	kart.scale = data["scale"]
 	
 	# 2. Set Network Identity
-	# The name MUST match on all clients for RPCs to work
 	kart.name = str(data["name"]) 
 	kart.set_multiplayer_authority(data["peer_id"])
 	
@@ -124,23 +122,21 @@ func _spawn_kart_custom(data: Dictionary) -> Node:
 	kart.track_width_ref = data["track_width"]
 	kart.is_player_controlled = data["is_player"]
 	
-	# 4. Reconstruct Powers (Convert IDs back to Resources)
+	# 4. Reconstruct Powers
 	var reconstructed_powers: Array[PowerDef] = []
 	for pid in data["power_ids"]:
 		if pid in GameData.powers:
 			reconstructed_powers.append(GameData.powers[pid])
 	kart.power_inventory = reconstructed_powers
 	
-	# 5. Setup Local Player Specifics (Camera, UI)
-	# We check if *this specific client instance* owns this kart
-	if kart.is_multiplayer_authority() and data["is_player"]:
-		# Ensure we only attach camera for the local player
-		if multiplayer.get_unique_id() == data["peer_id"]:
-			camera.position = kart.position
-			var remote = RemoteTransform2D.new()
-			remote.remote_path = camera.get_path()
-			kart.add_child(remote)
-			$UI.setup(kart)
+	# 5. Setup Local Player Specifics
+	# FIX: Check the data directly instead of asking the node (which isn't in tree yet)
+	if data["is_player"] and data["peer_id"] == multiplayer.get_unique_id():
+		camera.position = kart.position
+		var remote = RemoteTransform2D.new()
+		remote.remote_path = camera.get_path()
+		kart.add_child(remote)
+		$UI.setup(kart)
 	
 	# 6. Signal Connect
 	kart.race_finished.connect(winner_screen)
