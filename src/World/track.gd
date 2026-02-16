@@ -69,8 +69,6 @@ func _ready():
 		await _initialize_track_data()
 		_generate_track_visuals()
 		
-		$MultiplayerWaiting.visible = false
-		
 	else:
 		# Singleplayer
 		await _initialize_track_data()
@@ -82,29 +80,8 @@ func _ready():
 
 @rpc("call_local", "reliable")
 func start_race_countdown():
-	# 1. Find the local player's kart
-	var my_id = multiplayer.get_unique_id()
-	var my_kart = null
-	
-	# Wait loop: The RPC might arrive slightly before the Kart node is ready in the tree
-	for i in range(20): # Try for ~1 second
-		my_kart = _find_kart_by_id(my_id)
-		if my_kart: break
-		await get_tree().process_frame
-	
-	if my_kart:
-		# 2. Setup Camera
-		if camera:
-			camera.target = my_kart
-			camera.position = my_kart.position # Snap immediately
-			camera.make_current()
-		
-		# 3. Start UI Countdown
-		start_countdown()
-	else:
-		printerr("Error: Could not find local kart for countdown!")
-		# Fallback: start anyway so game isn't soft-locked
-		start_countdown()
+	$MultiplayerWaiting.visible = false
+	start_countdown()
 
 func _find_kart_by_id(id):
 	# Helper to find a kart node. Adjust strictly if your karts are named differently.
