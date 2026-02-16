@@ -1,14 +1,18 @@
 extends Control
 
+# Retry logic variables
+var retry_timer: Timer
+var attempt_count = 0
+
 func _ready():
 	GameData.num_bots = 0
 	# 1. Initialize UI State
 	$Background/ConnectingPanel.visible = true
 	%HostButton.disabled = true
 	%JoinButton.disabled = true
-	%StatusLabel.text = "Connecting to Server..."
-	%Start.pressed.connect(_on_start_pressed)
+	%StatusLabel.text = "Initializing Connection..."
 	
+	%Start.pressed.connect(_on_start_pressed)
 	%Minus.pressed.connect(change_num_bots.bind(-1))
 	%Plus.pressed.connect(change_num_bots.bind(1))
 	
@@ -21,18 +25,57 @@ func _ready():
 	%HostButton.pressed.connect(_on_host_pressed)
 	%JoinButton.pressed.connect(_on_join_pressed)
 	
-	# 4. Join Server
-	MultiplayerManager.join_server()
+	# START RETRY LOOP
+	_start_retry_loop()
+
+func _start_retry_loop():
+	# Create a timer that ticks every 2 seconds
+	retry_timer = Timer.new()
+	retry_timer.wait_time = 2.0
+	retry_timer.autostart = true
+	retry_timer.one_shot = false
+	retry_timer.timeout.connect(_check_connection_and_retry)
+	add_child(retry_timer)
+	
+	# Try immediately
+	_check_connection_and_retry()
+
+func _check_connection_and_retry():
+	# Check the status of the ACTUAL peer, not the default Offline one
+	var status = MultiplayerManager.peer.get_connection_status()
+	
+	if status == MultiplayerPeer.CONNECTION_CONNECTED:
+		_on_connected()
+		return
+		
+	if status == MultiplayerPeer.CONNECTION_CONNECTING:
+		# It's currently trying, just wait.
+		%StatusLabel.text = "Connecting to Server... \n(Attempt %d)" % attempt_count
+		return
+	
+	# If DISCONNECTED (0), try again
+	if status == MultiplayerPeer.CONNECTION_DISCONNECTED:
+		attempt_count += 1
+		%StatusLabel.text = "Waking up Server... \n(Attempt %d)" % attempt_count
+		MultiplayerManager.join_server()
 
 func _on_connected():
+	# Stop the retry loop
+	if retry_timer:
+		retry_timer.stop()
+		retry_timer.queue_free()
+		retry_timer = null
+		
 	$Background/ConnectingPanel.visible = false
-	%StatusLabel.text = "Connected! Create or Join a Room."
+	%StatusLabel.text = "Connected! ID: " + str(multiplayer.get_unique_id())
 	%HostButton.disabled = false
 	%JoinButton.disabled = false
-	
-	# Debug print to confirm ID
-	print("Connected successfully with ID: ", multiplayer.get_unique_id())
-	
+
+func _exit_tree():
+	# Cleanup timer if we leave the lobby scene
+	if retry_timer:
+		retry_timer.queue_free()
+
 func _on_host_pressed():
 	$Background/NamePanel.visible = true
 	%ConfirmName.pressed.connect(confirm_host)

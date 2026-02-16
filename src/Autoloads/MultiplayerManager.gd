@@ -23,13 +23,27 @@ func _ready():
 	if "--server" in OS.get_cmdline_args() or OS.has_feature("dedicated_server"):
 		_start_server()
 
-# --- Connection Logic (Keep as is, but simplified for brevity) ---
 func join_server():
-	# This connects to the "Hotel" (Render), but doesn't join a room yet
+	# 1. Reset the peer if it was stuck connecting or failed
+	if peer.get_connection_status() != MultiplayerPeer.CONNECTION_DISCONNECTED:
+		peer.close()
+	
+	# 2. Determine URL
 	var target_url = LIVE_SERVER_URL if IS_PROD_BUILD else LOCAL_SERVER_URL
-	peer.create_client(target_url)
+	
+	# 3. Create Client
+	var error = peer.create_client(target_url)
+	if error != OK:
+		printerr("Client creation failed: ", error)
+		return
+	
+	# 4. Assign peer to multiplayer API
 	multiplayer.multiplayer_peer = peer
-	multiplayer.connected_to_server.connect(_on_connection_success)
+	
+	# 5. Connect signals safely (prevent duplicates)
+	if not multiplayer.connected_to_server.is_connected(_on_connection_success):
+		multiplayer.connected_to_server.connect(_on_connection_success)
+
 
 func _start_server():
 	GameData.is_singleplayer = false

@@ -71,6 +71,7 @@ func _ready():
 	# Load the stats defined in JSON via the GameData factory
 	configure_from_id(kart_id)
 	$HealthBarAnchor/PlayerName.text = player_name
+	$HealthBarAnchor/PlayerName.visible = not GameData.is_singleplayer
 	
 	add_to_group("karts")
 	if health_bar:
