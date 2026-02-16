@@ -52,8 +52,7 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 125)
 layout_mode = 2
 theme_override_font_sizes/font_size = 40
-text = "Multiplayer
-(placeholder)"
+text = "Multiplayer"
 
 [node name="Settings" type="Button" parent="VBoxContainer"]
 unique_name_in_owner = true

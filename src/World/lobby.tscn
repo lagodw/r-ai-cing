@@ -105,9 +105,9 @@ anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
 offset_left = -197.0
-offset_top = -121.0
+offset_top = -210.0
 offset_right = 186.0
-offset_bottom = -35.0
+offset_bottom = -105.0
 grow_horizontal = 2
 grow_vertical = 0
 theme_override_font_sizes/font_size = 64
@@ -170,9 +170,9 @@ offset_bottom = 748.0
 [node name="MarginContainer" type="MarginContainer" parent="Background/HostPanel"]
 layout_mode = 0
 offset_left = 131.0
-offset_top = 331.0
+offset_top = 319.0
 offset_right = 1079.0
-offset_bottom = 826.0
+offset_bottom = 765.0
 
 [node name="Panel" type="Panel" parent="Background/HostPanel/MarginContainer"]
 layout_mode = 2

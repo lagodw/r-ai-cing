@@ -6,9 +6,6 @@ func _ready() -> void:
 	%Settings.pressed.connect(settings)
 	%Quit.pressed.connect(quit)
 	
-	if multiplayer.multiplayer_peer and multiplayer.multiplayer_peer.get_connection_status() == MultiplayerPeer.CONNECTION_CONNECTED:
-		print('connected')
-	
 func single_player():
 	GameData.is_singleplayer = true
 	var tracks: Array = GameData.tracks.keys()
