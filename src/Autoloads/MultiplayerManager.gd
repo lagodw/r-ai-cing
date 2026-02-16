@@ -18,6 +18,7 @@ var players = {} # Dictionary: { peer_id: { "name": "Player1", "room": "ABCD" } 
 # Dictionary to store what kart/power each player chose
 # Format: { player_id: { "kart": "speedster", "power": "missile", "name": "Bob" } }
 var player_loadouts = {}
+var completed_room_loadouts = {}
 var is_game_running = false
 
 func _ready():
@@ -107,8 +108,29 @@ func _on_connection_success(): emit_signal("connection_succeeded")
 func _on_peer_connected(_id): pass # We handle this in register_player now
 func _on_peer_disconnected(id):
 	if multiplayer.is_server():
+		print("Peer disconnected: ", id)
 		players.erase(id)
+		player_loadouts.erase(id) # Clean up their loadout data
 		rpc("update_player_list", players)
+		
+		# If the server is now empty, reset it to prevent getting stuck
+		if players.is_empty():
+			_reset_server_state()
+			
+func _reset_server_state():
+	print("All players disconnected. Resetting server state...")
+	
+	# 1. Clear Data
+	room_code = ""
+	players.clear()
+	player_loadouts.clear()
+	completed_room_loadouts.clear()
+	
+	# 2. Reset Scene
+	# We move the server back to the main menu (or a simple empty scene)
+	# to stop the game physics/logic from running unnecessarily.
+	# We use call_deferred to safely change scenes during a callback.
+	get_tree().call_deferred("change_scene_to_file", "res://src/World/main_menu.tscn")
 
 # 1. Client calls this when clicking "Start"
 func request_start_game():

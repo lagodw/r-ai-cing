@@ -22,14 +22,25 @@ func _ready():
 	# --- SERVER LOGIC ---
 	if multiplayer.is_server() and not GameData.is_singleplayer:
 		print("Server loaded Track. Waiting for loadouts...")
-		var all_loadouts = await MultiplayerManager.game_started_with_loadouts
 		
-		# FIX: Calculate track data (Start Pos, Waypoints) BEFORE spawning
+		var all_loadouts = {}
+		
+		# 1. Check if we ALREADY have the loadouts (Race condition fix)
+		# We need to find WHICH room we are serving. 
+		# Since this is a simple dedicated server, we might assume one room or find the room from players.
+		# For this template, we iterate to find the first completed room data if available.
+		var found_early = false
+		if not MultiplayerManager.completed_room_loadouts.is_empty():
+			# Just grab the first available room's data (assuming 1 active game per server instance for now)
+			all_loadouts = MultiplayerManager.completed_room_loadouts.values()[0]
+			found_early = true
+			print("Loadouts were already ready!")
+		
+		if not found_early:
+			# 2. If not, wait for the signal
+			all_loadouts = await MultiplayerManager.game_started_with_loadouts
+		
 		await _initialize_track_data() 
-		
-		# Server doesn't need to draw sprites to know physics, 
-		# but _initialize_track_data handles the logic.
-		# If you want visuals on server for debug, you can call _generate_visuals too.
 		_generate_track_visuals() 
 		
 		_spawn_racers(all_loadouts)
