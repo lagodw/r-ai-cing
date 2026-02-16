@@ -85,51 +85,49 @@ func _scan_folder(path: String, target_dict: Dictionary, json_parser_func: Calla
 func _parse_kart_json(data: Dictionary) -> KartDef:
 	var def = KartDef.new()
 	def.id = data.get("id", "unknown_kart")
-	def.name = data.get("name", "Unnamed")
 	def.max_health = data.get("max_health", 100)
-	def.max_speed = data.get("max_speed", 500)
-	def.acceleration = data.get("acceleration", 800)
-	def.turn_speed = data.get("turn_speed", 3.5)
-	def.width_percent = data.get("width_percent", 0.0)
+	def.max_speed = data.get("max_speed", 500.0)
+	def.acceleration = data.get("acceleration", 500.0)
+	def.traction = data.get("traction", 10.0)
+	def.width_percent = data.get("width_percent", 0.2)
 	
 	return def
 
 func _parse_power_json(data: Dictionary) -> PowerDef:
 	var def = PowerDef.new()
 	def.id = data.get("id", "unknown_power")
-	def.type = data.get("type", "projectile")
+	def.type = data.get("type", "Projectile")
+	def.description = data.get("description", "Description")
 	def.cooldown = data.get("cooldown", 1.0)
+	
+	# Dimensions
+	def.length = data.get("length", 20.0)
+	def.width = data.get("width", 20.0)
+	
+	# Projectile Stats
 	def.damage = data.get("damage", 0)
-	def.speed = data.get("speed", 0.0)
+	def.speed = data.get("speed", 800.0)
+	def.projectile_count = data.get("projectile_count", 1)
+	def.can_bounce = data.get("can_bounce", false)
 	def.projectile_behavior = data.get("projectile_behavior", "Forward")
 	def.turn_speed = data.get("turn_speed", 4.0)
 	def.detection_radius = data.get("detection_radius", 400.0)
+	
+	# "duration" is for Projectile Lifetime or Orbit Duration
+	def.duration = data.get("duration", 0.0) 
+	
+	# Effect/Buff Stats
 	def.stat_target = data.get("stat_target", "")
 	def.amount = data.get("amount", 0.0)
-	def.duration = data.get("duration", 0.0)
+	
+	# "effect_duration" is for how long a Buff/Stat change lasts
+	def.effect_duration = data.get("effect_duration", 0.0)
 	
 	return def
 
 func _parse_track_json(data: Dictionary) -> TrackDef:
 	var def = TrackDef.new()
-	def.id = data.get("id", "track_01") # Add ID to track JSON
-	def.background_path = "res://assets/backgrounds/" + data.get("background_image", "default.png")
-	
-	# Parse helpers
-	var vec = func(d): return Vector2(d.get("x",0), d.get("y",0))
-	
-	if data.has("start_position"):
-		def.start_position = vec.call(data["start_position"])
-	
-	for p in data.get("waypoints", []):
-		def.waypoints.append(vec.call(p))
-		
-	for wall_poly in data.get("collision_walls", []):
-		var poly = PackedVector2Array()
-		for point in wall_poly:
-			poly.append(vec.call(point))
-		def.walls.append(poly)
-		
+	def.id = data.get("id", "track_01")
 	return def
 
 # --- Helper ---

@@ -1,0 +1,8 @@
+{
+  "id": "Dune Buggy",
+  "max_health": 150,
+  "max_speed": 475,
+  "acceleration": 600,
+  "traction": 20,
+  "width_percent": 0.2
+}

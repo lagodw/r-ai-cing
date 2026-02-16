@@ -6,8 +6,8 @@
 script = ExtResource("1_b5yia")
 id = "Arcader"
 max_health = 80
-max_speed = 600.0
+max_speed = 525.0
 acceleration = 400.0
 traction = 7.0
-width_percent = 0.15
+width_percent = 0.17
 metadata/_custom_type_script = "uid://d2vcvaa1qp6xu"

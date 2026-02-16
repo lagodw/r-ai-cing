@@ -5,9 +5,9 @@
 [resource]
 script = ExtResource("1_yqgpk")
 id = "Spectre"
-max_health = 100
-max_speed = 600.0
-acceleration = 500.0
+max_health = 80
+max_speed = 535.0
+acceleration = 550.0
 traction = 5.0
-width_percent = 0.15
+width_percent = 0.16
 metadata/_custom_type_script = "uid://d2vcvaa1qp6xu"

@@ -5,8 +5,10 @@
 [resource]
 script = ExtResource("1_qmsxh")
 id = "Race"
-laps_required = 3
+laps_required = 5
 start_position = Vector2(0, 0)
+start_angle = 0.0
+track_width = 200.0
 waypoints = PackedVector2Array()
 walls = Array[PackedVector2Array]([])
 hazards = Array[Dictionary]([])

@@ -6,8 +6,8 @@
 script = ExtResource("1_2sxyo")
 id = "Chariot"
 max_health = 100
-max_speed = 450.0
+max_speed = 475.0
 acceleration = 600.0
 traction = 8.0
-width_percent = 0.12
+width_percent = 0.17
 metadata/_custom_type_script = "uid://d2vcvaa1qp6xu"

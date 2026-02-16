@@ -1,16 +1,14 @@
-[gd_scene load_steps=5 format=3 uid="uid://cppo8q4w7blh2"]
+[gd_scene load_steps=4 format=3 uid="uid://cppo8q4w7blh2"]
 
 [ext_resource type="Theme" uid="uid://crtg3dknqulx2" path="res://assets/UI/Theme.tres" id="1_3d86p"]
 [ext_resource type="Script" uid="uid://c7xor85t724fe" path="res://src/World/kart_option.gd" id="2_ejd6b"]
 [ext_resource type="Texture2D" uid="uid://533g6wyyxxl3" path="res://assets/karts/Dune Buggy.png" id="2_ykenn"]
-[ext_resource type="Resource" uid="uid://ct3qka56af1ed" path="res://data/karts/Buggy.tres" id="3_ejd6b"]
 
 [node name="KartOption" type="MarginContainer"]
 offset_right = 300.0
 offset_bottom = 450.0
 theme = ExtResource("1_3d86p")
 script = ExtResource("2_ejd6b")
-kart = ExtResource("3_ejd6b")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 2
@@ -58,7 +56,8 @@ text = "Speed"
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 20)
 layout_mode = 2
-max_value = 750.0
+min_value = 400.0
+max_value = 600.0
 step = 1.0
 value = 400.0
 show_percentage = false

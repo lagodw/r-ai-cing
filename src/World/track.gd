@@ -248,8 +248,8 @@ func _spawn_racers(mp_loadouts = null):
 
 	# --- SPAWN LOOP ---
 	# Constants
-	var gap_depth = 40.0 * 2.5
-	var gap_width = 20.0 * 2.0 
+	var gap_depth = 40.0 * 2
+	var gap_width = 20.0
 	
 	# IMPORTANT: Only the Server (or Singleplayer) runs the loop to create karts
 	if not GameData.is_singleplayer and not multiplayer.is_server():

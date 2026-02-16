@@ -5,7 +5,7 @@
 [resource]
 script = ExtResource("1_05pr1")
 id = "Basic"
-laps_required = 3
+laps_required = 5
 start_position = Vector2(0, 0)
 start_angle = 0.0
 track_width = 200.0

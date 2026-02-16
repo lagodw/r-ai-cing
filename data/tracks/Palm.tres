@@ -5,9 +5,10 @@
 [resource]
 script = ExtResource("1_f31mp")
 id = "Palm"
-background_path = "uid://cyg0bu5cqy8k2"
-laps_required = 3
-start_position = Vector2(360, -430)
+laps_required = 5
+start_position = Vector2(0, 0)
+start_angle = 0.0
+track_width = 200.0
 waypoints = PackedVector2Array()
 walls = Array[PackedVector2Array]([])
 hazards = Array[Dictionary]([])

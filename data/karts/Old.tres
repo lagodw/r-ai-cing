@@ -6,8 +6,8 @@
 script = ExtResource("1_3j7ed")
 id = "Ye Old Kart"
 max_health = 200
-max_speed = 400.0
-acceleration = 400.0
+max_speed = 460.0
+acceleration = 450.0
 traction = 20.0
 width_percent = 0.2
 metadata/_custom_type_script = "uid://d2vcvaa1qp6xu"
