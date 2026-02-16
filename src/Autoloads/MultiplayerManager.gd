@@ -18,6 +18,7 @@ var players = {} # Dictionary: { peer_id: { "name": "Player1", "room": "ABCD" } 
 # Dictionary to store what kart/power each player chose
 # Format: { player_id: { "kart": "speedster", "power": "missile", "name": "Bob" } }
 var player_loadouts = {}
+var is_game_running = false
 
 func _ready():
 	if "--server" in OS.get_cmdline_args() or OS.has_feature("dedicated_server"):
@@ -121,8 +122,15 @@ func request_start_game():
 # 2. Server runs this to process the request
 @rpc("any_peer")
 func server_handle_start_game(code):
+	# SAFETY CHECK: Don't start if already running
+	if is_game_running:
+		print("Request denied: Game already in progress")
+		return
+
 	var sender_id = multiplayer.get_remote_sender_id()
 	print("Server received Start Request from ", sender_id, " for Room ", code)
+	
+	is_game_running = true # Lock the server
 	
 	# Server picks the track ---
 	var track_keys = GameData.tracks.keys()
@@ -204,8 +212,16 @@ func rpc_to_room(player_room_code, function_name, data):
 		if players[id]["room"] == player_room_code:
 			rpc_id(id, function_name, data)
 
-# 3. Client receives the full list and starts
-@rpc("authority")
-func client_start_race(all_loadouts):
-	# We emit a signal with the data so track.gd can use it
-	emit_signal("game_started_with_loadouts", all_loadouts)
+# Call this from Track.gd when the game ends (Server side only)
+func reset_server_to_main_menu():
+	if not multiplayer.is_server(): return
+	
+	print("Game finished. Resetting Server to Main Menu...")
+	
+	# 1. Clear Game State so new games can start fresh
+	player_loadouts.clear() 
+	
+	# 2. Reset the Server's scene ONLY. 
+	# Connected clients will stay in the Track scene until they manually leave.
+	get_tree().paused = false
+	get_tree().change_scene_to_file("res://src/World/main_menu.tscn")

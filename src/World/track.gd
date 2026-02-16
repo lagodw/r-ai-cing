@@ -11,6 +11,8 @@ extends Node2D
 @onready var hazard_spawner = $HazardSpawner
 
 func _ready():
+	if not GameData.is_singleplayer:
+		$Victory/Panel/VBoxContainer/Again.visible = false
 	$Victory/Panel/VBoxContainer/Again.pressed.connect(go_again)
 	$Victory/Panel/VBoxContainer/Main.pressed.connect(main_menu)
 	multiplayer_spawner.spawn_function = _spawn_kart_custom
@@ -347,12 +349,35 @@ func winner_screen(winner_name: String):
 
 	$Victory.visible = true
 	get_tree().paused = true
+	
+	# SERVER ONLY: Auto-Reset Logic
+	if multiplayer.is_server() and not GameData.is_singleplayer:
+		# Wait 5 seconds, then reset server to Main Menu
+		# This timer must have 'one_shot' and 'autostart' or be created via code
+		var timer = get_tree().create_timer(5.0)
+		await timer.timeout
+		
+		# Server goes home, leaving clients on the victory screen
+		MultiplayerManager.reset_server_to_main_menu()
 
 func go_again():
 	get_tree().paused = false
 	get_tree().change_scene_to_file("res://src/World/Track.tscn")
 	
 func main_menu():
+	if GameData.is_singleplayer:
+		get_tree().paused = false
+		get_tree().change_scene_to_file("res://src/World/main_menu.tscn")
+		return
+
+	# 1. Close connection (Clean exit)
+	multiplayer.multiplayer_peer.close()
+	
+	# 2. Clear local data
+	MultiplayerManager.players.clear()
+	MultiplayerManager.room_code = ""
+	
+	# 3. Go to local main menu
 	get_tree().paused = false
 	get_tree().change_scene_to_file("res://src/World/main_menu.tscn")
 
