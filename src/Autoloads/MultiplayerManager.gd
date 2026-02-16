@@ -228,6 +228,12 @@ func _are_all_players_ready(player_room_code):
 				return false # This person hasn't chosen yet
 	return true
 
+# 3. Client receives the full list and starts
+@rpc("authority")
+func client_start_race(all_loadouts):
+	# We emit a signal with the data so track.gd can use it
+	emit_signal("game_started_with_loadouts", all_loadouts)
+	
 # Helper to send RPC only to people in a specific room
 func rpc_to_room(player_room_code, function_name, data):
 	for id in players:
