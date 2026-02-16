@@ -156,6 +156,14 @@ func _spawn_kart_custom(data: Dictionary) -> Node:
 	kart.track_width_ref = data["track_width"]
 	kart.is_player_controlled = data["is_player"]
 	
+	# If this is not a player, we treat it as a Bot and attach the AI Controller
+	if not kart.is_player_controlled:
+		kart.is_bot = true
+		var ai_script = load("res://src/Entities/AIController.gd")
+		var ai_node = ai_script.new() # Create a new Node with the script attached
+		ai_node.name = "AIController"
+		kart.add_child(ai_node)
+	
 	# 4. Reconstruct Powers
 	var reconstructed_powers: Array[PowerDef] = []
 	for pid in data["power_ids"]:
@@ -164,7 +172,6 @@ func _spawn_kart_custom(data: Dictionary) -> Node:
 	kart.power_inventory = reconstructed_powers
 	
 	# 5. Setup Local Player Specifics
-	# FIX: Check the data directly instead of asking the node (which isn't in tree yet)
 	if data["is_player"] and data["peer_id"] == multiplayer.get_unique_id():
 		camera.position = kart.position
 		var remote = RemoteTransform2D.new()
@@ -192,11 +199,11 @@ func _spawn_racers(mp_loadouts = null):
 	var right_dir = forward_dir.rotated(PI / 2)
 	var final_start = raw_start * walls.scale
 	
-	# --- PREPARE DATA LIST (Same as before) ---
+	# --- PREPARE DATA LIST ---
 	var racer_configs = []
 	
 	if GameData.is_singleplayer:
-		# Singleplayer Config
+		# 1. Add Player Config
 		racer_configs.append({ 
 			"id": GameData.selected_kart_id, 
 			"is_player": true, 
@@ -205,6 +212,27 @@ func _spawn_racers(mp_loadouts = null):
 			"powers": GameData.selected_powers, 
 			"peer_id": 1 
 		})
+		
+		# --- FIX START: Generate Bot Configs ---
+		var available_karts = GameData.karts.keys()
+		var available_powers = GameData.powers.values()
+		
+		for i in range(GameData.num_bots):
+			# Pick a random kart and 2 random powers
+			var bot_kart_id = available_karts.pick_random()
+			var bot_powers = [available_powers.pick_random(), available_powers.pick_random()]
+			
+			racer_configs.append({
+				"id": bot_kart_id,
+				"is_player": false,
+				# Giving unique names helps debugging
+				"name": "Bot_%d" % i,
+				"display_name": "Bot %d" % (i + 1),
+				"powers": bot_powers,
+				"peer_id": 1 # In Singleplayer, Server (You) owns the bots
+			})
+		# --- FIX END ---
+		
 	else:
 		# Multiplayer Logic
 		for peer_id in mp_loadouts:
@@ -248,13 +276,14 @@ func _spawn_racers(mp_loadouts = null):
 			"kart_id": config.id,
 			"is_player": config.is_player,
 			"track_width": track.track_width,
-			# Handle power IDs: if config.powers is Objects (SP), convert to IDs. If IDs (MP), use as is.
-			"power_ids": [] ,
+			"power_ids": [],
 			"player_name": config.display_name,
 		}
 		
 		if GameData.is_singleplayer:
+			# Singleplayer handles power objects directly here
 			for p in config.powers: spawn_data["power_ids"].append(p.id)
+			
 			# Singleplayer: Spawn Manually (Spawner often requires MP peer)
 			var kart_node = _spawn_kart_custom(spawn_data)
 			add_child(kart_node)
