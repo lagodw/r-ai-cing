@@ -100,9 +100,18 @@ func fire_projectile(kart: Kart, data: PowerDef):
 		spawner.spawn(spawn_data)
 
 func drop_hazard(kart: Kart, data: PowerDef):
-	var hazard_scene = load("res://src/Entities/Hazard.tscn")
+	# 1. Only Server Spawns
+	if not multiplayer.is_server():
+		return
+
+	# 2. Find the Spawner
+	var track = kart.get_tree().current_scene
+	if not track.has_node("HazardSpawner"):
+		printerr("PowerManager: HazardSpawner not found!")
+		return
+	var spawner = track.get_node("HazardSpawner")
 	
-	# Logic similar to projectiles for spread
+	# 3. Calculate Spread Logic
 	var count = max(1, data.projectile_count)
 	var spread_angle_deg = 90.0
 	var spread_rad = deg_to_rad(spread_angle_deg)
@@ -115,21 +124,7 @@ func drop_hazard(kart: Kart, data: PowerDef):
 		angle_step = spread_rad / (count - 1)
 	
 	for i in range(count):
-		var hazard = hazard_scene.instantiate()
-		
-		# Stats & Dimensions
-		hazard.damage = data.damage
-		hazard.duration = data.duration
-		hazard.shooter_id = kart.name
-		hazard.length = data.length
-		hazard.width = data.width
-		hazard.lob_speed = data.speed
-		
-		# Visuals
-		var sprite: Sprite2D = hazard.get_node("Sprite2D")
-		sprite.texture = load("res://assets/powers/%s.png" % data.id)
-		
-		# Determine Base Direction
+		# Determine Direction (Forward/Backward)
 		var base_rotation = kart.rotation
 		if data.projectile_behavior != "Forward":
 			base_rotation += PI # Backward
@@ -140,21 +135,36 @@ func drop_hazard(kart: Kart, data: PowerDef):
 			current_angle += start_angle_offset + (angle_step * i)
 		
 		var move_vector = Vector2.RIGHT.rotated(current_angle)
+		var spawn_pos = kart.global_position + (move_vector * 60.0)
 		
-		# Initial Spawn Position (Offset from kart)
-		hazard.global_position = kart.global_position + (move_vector * 60.0)
+		# Determine Lob vs Drop Mechanics
+		var t_dir = Vector2.ZERO
+		var t_dist = 0.0
 		
-		# Determine Deployment (Lob vs Drop)
 		if data.projectile_behavior == "Forward":
-			# Lob Forward
-			hazard.travel_dir = move_vector
-			hazard.max_travel_dist = 300.0
+			t_dir = move_vector # Lob Forward
+			t_dist = 300.0
 		else:
-			# Drop Behind
-			hazard.travel_dir = Vector2.ZERO # No movement
-			hazard.max_travel_dist = 0.0
+			t_dir = Vector2.ZERO # Drop in place
+			t_dist = 0.0
+
+		# 4. Prepare Network Data
+		var spawn_data = {
+			"position": spawn_pos,
+			"rotation": 0.0, # Hazards usually don't rotate with the kart
+			"shooter_id": kart.name,
+			"damage": data.damage,
+			"duration": data.duration,
+			"length": data.length,
+			"width": data.width,
+			"lob_speed": data.speed,
+			"travel_dir": t_dir,
+			"max_travel_dist": t_dist,
+			"texture_path": "res://assets/powers/%s.png" % data.id
+		}
 		
-		get_tree().current_scene.add_child(hazard, true)
+		# 5. Spawn!
+		spawner.spawn(spawn_data)
 
 func apply_buff(kart: Kart, data: PowerDef):
 	if data.stat_target == "max_speed":

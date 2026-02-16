@@ -147,18 +147,16 @@ func _on_hit(body):
 		if can_bounce:
 			return
 			
-		_destroy() # FIX: Use safe destroy
+		_destroy()
 		return
 
 	# Hit a Kart
 	if body.has_method("take_damage"):
-		# FIX: Only Server deals damage to avoid duplication
 		if is_multiplayer_authority():
-			body.take_damage(damage)
+			body.rpc_id(body.get_multiplayer_authority(), "take_damage", damage)
 			
-		_destroy() # FIX: Use safe destroy
+		_destroy()
 
-# --- FIX: Safe Destruction Logic ---
 func _destroy():
 	if is_multiplayer_authority():
 		# Server: Actually delete the object.

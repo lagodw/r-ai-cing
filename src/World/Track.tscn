@@ -49,6 +49,10 @@ zoom = Vector2(2, 2)
 _spawnable_scenes = PackedStringArray("uid://c3euljm7hekrx")
 spawn_path = NodePath("..")
 
+[node name="HazardSpawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("uid://48epoddhvcoh")
+spawn_path = NodePath("..")
+
 [node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
 _spawnable_scenes = PackedStringArray("uid://ceh82rynpo7cg")
 spawn_path = NodePath("..")

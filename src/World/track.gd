@@ -5,15 +5,17 @@ extends Node2D
 @onready var background = $Background
 @onready var walls = $Walls
 @onready var camera = $Camera2D
-@onready var multiplayer_spawner = $MultiplayerSpawner
 @onready var ui_layer = $UI
+@onready var multiplayer_spawner = $MultiplayerSpawner
 @onready var projectile_spawner = $ProjectileSpawner
+@onready var hazard_spawner = $HazardSpawner
 
 func _ready():
 	$Victory/Panel/VBoxContainer/Again.pressed.connect(go_again)
 	$Victory/Panel/VBoxContainer/Main.pressed.connect(main_menu)
 	multiplayer_spawner.spawn_function = _spawn_kart_custom
 	projectile_spawner.spawn_function = _spawn_projectile_custom
+	hazard_spawner.spawn_function = _spawn_hazard_custom
 	
 	# --- SERVER LOGIC ---
 	if multiplayer.is_server():
@@ -266,6 +268,34 @@ func _spawn_projectile_custom(data: Dictionary) -> Node:
 		proj.orbit_duration = data["orbit_duration"]
 		
 	return proj
+	
+func _spawn_hazard_custom(data: Dictionary) -> Node:
+	var hazard_scene = load("res://src/Entities/Hazard.tscn")
+	var hazard = hazard_scene.instantiate()
+	
+	# Apply Transform
+	hazard.global_position = data["position"]
+	hazard.rotation = data["rotation"]
+	
+	# Apply Stats
+	hazard.shooter_id = data["shooter_id"]
+	hazard.damage = data["damage"]
+	hazard.duration = data["duration"]
+	hazard.length = data["length"]
+	hazard.width = data["width"]
+	hazard.lob_speed = data["lob_speed"]
+	
+	# Apply Lobbing/Movement Data
+	hazard.travel_dir = data["travel_dir"]
+	hazard.max_travel_dist = data["max_travel_dist"]
+	
+	# Apply Visuals
+	if data.has("texture_path"):
+		var sprite = hazard.get_node_or_null("Sprite2D")
+		if sprite:
+			sprite.texture = load(data["texture_path"])
+			
+	return hazard
 	
 #func _draw():
 	#var track = GameData.current_track

@@ -79,17 +79,30 @@ func _activate() -> void:
 	is_active = true
 	if duration > 0:
 		await get_tree().create_timer(duration).timeout
-		queue_free()
+		_destroy()
 
 func _on_hit(body: Node) -> void:
 	if not is_active:
-		# If we hit a wall while lobbing, we ignore it here 
-		# because the RayCast in _physics_process handles the bounce.
 		return
 
-	#if body.name == shooter_id:
-		#return
+	# Prevent hitting yourself immediately if needed (optional)
+	# if body.name == shooter_id: return
 		
 	if body.has_method("take_damage"):
-		body.take_damage(damage)
+		# FIX: Only the Server Authority triggers the damage RPC
+		if is_multiplayer_authority():
+			body.rpc_id(body.get_multiplayer_authority(), "take_damage", damage)
+		
+		_destroy()
+
+func _destroy():
+	if is_multiplayer_authority():
+		# Server: Actually delete it, syncing the deletion to clients
 		queue_free()
+	else:
+		# Client: Hide immediately so it feels responsive
+		visible = false
+		set_physics_process(false)
+		if has_node("CollisionShape2D"):
+			$CollisionShape2D.set_deferred("disabled", true)
+		# We wait for the Server to actually delete us

@@ -249,6 +249,7 @@ func _handle_stunned_physics(delta):
 	move_and_slide()
 
 # --- Combat & Health ---
+@rpc("any_peer", "call_local")
 func take_damage(amount: int):
 	if is_stunned: return # Can't kill what's already dead
 	
