@@ -118,6 +118,8 @@ func _on_hit(body: Node) -> void:
 	# if body.name == shooter_id: return
 		
 	if body.has_method("take_damage"):
+		if body.get("is_shield_up"):
+			return
 		if is_multiplayer_authority():
 			# 1. Apply Damage
 			if damage > 0:

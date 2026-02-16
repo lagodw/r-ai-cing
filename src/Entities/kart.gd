@@ -25,7 +25,9 @@ var max_speed: float = 500.0
 var acceleration: float = 800.0
 var turn_speed: float = 3.5
 var friction: float = 1.0
-var traction: float = 5.0  # High = snappy grip, Low = drift/ice
+var traction: float = 5.0:  # High = snappy grip, Low = drift/ice
+	set(val):
+		traction = max(val, 0)
 var max_health: int = 100
 var current_health: int = 100:
 	set(value):
@@ -48,6 +50,9 @@ var bump_velocity: Vector2 = Vector2.ZERO
 var bump_decay: float = 800.0 # How fast the bump force fades
 var last_bump_time: float = 0.0
 var bump_cooldown: float = 0.5 # Seconds before you can bump again
+
+var is_shield_up: bool = false
+var shield_cooldown_timer: float = 0.0
 
 # --- Input Interface (Decoupled for AI/Multiplayer) ---
 var input_steer: float = 0.0    # -1.0 (Left) to 1.0 (Right)
@@ -154,6 +159,9 @@ func _process(delta):
 	# This runs on ALL clients, so everyone sees the spin when is_stunned is true.
 	if is_stunned:
 		sprite.rotation_degrees += 720 * delta
+	
+	if shield_cooldown_timer > 0:
+		shield_cooldown_timer -= delta
 		
 # --- Physics & Movement ---
 func _gather_input():
@@ -200,6 +208,8 @@ func _gather_input():
 	# Ability Inputs
 	if Input.is_action_just_pressed("activate_slot_0"): use_power(0)
 	if Input.is_action_just_pressed("activate_slot_1"): use_power(1)
+	if Input.is_action_just_pressed("shield"):
+		attempt_shield()
 	
 func _apply_physics(delta):
 	# A. Steering
@@ -400,6 +410,10 @@ func _apply_dimensions(target_length: float, target_width: float):
 			# Assuming Sprite is oriented Right (X-axis)
 			sprite.scale.x = target_length / tex_size.x
 			sprite.scale.y = target_width / tex_size.y
+		var shield_sprite = $Shield
+		var shield_size = shield_sprite.texture.get_size()
+		shield_sprite.scale.x = target_length / shield_size.x
+		shield_sprite.scale.y = target_width / shield_size.y
 
 # This function is called by the aggressor via RPC
 @rpc("any_peer", "call_local")
@@ -477,3 +491,32 @@ func apply_stat_modifier(stat_name: String, amount: float, duration: float):
 	# but strictly subtracting the amount ensures we only undo THIS specific effect.
 	var current_val = get(stat_name)
 	set(stat_name, current_val - amount)
+
+func attempt_shield():
+	# Check if we can use it (not stunned, cooldown ready)
+	if is_stunned or shield_cooldown_timer > 0:
+		return
+		
+	# Call RPC so everyone sees the shield activate
+	rpc("activate_shield")
+
+@rpc("call_local", "reliable")
+func activate_shield():
+	# 1. Activate State
+	is_shield_up = true
+	shield_cooldown_timer = 2.0
+	cooldown_started.emit(3, shield_cooldown_timer)
+	
+	# 2. Visual Feedback
+	$Shield.visible = true
+	
+	# 3. Play Sound (Optional)
+	# AudioManager.play_sfx("ShieldUp") 
+	
+	# 4. Wait for Duration (0.5s)
+	await get_tree().create_timer(0.5).timeout
+	$Shield.visible = false
+
+	# 5. Deactivate
+	is_shield_up = false
+	

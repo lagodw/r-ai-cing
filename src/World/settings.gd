@@ -15,7 +15,7 @@ var remapping_button = null
 # Make sure the keys (left side) match exactly what is in Project Settings > Input Map
 var input_actions = {
 	"move_up": "Forward",
-	"drift": "Drift",
+	"shield": "Shield",
 	"move_down": "Backward",
 	"activate_slot_0": "Power 1",
 	"move_right": "Steer Right",

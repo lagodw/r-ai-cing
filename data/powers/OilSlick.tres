@@ -19,6 +19,6 @@ turn_speed = 4.0
 detection_radius = 400.0
 duration = 0.0
 stat_target = "traction"
-amount = -10.0
+amount = -15.0
 effect_duration = 1.0
 metadata/_custom_type_script = "uid://bcbsm06swr0r8"

@@ -1,4 +1,4 @@
-[gd_scene load_steps=26 format=3 uid="uid://dnd4ot45brbyk"]
+[gd_scene load_steps=27 format=3 uid="uid://dnd4ot45brbyk"]
 
 [ext_resource type="Script" uid="uid://dhqvmde3vmpt3" path="res://src/World/track.gd" id="1_7nrbi"]
 [ext_resource type="Texture2D" uid="uid://cyg0bu5cqy8k2" path="res://assets/tracks/Palm.png" id="2_imajx"]
@@ -11,6 +11,7 @@
 [ext_resource type="Theme" uid="uid://crtg3dknqulx2" path="res://assets/UI/Theme.tres" id="8_o8aps"]
 [ext_resource type="Texture2D" uid="uid://d3vr80ghsnlnx" path="res://assets/UI/Menu.png" id="9_7wood"]
 [ext_resource type="Script" uid="uid://divvvcfvjgu3t" path="res://src/World/esacape.gd" id="9_o8aps"]
+[ext_resource type="Texture2D" uid="uid://b08q4jd5qagmo" path="res://assets/powers/Bubble.png" id="9_u2e6d"]
 [ext_resource type="PackedScene" uid="uid://5p4v7xvgvs4o" path="res://src/Entities/VirtualJoystick.tscn" id="10_jgmkd"]
 [ext_resource type="Texture2D" uid="uid://btphdb068iw6x" path="res://assets/UI/Trophy.png" id="11_2f1gn"]
 [ext_resource type="Texture2D" uid="uid://bb3k0k5ff0tfk" path="res://assets/UI/VolumeOn.png" id="12_85pjj"]
@@ -142,6 +143,41 @@ offset_bottom = 23.0
 theme = ExtResource("8_o8aps")
 theme_override_font_sizes/font_size = 24
 text = "P"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Power3" type="Button" parent="UI/HBoxContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(150, 150)
+layout_mode = 2
+theme_override_colors/icon_disabled_color = Color(1, 1, 1, 1)
+icon = ExtResource("9_u2e6d")
+expand_icon = true
+
+[node name="Slot3Bar" type="TextureProgressBar" parent="UI/HBoxContainer/Power3"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+fill_mode = 5
+nine_patch_stretch = true
+texture_progress = ExtResource("5_kxkim")
+
+[node name="TouchScreenButton" type="TouchScreenButton" parent="UI/HBoxContainer/Power3"]
+texture_normal = ExtResource("6_ckak7")
+texture_pressed = ExtResource("6_ckak7")
+action = "activate_slot_1"
+
+[node name="Label3" type="Label" parent="UI/HBoxContainer/Power3"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 23.0
+theme = ExtResource("8_o8aps")
+theme_override_font_sizes/font_size = 24
+text = "Space"
 horizontal_alignment = 1
 vertical_alignment = 1
 

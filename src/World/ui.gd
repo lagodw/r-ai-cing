@@ -2,6 +2,7 @@ extends CanvasLayer
 
 @onready var slot_1_progress: TextureProgressBar = %Slot1Bar
 @onready var slot_2_progress: TextureProgressBar = %Slot2Bar
+@onready var shield_progress: TextureProgressBar = %Slot3Bar
 var player_kart: Kart
 
 func _ready() -> void:
@@ -22,6 +23,8 @@ func _ready() -> void:
 		$HBoxContainer/Power2.disabled = true
 		$HBoxContainer/Power1/Label1.visible = false
 		$HBoxContainer/Power2/Label2.visible = false
+		$HBoxContainer/Power3.disabled = true
+		$HBoxContainer/Power3/Label3.visible = false
 
 func setup(kart: Kart) -> void:
 	player_kart = kart
@@ -31,6 +34,7 @@ func setup(kart: Kart) -> void:
 	%Power2.icon = load("res://assets/powers/%s.png" % GameData.selected_powers[1].id)
 	%Power1.pressed.connect(player_kart.activate_power_effect.bind(0))
 	%Power2.pressed.connect(player_kart.activate_power_effect.bind(1))
+	%Power3.pressed.connect(player_kart.attempt_shield)
 	update_lap(0)
 	visible = true
 	$Menu.pressed.connect(show_menu)
@@ -45,6 +49,7 @@ func _on_cooldown_started(slot_index: int, duration: float):
 	match slot_index:
 		0: progress_bar = slot_1_progress
 		1: progress_bar = slot_2_progress
+		3: progress_bar = shield_progress
 		_: return # We only have 2 slots in UI
 	
 	# Animate the progress bar
