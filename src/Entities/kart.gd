@@ -74,6 +74,14 @@ func _ready():
 	add_to_group("karts")
 	if health_bar:
 		health_bar.max_value = max_health
+		
+	if has_node("MultiplayerSynchronizer"):
+		var sync_node = $MultiplayerSynchronizer
+		var config = sync_node.replication_config
+		print("--- SYNC DEBUG START FOR: ", name, " ---")
+		for prop in config.get_properties():
+			print("Syncing Property: ", prop)
+		print("--- SYNC DEBUG END ---")
 
 # --- Setup ---
 func configure_from_id(id: String):

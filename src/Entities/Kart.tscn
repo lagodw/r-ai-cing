@@ -16,12 +16,6 @@ properties/1/replication_mode = 1
 properties/2/path = NodePath(".:velocity")
 properties/2/spawn = true
 properties/2/replication_mode = 1
-properties/3/path = NodePath(".:steer_input")
-properties/3/spawn = true
-properties/3/replication_mode = 1
-properties/4/path = NodePath(".:throttle_input")
-properties/4/spawn = true
-properties/4/replication_mode = 1
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_4um18"]
 corner_radius_top_left = 2

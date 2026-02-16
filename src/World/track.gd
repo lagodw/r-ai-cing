@@ -6,6 +6,7 @@ extends Node2D
 @onready var walls = $Walls
 @onready var camera = $Camera2D
 @onready var multiplayer_spawner = $MultiplayerSpawner
+@onready var ui_layer = $UI
 
 func _ready():
 	$Victory/Panel/VBoxContainer/Again.pressed.connect(go_again)
@@ -30,8 +31,7 @@ func _ready():
 	# --- CLIENT LOGIC (Original) ---
 	# 1. Instantiate Selection Screen
 	var selection = load("res://src/World/selection.tscn").instantiate()
-	add_child(selection)
-	move_child(selection, 0)
+	ui_layer.add_child(selection)
 	
 	# 2. Wait for player to finish selecting locally
 	await selection.race_started
@@ -114,7 +114,7 @@ func _spawn_kart_custom(data: Dictionary) -> Node:
 	kart.scale = data["scale"]
 	
 	# 2. Set Network Identity
-	#kart.name = str(data["name"]) 
+	kart.name = str(data["name"]) 
 	kart.set_multiplayer_authority(data["peer_id"])
 	
 	# 3. Apply Kart Settings
