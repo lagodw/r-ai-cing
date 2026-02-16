@@ -57,7 +57,7 @@ func _physics_process(delta):
 	if max_lifetime > 0:
 		current_lifetime += delta
 		if current_lifetime >= max_lifetime:
-			queue_free()
+			_destroy() # FIX: Use safe destroy
 			return
 
 	match behavior:
@@ -97,11 +97,11 @@ func _move_forward(delta):
 func _process_orbit(delta):
 	orbit_timer += delta
 	if orbit_timer > orbit_duration:
-		queue_free()
+		_destroy() # FIX: Use safe destroy
 		return
 
 	if not is_instance_valid(orbit_center):
-		queue_free()
+		_destroy() # FIX: Use safe destroy
 		return
 		
 	var angular_speed = speed / orbit_radius
@@ -147,10 +147,27 @@ func _on_hit(body):
 		if can_bounce:
 			return
 			
-		queue_free()
+		_destroy() # FIX: Use safe destroy
 		return
 
 	# Hit a Kart
 	if body.has_method("take_damage"):
-		body.take_damage(damage)
+		# FIX: Only Server deals damage to avoid duplication
+		if is_multiplayer_authority():
+			body.take_damage(damage)
+			
+		_destroy() # FIX: Use safe destroy
+
+# --- FIX: Safe Destruction Logic ---
+func _destroy():
+	if is_multiplayer_authority():
+		# Server: Actually delete the object.
+		# This triggers the "despawn" signal to clients.
 		queue_free()
+	else:
+		# Client: Just hide it immediately so it looks responsive.
+		# DO NOT delete it. Wait for the Server's packet to delete it.
+		visible = false
+		set_physics_process(false)
+		if has_node("CollisionShape2D"):
+			$CollisionShape2D.set_deferred("disabled", true)

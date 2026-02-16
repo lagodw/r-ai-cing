@@ -105,7 +105,6 @@ func _generate_track_visuals():
 
 # This runs on BOTH Server and Clients to build the exact same node
 func _spawn_kart_custom(data: Dictionary) -> Node:
-	printt('spawning', data)
 	var kart = kart_scene.instantiate()
 	
 	# 1. Apply Transform

@@ -29,13 +29,6 @@ func _ready() -> void:
 			option.track_id = track
 			option.selected.connect(on_track_selected)
 			%TrackGrid.add_child(option)
-	else:
-		var track_id = GameData.tracks.keys().pick_random()
-		var option = track_option_scene.instantiate()
-		option.track_id = track_id
-		%TrackGrid.add_child(option)
-		current_track_node = option
-		confirm_track()
 	
 	# --- 1. Load Random Karts ---
 	var karts = GameData.karts.keys().duplicate()
@@ -117,6 +110,7 @@ func change_num_bots(change: int):
 	%NumBots.text = str(GameData.num_bots)
 
 func confirm_track():
-	GameData.current_track = GameData.tracks[current_track_node.track_id]
+	if GameData.is_singleplayer:
+		GameData.current_track = GameData.tracks[current_track_node.track_id]
 	$TrackSelection.visible = false
 	$KartSelection.visible = true

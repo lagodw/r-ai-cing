@@ -107,26 +107,37 @@ func request_start_game():
 # 2. Server runs this to process the request
 @rpc("any_peer")
 func server_handle_start_game(code):
-	# Only the Server runs this!
 	var sender_id = multiplayer.get_remote_sender_id()
 	print("Server received Start Request from ", sender_id, " for Room ", code)
 	
-	# 1. Force the Server to also enter the game scene so it can spawn entities
-	# Note: If you plan to have multiple rooms later, the server architecture will need to change (e.g., instantiating rooms).
-	# For now, this fixes the single-match dedicated server issue.
+	# Server picks the track ---
+	var track_keys = GameData.tracks.keys()
+	var selected_track_id = track_keys.pick_random()
+	
+	# Set Server's own GameData so it loads the correct map later
+	if selected_track_id in GameData.tracks:
+		GameData.current_track = GameData.tracks[selected_track_id]
+
+	# 1. Force the Server to also enter the game scene
 	get_tree().change_scene_to_file("res://src/World/Track.tscn")
 	
-	# 2. Tell all players in the room to start
+	# 2. Tell all players in the room to start AND send the track ID
 	for p_id in players:
 		if players[p_id]["room"] == code:
-			rpc_id(p_id, "client_begin_game")
+			# FIX: Pass the selected_track_id to the clients
+			rpc_id(p_id, "client_begin_game", selected_track_id)
 
 # 3. Client receives this and actually switches scenes
 @rpc("authority")
-func client_begin_game():
-	print("Game Start signal received from Server!")
+func client_begin_game(track_id: String):
+	print("Game Start signal received from Server! Map: ", track_id)
+	
+	if track_id in GameData.tracks:
+		GameData.current_track = GameData.tracks[track_id]
+	else:
+		printerr("Server sent unknown track ID: ", track_id)
+	
 	emit_signal("game_started")
-
 # 1. Client sends their choice to the server
 func send_player_selection(kart_id: String, power_ids: Array):
 	rpc_id(1, "server_receive_selection", kart_id, power_ids)

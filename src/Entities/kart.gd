@@ -75,13 +75,6 @@ func _ready():
 	if health_bar:
 		health_bar.max_value = max_health
 		
-	if has_node("MultiplayerSynchronizer"):
-		var sync_node = $MultiplayerSynchronizer
-		var config = sync_node.replication_config
-		print("--- SYNC DEBUG START FOR: ", name, " ---")
-		for prop in config.get_properties():
-			print("Syncing Property: ", prop)
-		print("--- SYNC DEBUG END ---")
 
 # --- Setup ---
 func configure_from_id(id: String):
@@ -309,7 +302,7 @@ func activate_power_effect(slot_index: int):
 	await get_tree().create_timer(power.cooldown).timeout
 	slot_on_cooldown[slot_index] = false
 
-@rpc("call_local")
+@rpc("any_peer", "call_local", "reliable")
 func on_damaged_visual():
 	# Flash Red
 	var tween = create_tween()
