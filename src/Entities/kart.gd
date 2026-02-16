@@ -52,20 +52,20 @@ var input_throttle: float = 0.0 # -1.0 (Brake) to 1.0 (Gas)
 @onready var health_bar = $HealthBarAnchor/ProgressBar
 @onready var health_anchor = $HealthBarAnchor
 @onready var joystick: Control
-
-func _enter_tree():
-	# STRICT CHECK: Only treat the name as an Authority ID if it is a pure integer.
-	# This handles "1" (Player) correctly, but forces "Bot_1", "Bot_2" etc. to fail this check.
-	if name.is_valid_int():
-		var id_from_name = name.to_int()
-		if id_from_name > 0:
-			# It's a valid Player ID (e.g. "1", "2491")
-			set_multiplayer_authority(id_from_name)
-			return
-
-	# It's a Bot (e.g. "Bot_0", "Bot_1") or an invalid name.
-	# Default to Server Authority (1) so the host (you) always runs the physics for bots.
-	set_multiplayer_authority(1)
+#
+#func _enter_tree():
+	## STRICT CHECK: Only treat the name as an Authority ID if it is a pure integer.
+	## This handles "1" (Player) correctly, but forces "Bot_1", "Bot_2" etc. to fail this check.
+	#if name.is_valid_int():
+		#var id_from_name = name.to_int()
+		#if id_from_name > 0:
+			## It's a valid Player ID (e.g. "1", "2491")
+			#set_multiplayer_authority(id_from_name)
+			#return
+#
+	## It's a Bot (e.g. "Bot_0", "Bot_1") or an invalid name.
+	## Default to Server Authority (1) so the host (you) always runs the physics for bots.
+	#set_multiplayer_authority(1)
 
 func _ready():
 	# Load the stats defined in JSON via the GameData factory

@@ -114,7 +114,7 @@ func _spawn_kart_custom(data: Dictionary) -> Node:
 	kart.scale = data["scale"]
 	
 	# 2. Set Network Identity
-	kart.name = str(data["name"]) 
+	#kart.name = str(data["name"]) 
 	kart.set_multiplayer_authority(data["peer_id"])
 	
 	# 3. Apply Kart Settings
