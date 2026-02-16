@@ -1,8 +1,10 @@
-[gd_scene load_steps=8 format=3 uid="uid://ceh82rynpo7cg"]
+[gd_scene load_steps=10 format=3 uid="uid://ceh82rynpo7cg"]
 
 [ext_resource type="Texture2D" uid="uid://533g6wyyxxl3" path="res://assets/karts/Starter_Kart.png" id="1_1f23y"]
 [ext_resource type="Script" uid="uid://b33jv2vay4pj6" path="res://src/Entities/kart.gd" id="1_4um18"]
+[ext_resource type="AudioStream" uid="uid://cng6iupwneu2o" path="res://assets/audio/Hit.mp3" id="2_qi88q"]
 [ext_resource type="Theme" uid="uid://crtg3dknqulx2" path="res://assets/UI/Theme.tres" id="3_4t204"]
+[ext_resource type="AudioStream" uid="uid://b6078k55krg8e" path="res://assets/audio/BreakDown.mp3" id="3_r8rp6"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_4um18"]
 size = Vector2(30, 18)
@@ -43,6 +45,8 @@ corner_radius_bottom_left = 2
 [node name="Kart" type="CharacterBody2D"]
 z_index = 1
 script = ExtResource("1_4um18")
+damage_sfx = ExtResource("2_qi88q")
+breakdown_sfx = ExtResource("3_r8rp6")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 position = Vector2(4.76837e-07, 0)

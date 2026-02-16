@@ -46,7 +46,7 @@ func _ready():
 		await get_tree().create_timer(0.5).timeout
 		rpc("start_race_countdown")
 		return
-
+	
 	# --- CLIENT LOGIC ---
 	# Show selection screen (Client only)
 	var selection = load("res://src/World/selection.tscn").instantiate()
@@ -354,33 +354,21 @@ func _spawn_hazard_custom(data: Dictionary) -> Node:
 func winner_screen(winner_name: String):
 	# SERVER ONLY: Auto-Reset Logic
 	if multiplayer.is_server() and not GameData.is_singleplayer:
-		# Wait 5 seconds, then reset server to Main Menu
-		# This timer must have 'one_shot' and 'autostart' or be created via code
-		#var timer = get_tree().create_timer(5.0)
-		#await timer.timeout
-		#
 		# Server goes home, leaving clients on the victory screen
 		MultiplayerManager.reset_server_to_main_menu()
 		return
-
-	# 1. Check if the winner is ME based on name
-	var is_me = false
 	
 	if GameData.is_singleplayer:
-		if winner_name == "You": is_me = true
-	else:
-		# Check against my local name stored in MultiplayerManager
-		var my_id = multiplayer.get_unique_id()
-		if my_id in MultiplayerManager.players:
-			if winner_name == MultiplayerManager.players[my_id]["name"]:
-				is_me = true
-	
-	# 2. Show Text
-	if is_me:
 		$Victory/Panel/Winner.text = "You!"
 	else:
+		## Check against my local name stored in MultiplayerManager
+		#var my_id = multiplayer.get_unique_id()
+		#if my_id in MultiplayerManager.players:
+			#if winner_name == MultiplayerManager.players[my_id]["name"]:
+				#is_me = true
 		$Victory/Panel/Winner.text = winner_name + "!"
-
+	
+	AudioManager.play_sfx("Victory")
 	$Victory.visible = true
 	get_tree().paused = true
 	
@@ -409,15 +397,20 @@ func start_countdown():
 	get_tree().paused = true
 	$UI.visible = true
 	$Start.visible = true
+	AudioManager.play_sfx("Countdown")
 	await get_tree().create_timer(1).timeout
+	AudioManager.play_sfx("Countdown")
 	%Countdown.text = str(2)
 	await get_tree().create_timer(1).timeout
+	AudioManager.play_sfx("Countdown")
 	%Countdown.text = str(1)
 	await get_tree().create_timer(1).timeout
+	AudioManager.play_sfx("Start")
 	%Countdown.text = "Start!"
 	await get_tree().create_timer(1).timeout
 	$Start.visible = false
 	get_tree().paused = false
+	AudioManager.play_music("PhotonRush")
 	
 func _on_race_finished(winner_name: String):
 	# Only the person who actually won triggers the broadcast

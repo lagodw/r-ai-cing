@@ -8,6 +8,13 @@ signal cooldown_started(slot_index: int, duration: float)
 @export var kart_id: String = "speedster" # Default ID, overwritten by Spawner
 @export var is_player_controlled: bool = false
 var player_name: String = "Player"
+var is_bot: bool = false
+
+@export_group("Audio")
+@export var damage_sfx: AudioStream
+@export var breakdown_sfx: AudioStream 
+@export var sfx_max_distance: float = 500.0 # Range in pixels where sound is audible
+var sfx_players = {}
 
 var track_width_ref: float = 200.0
 # The Resource containing base stats (Loaded from JSON)
@@ -20,7 +27,7 @@ var turn_speed: float = 3.5
 var friction: float = 1.0
 var traction: float = 5.0  # High = snappy grip, Low = drift/ice
 var max_health: int = 100
-@export var current_health: int = 100:
+var current_health: int = 100:
 	set(value):
 		current_health = value
 		update_health_bar()
@@ -254,15 +261,17 @@ func take_damage(amount: int):
 	if is_stunned: return
 	
 	current_health -= amount
-	
+	_play_locational_sound(damage_sfx)
 	# RPC: Tell everyone I took damage (for visual effects/sounds)
 	rpc("on_damaged_visual")
 	
 	if current_health <= 0:
+		_play_locational_sound(breakdown_sfx)
 		rpc("_break_down")
 
 @rpc("call_local", "reliable")
 func _break_down():
+	AudioManager.play_sfx("BreakDown")
 	is_stunned = true
 	current_health = 0
 	
@@ -338,6 +347,10 @@ func _advance_waypoint(total_waypoints: int):
 	# Detect Lap Completion
 	if current_waypoint_index == total_waypoints - 1:
 		current_lap += 1
+		if is_multiplayer_authority() and not is_bot:
+			# Play the sound globally (non-positional) for the player
+			AudioManager.play_sfx("FinishLap")
+		
 		emit_signal("lap_finished", current_lap)
 		print(name, " started lap: ", current_lap + 1)
 		
@@ -423,3 +436,19 @@ func _apply_bump_to_other(other_kart: Kart, normal: Vector2, my_impact_velocity:
 		
 		# Apply recoil to ourselves
 		bump_velocity += normal * my_speed * 0.3
+
+func _play_locational_sound(stream: AudioStream):
+	if not stream: return
+	
+	# create a temporary 2D player attached to the kart
+	var player = AudioStreamPlayer2D.new()
+	player.stream = stream
+	player.bus = "SFX"
+	player.max_distance = sfx_max_distance
+	player.panning_strength = 1.0 # Enable spatial panning
+	
+	add_child(player)
+	player.play()
+	
+	# Auto-destroy the player when sound finishes
+	player.finished.connect(player.queue_free)

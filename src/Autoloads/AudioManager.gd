@@ -23,16 +23,16 @@ func _ready() -> void:
 
 # --- Playback Functions ---
 
-func play_music(stream: AudioStream, _crossfade_duration: float = 0.0):
+func play_music(music_name: String, _crossfade_duration: float = 0.0):
+	var stream: AudioStream = load("res://assets/audio/%s.mp3"%music_name)
 	if _music_player.stream == stream and _music_player.playing:
 		return
 		
 	_music_player.stream = stream
 	_music_player.play()
 
-func play_sfx(stream: AudioStream, pitch_scale: float = 1.0):
-	if not stream: return
-	
+func play_sfx(sfx_name: String, pitch_scale: float = 1.0):
+	var stream: AudioStream = load("res://assets/audio/%s.mp3"%sfx_name)
 	# Find the first available player in the pool
 	for p in _sfx_pool:
 		if not p.playing:

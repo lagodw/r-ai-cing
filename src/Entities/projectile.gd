@@ -1,6 +1,9 @@
 class_name Projectile
 extends Area2D
 
+@export var launch_sfx: AudioStream
+@export var sound_max_distance: float = 500.0 # Pixels. Sounds beyond this are silent.
+
 # Config
 var speed = 0
 var damage = 0
@@ -28,6 +31,7 @@ var orbit_angle: float = 0.0
 var orbit_duration: float = 5.0
 var orbit_timer: float = 0.0
 
+
 func _ready():
 	connect("body_entered", _on_hit)
 	
@@ -36,6 +40,28 @@ func _ready():
 	
 	if behavior == "Orbit" and orbit_center:
 		orbit_angle = global_position.angle_to_point(orbit_center.global_position)
+		
+	# Play the spawn sound with distance checks
+	_setup_audio()
+
+func _setup_audio():
+	if not launch_sfx:
+		return
+
+	# We create the player programmatically so you don't have to edit every scene manually
+	var sfx_player = AudioStreamPlayer2D.new()
+	sfx_player.stream = launch_sfx
+	sfx_player.bus = "SFX" # Route to your SFX bus
+	
+	# Key Feature: Distance Culling
+	# The sound will attenuate (fade out) over this distance
+	sfx_player.max_distance = sound_max_distance
+	
+	# Optional: Adjust 'panning_strength' if you want it less directional (0.0 is mono, 1.0 is full spatial)
+	sfx_player.panning_strength = 1.0 
+	
+	add_child(sfx_player)
+	sfx_player.play()
 
 func _apply_dimensions():
 	var sprite = get_node_or_null("Sprite2D")

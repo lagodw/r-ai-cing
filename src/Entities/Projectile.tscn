@@ -1,7 +1,8 @@
-[gd_scene load_steps=5 format=3 uid="uid://c3euljm7hekrx"]
+[gd_scene load_steps=6 format=3 uid="uid://c3euljm7hekrx"]
 
 [ext_resource type="Script" uid="uid://bn6q2kaoxfh8n" path="res://src/Entities/projectile.gd" id="1_ner6r"]
 [ext_resource type="Texture2D" uid="uid://dqitcb6afhxmy" path="res://assets/powers/Bullet.png" id="2_g55tu"]
+[ext_resource type="AudioStream" uid="uid://e2swx12c3xe3" path="res://assets/audio/Fire.mp3" id="2_v0o6k"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ner6r"]
 size = Vector2(12, 4)
@@ -16,6 +17,7 @@ properties/1/replication_mode = 1
 
 [node name="Projectile" type="Area2D"]
 script = ExtResource("1_ner6r")
+launch_sfx = ExtResource("2_v0o6k")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 position = Vector2(5.96046e-08, -2.27374e-13)

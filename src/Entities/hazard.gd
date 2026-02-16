@@ -1,6 +1,9 @@
 class_name Hazard
 extends Area2D
 
+@export var launch_sfx: AudioStream
+@export var sound_max_distance: float = 500.0 # Pixels. Sounds beyond this are silent.
+
 var damage: int = 0
 var shooter_id: String = ""
 var duration: float = 5.0
@@ -29,6 +32,28 @@ func _ready() -> void:
 		is_active = false
 	else:
 		_activate()
+		
+	# Play the spawn sound with distance checks
+	_setup_audio()
+
+func _setup_audio():
+	if not launch_sfx:
+		return
+
+	# We create the player programmatically so you don't have to edit every scene manually
+	var sfx_player = AudioStreamPlayer2D.new()
+	sfx_player.stream = launch_sfx
+	sfx_player.bus = "SFX" # Route to your SFX bus
+	
+	# Key Feature: Distance Culling
+	# The sound will attenuate (fade out) over this distance
+	sfx_player.max_distance = sound_max_distance
+	
+	# Optional: Adjust 'panning_strength' if you want it less directional (0.0 is mono, 1.0 is full spatial)
+	sfx_player.panning_strength = 1.0 
+	
+	add_child(sfx_player)
+	sfx_player.play()
 
 func _apply_dimensions():
 	var sprite = get_node_or_null("Sprite2D")

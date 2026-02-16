@@ -1,11 +1,13 @@
-[gd_scene load_steps=3 format=3 uid="uid://48epoddhvcoh"]
+[gd_scene load_steps=4 format=3 uid="uid://48epoddhvcoh"]
 
 [ext_resource type="Script" uid="uid://c4lijsiainn72" path="res://src/Entities/hazard.gd" id="1_17j61"]
+[ext_resource type="AudioStream" uid="uid://v5e1lsiefnk0" path="res://assets/audio/Drop.mp3" id="2_kli28"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_kli28"]
 
 [node name="Hazard" type="Area2D"]
 script = ExtResource("1_17j61")
+launch_sfx = ExtResource("2_kli28")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_kli28")

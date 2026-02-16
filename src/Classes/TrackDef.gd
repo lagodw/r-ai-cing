@@ -1,7 +1,7 @@
 class_name TrackDef extends Resource
 
 @export var id: String
-@export var laps_required: int = 3
+@export var laps_required: int = 5
 @export var start_position: Vector2
 @export var start_angle: float = 0.0
 @export var track_width: float = 200.0
