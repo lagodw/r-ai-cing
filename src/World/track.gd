@@ -11,10 +11,10 @@ extends Node2D
 @onready var hazard_spawner = $HazardSpawner
 
 func _ready():
-	if not GameData.is_singleplayer:
-		$Victory/Panel/VBoxContainer/Again.visible = false
 	$Victory/Panel/VBoxContainer/Again.pressed.connect(go_again)
 	$Victory/Panel/VBoxContainer/Main.pressed.connect(main_menu)
+	
+	# Configure Spawners
 	multiplayer_spawner.spawn_function = _spawn_kart_custom
 	projectile_spawner.spawn_function = _spawn_projectile_custom
 	hazard_spawner.spawn_function = _spawn_hazard_custom
@@ -25,64 +25,99 @@ func _ready():
 		
 		var all_loadouts = {}
 		
-		# 1. Check if we ALREADY have the loadouts (Race condition fix)
-		# We need to find WHICH room we are serving. 
-		# Since this is a simple dedicated server, we might assume one room or find the room from players.
-		# For this template, we iterate to find the first completed room data if available.
+		# 1. Check for existing loadouts (Race Condition Fix)
 		var found_early = false
 		if not MultiplayerManager.completed_room_loadouts.is_empty():
-			# Just grab the first available room's data (assuming 1 active game per server instance for now)
 			all_loadouts = MultiplayerManager.completed_room_loadouts.values()[0]
 			found_early = true
-			print("Loadouts were already ready!")
 		
 		if not found_early:
-			# 2. If not, wait for the signal
 			all_loadouts = await MultiplayerManager.game_started_with_loadouts
 		
+		# 2. Build Track
 		await _initialize_track_data() 
 		_generate_track_visuals() 
 		
+		# 3. Spawn Karts
 		_spawn_racers(all_loadouts)
+		
+		# 4. START RACE SYNC
+		# Wait a brief moment to ensure karts are replicated to clients
+		await get_tree().create_timer(0.5).timeout
+		rpc("start_race_countdown")
 		return
 
 	# --- CLIENT LOGIC ---
+	# Show selection screen (Client only)
 	var selection = load("res://src/World/selection.tscn").instantiate()
 	ui_layer.add_child(selection)
-	
 	await selection.race_started
 	
 	if not GameData.is_singleplayer:
 		$MultiplayerWaiting.visible = true
 		
+		# Send selection
 		var power_ids = []
 		for p in GameData.selected_powers:
 			power_ids.append(p.id)
-			
 		MultiplayerManager.send_player_selection(GameData.selected_kart_id, power_ids)
 		
+		# Wait for game start signal
 		var _all_loadouts = await MultiplayerManager.game_started_with_loadouts
 		
-		# FIX: Client also calculates data to ensure sync (and for visuals)
+		# Build Track
 		await _initialize_track_data()
 		_generate_track_visuals()
 		
-		# Client doesn't spawn (Spawner does), but needs to know track data for camera/prediction
-		
 		$MultiplayerWaiting.visible = false
-		start_countdown()
+		
 	else:
 		# Singleplayer
 		await _initialize_track_data()
 		_generate_track_visuals()
 		_spawn_racers(null)
-		start_countdown()
+		
+		# Manually trigger for singleplayer since no RPC will come
+		start_race_countdown() 
+
+@rpc("call_local", "reliable")
+func start_race_countdown():
+	# 1. Find the local player's kart
+	var my_id = multiplayer.get_unique_id()
+	var my_kart = null
 	
-func start_game():
-	get_tree().paused = true
-	# 3. NOW we spawn everyone
-	_spawn_racers()
-	start_countdown()
+	# Wait loop: The RPC might arrive slightly before the Kart node is ready in the tree
+	for i in range(20): # Try for ~1 second
+		my_kart = _find_kart_by_id(my_id)
+		if my_kart: break
+		await get_tree().process_frame
+	
+	if my_kart:
+		# 2. Setup Camera
+		if camera:
+			camera.target = my_kart
+			camera.position = my_kart.position # Snap immediately
+			camera.make_current()
+		
+		# 3. Start UI Countdown
+		start_countdown()
+	else:
+		printerr("Error: Could not find local kart for countdown!")
+		# Fallback: start anyway so game isn't soft-locked
+		start_countdown()
+
+func _find_kart_by_id(id):
+	# Helper to find a kart node. Adjust strictly if your karts are named differently.
+	# Usually MultiplayerSpawner names children by their authority ID if set, 
+	# or we check a property on the script.
+	for child in get_children():
+		if child.has_method("get_multiplayer_authority"): 
+			if child.get_multiplayer_authority() == id:
+				return child
+		# Fallback: Check if node name matches ID (common Godot pattern)
+		if child.name == str(id):
+			return child
+	return null
 
 func _initialize_track_data():
 	var track = GameData.current_track
@@ -394,6 +429,7 @@ func main_menu():
 	get_tree().change_scene_to_file("res://src/World/main_menu.tscn")
 
 func start_countdown():
+	get_tree().paused = true
 	$UI.visible = true
 	$Start.visible = true
 	await get_tree().create_timer(1).timeout
