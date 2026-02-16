@@ -19,7 +19,6 @@ var players = {} # Dictionary: { peer_id: { "name": "Player1", "room": "ABCD" } 
 # Format: { player_id: { "kart": "speedster", "power": "missile", "name": "Bob" } }
 var player_loadouts = {}
 var completed_room_loadouts = {}
-var is_game_running = false
 
 func _ready():
 	if "--server" in OS.get_cmdline_args() or OS.has_feature("dedicated_server"):
@@ -98,8 +97,6 @@ func update_player_list(new_players):
 	var my_id = multiplayer.get_unique_id()
 	if my_id in players:
 		room_code = players[my_id]["room"]
-	else:
-		print("ERROR: I am not in the player list!")
 	
 	emit_signal("player_list_updated")
 
@@ -144,31 +141,29 @@ func request_start_game():
 # 2. Server runs this to process the request
 @rpc("any_peer")
 func server_handle_start_game(code):
-	# SAFETY CHECK: Don't start if already running
-	if is_game_running:
-		print("Request denied: Game already in progress")
-		return
-
-	var sender_id = multiplayer.get_remote_sender_id()
-	print("Server received Start Request from ", sender_id, " for Room ", code)
+	# 1. Clear old data for this room
+	completed_room_loadouts.erase(code)
 	
-	is_game_running = true # Lock the server
-	
-	# Server picks the track ---
+	# 2. Select Track
 	var track_keys = GameData.tracks.keys()
 	var selected_track_id = track_keys.pick_random()
-	
-	# Set Server's own GameData so it loads the correct map later
 	if selected_track_id in GameData.tracks:
 		GameData.current_track = GameData.tracks[selected_track_id]
-
-	# 1. Force the Server to also enter the game scene
-	get_tree().change_scene_to_file("res://src/World/Track.tscn")
 	
-	# 2. Tell all players in the room to start AND send the track ID
+	# 3. Force Server Scene Refresh
+	# If the server is still in the Track scene from the last game, we must explicitly reload it
+	# to ensure _ready() runs again and resets the spawner logic.
+	var current = get_tree().current_scene
+	if current and current.scene_file_path == "res://src/World/Track.tscn":
+		print("Server is already in Track scene. Reloading...")
+		# Reload current scene is safer than change_scene_to_file for the same scene
+		get_tree().reload_current_scene()
+	else:
+		get_tree().change_scene_to_file("res://src/World/Track.tscn")
+	
+	# 4. Notify Clients
 	for p_id in players:
 		if players[p_id]["room"] == code:
-			# FIX: Pass the selected_track_id to the clients
 			rpc_id(p_id, "client_begin_game", selected_track_id)
 
 # 3. Client receives this and actually switches scenes
