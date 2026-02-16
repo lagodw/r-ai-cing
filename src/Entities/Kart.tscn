@@ -1,6 +1,6 @@
 [gd_scene load_steps=11 format=3 uid="uid://ceh82rynpo7cg"]
 
-[ext_resource type="Texture2D" uid="uid://533g6wyyxxl3" path="res://assets/karts/Starter_Kart.png" id="1_1f23y"]
+[ext_resource type="Texture2D" uid="uid://533g6wyyxxl3" path="res://assets/karts/Dune Buggy.png" id="1_1f23y"]
 [ext_resource type="Script" uid="uid://b33jv2vay4pj6" path="res://src/Entities/kart.gd" id="1_4um18"]
 [ext_resource type="AudioStream" uid="uid://cng6iupwneu2o" path="res://assets/audio/Hit.mp3" id="2_qi88q"]
 [ext_resource type="Theme" uid="uid://crtg3dknqulx2" path="res://assets/UI/Theme.tres" id="3_4t204"]

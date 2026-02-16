@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="KartDef" load_steps=2 format=3 uid="uid://bp8a851qfd2y5"]
+
+[ext_resource type="Script" uid="uid://d2vcvaa1qp6xu" path="res://src/Classes/KartDef.gd" id="1_yqgpk"]
+
+[resource]
+script = ExtResource("1_yqgpk")
+id = "Spectre"
+max_health = 100
+max_speed = 600.0
+acceleration = 500.0
+traction = 5.0
+width_percent = 0.15
+metadata/_custom_type_script = "uid://d2vcvaa1qp6xu"

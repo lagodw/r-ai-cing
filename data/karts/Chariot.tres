@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="KartDef" load_steps=2 format=3 uid="uid://lmttsw0rqqyt"]
+
+[ext_resource type="Script" uid="uid://d2vcvaa1qp6xu" path="res://src/Classes/KartDef.gd" id="1_2sxyo"]
+
+[resource]
+script = ExtResource("1_2sxyo")
+id = "Chariot"
+max_health = 100
+max_speed = 450.0
+acceleration = 600.0
+traction = 8.0
+width_percent = 0.12
+metadata/_custom_type_script = "uid://d2vcvaa1qp6xu"

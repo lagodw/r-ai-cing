@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="KartDef" load_steps=2 format=3 uid="uid://rxav3wog6vog"]
+
+[ext_resource type="Script" uid="uid://d2vcvaa1qp6xu" path="res://src/Classes/KartDef.gd" id="1_u2q75"]
+
+[resource]
+script = ExtResource("1_u2q75")
+id = "Go Kart"
+max_health = 80
+max_speed = 450.0
+acceleration = 750.0
+traction = 10.0
+width_percent = 0.12
+metadata/_custom_type_script = "uid://d2vcvaa1qp6xu"

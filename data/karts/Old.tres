@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="KartDef" load_steps=2 format=3 uid="uid://dihofhw310a7x"]
+
+[ext_resource type="Script" uid="uid://d2vcvaa1qp6xu" path="res://src/Classes/KartDef.gd" id="1_3j7ed"]
+
+[resource]
+script = ExtResource("1_3j7ed")
+id = "Ye Old Kart"
+max_health = 200
+max_speed = 400.0
+acceleration = 400.0
+traction = 20.0
+width_percent = 0.2
+metadata/_custom_type_script = "uid://d2vcvaa1qp6xu"

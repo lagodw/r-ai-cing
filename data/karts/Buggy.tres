@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="KartDef" load_steps=2 format=3 uid="uid://ct3qka56af1ed"]
+
+[ext_resource type="Script" uid="uid://d2vcvaa1qp6xu" path="res://src/Classes/KartDef.gd" id="1_52kgb"]
+
+[resource]
+script = ExtResource("1_52kgb")
+id = "Dune Buggy"
+max_health = 150
+max_speed = 450.0
+acceleration = 600.0
+traction = 20.0
+width_percent = 0.2
+metadata/_custom_type_script = "uid://d2vcvaa1qp6xu"

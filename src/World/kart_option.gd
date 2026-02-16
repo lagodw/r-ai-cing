@@ -11,6 +11,7 @@ func _ready() -> void:
 	%HandlingBar.value = kart.traction
 	%WeightBar.value = kart.width_percent
 	%Name.text = kart.id.replace("_", " ")
+	%HealthBar.value = kart.max_health
 
 func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
