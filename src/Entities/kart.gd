@@ -7,7 +7,7 @@ signal cooldown_started(slot_index: int, duration: float)
 # --- Configuration & Resources ---
 @export var kart_id: String = "speedster" # Default ID, overwritten by Spawner
 @export var is_player_controlled: bool = false
-@export var auto_gas: bool = false # Set true for simple mobile mode
+var player_name: String = "Player"
 
 var track_width_ref: float = 200.0
 # The Resource containing base stats (Loaded from JSON)
@@ -22,16 +22,8 @@ var traction: float = 5.0  # High = snappy grip, Low = drift/ice
 var max_health: int = 100
 @export var current_health: int = 100:
 	set(value):
-		var previous = current_health
 		current_health = value
-		
-		# If we just died (and weren't dead before), break down
-		if current_health <= 0 and previous > 0:
-			_break_down()
-			
-		# Update UI if this is the local player
-		if name == str(multiplayer.get_unique_id()):
-			update_health_bar()
+		update_health_bar()
 
 # --- State Variables ---
 var current_speed: float = 0.0
@@ -78,6 +70,7 @@ var input_throttle: float = 0.0 # -1.0 (Brake) to 1.0 (Gas)
 func _ready():
 	# Load the stats defined in JSON via the GameData factory
 	configure_from_id(kart_id)
+	$HealthBarAnchor/PlayerName.text = player_name
 	
 	add_to_group("karts")
 	if health_bar:
@@ -148,6 +141,12 @@ func _physics_process(delta):
 		# Offset it above the kart
 		#health_anchor.global_position = global_position + Vector2(0, -20)
 
+func _process(delta):
+	# Visual Spin Effect
+	# This runs on ALL clients, so everyone sees the spin when is_stunned is true.
+	if is_stunned:
+		sprite.rotation_degrees += 720 * delta
+		
 # --- Physics & Movement ---
 func _gather_input():
 	if not is_player_controlled: return
@@ -245,13 +244,13 @@ func _handle_stunned_physics(delta):
 	# Spin out or slide to a stop
 	current_speed = move_toward(current_speed, 0, friction * 200 * delta)
 	velocity = transform.x * current_speed
-	sprite.rotation_degrees += 720 * delta # Spin effect
+	#sprite.rotation_degrees += 720 * delta # Spin effect
 	move_and_slide()
 
 # --- Combat & Health ---
 @rpc("any_peer", "call_local")
 func take_damage(amount: int):
-	if is_stunned: return # Can't kill what's already dead
+	if is_stunned: return
 	
 	current_health -= amount
 	
@@ -259,13 +258,15 @@ func take_damage(amount: int):
 	rpc("on_damaged_visual")
 	
 	if current_health <= 0:
-		_break_down()
+		rpc("_break_down")
 
+@rpc("call_local", "reliable")
 func _break_down():
 	is_stunned = true
 	current_health = 0
 	
 	# Respawn Timer
+	# Since everyone runs this function locally, everyone starts their own timer.
 	await get_tree().create_timer(1.5).timeout
 	_respawn()
 
@@ -347,7 +348,7 @@ func _advance_waypoint(total_waypoints: int):
 	current_waypoint_index = (current_waypoint_index + 1) % total_waypoints
 
 func _declare_victory():
-	race_finished.emit(name)
+	race_finished.emit(player_name)
 
 func update_health_bar():
 	if not health_bar:

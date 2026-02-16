@@ -18,7 +18,7 @@ func _ready():
 	hazard_spawner.spawn_function = _spawn_hazard_custom
 	
 	# --- SERVER LOGIC ---
-	if multiplayer.is_server():
+	if multiplayer.is_server() and not GameData.is_singleplayer:
 		print("Server loaded Track. Waiting for loadouts...")
 		var all_loadouts = await MultiplayerManager.game_started_with_loadouts
 		
@@ -124,6 +124,7 @@ func _spawn_kart_custom(data: Dictionary) -> Node:
 	# 2. Set Network Identity
 	kart.name = str(data["name"]) 
 	kart.set_multiplayer_authority(data["peer_id"])
+	kart.player_name = data.get("player_name", "Racer")
 	
 	# 3. Apply Kart Settings
 	kart.kart_id = data["kart_id"]
@@ -147,7 +148,7 @@ func _spawn_kart_custom(data: Dictionary) -> Node:
 		$UI.setup(kart)
 	
 	# 6. Signal Connect
-	kart.race_finished.connect(winner_screen)
+	kart.race_finished.connect(_on_race_finished)
 	
 	return kart
 
@@ -170,22 +171,25 @@ func _spawn_racers(mp_loadouts = null):
 	var racer_configs = []
 	
 	if GameData.is_singleplayer:
-		# ... (Single Player Config Logic - Same as previous turn) ...
-		# See "Single Player Logic" block below for refresher if needed
-		racer_configs.append({ "id": GameData.selected_kart_id, "is_player": true, "name": "1", "powers": GameData.selected_powers, "peer_id": 1 })
-		# (Add bots logic here if needed...)
+		# Singleplayer Config
+		racer_configs.append({ 
+			"id": GameData.selected_kart_id, 
+			"is_player": true, 
+			"name": "1", 
+			"display_name": "You",
+			"powers": GameData.selected_powers, 
+			"peer_id": 1 
+		})
 	else:
 		# Multiplayer Logic
 		for peer_id in mp_loadouts:
 			var data = mp_loadouts[peer_id]
-			# Convert powers to actual objects or keep IDs? 
-			# For the CONFIG list, let's keep them as objects or IDs.
-			# But for the SPAWNER, we need IDs.
 			racer_configs.append({
 				"id": data["kart"],
-				"is_player": true, # In MP, everyone in the list is a player
-				"name": str(peer_id),
-				"power_ids": data["powers"], # These are already IDs from MPManager
+				"is_player": true,
+				"name": str(peer_id), # Keep ID for Godot internal networking
+				"display_name": data["name"],
+				"power_ids": data["powers"],
 				"peer_id": peer_id
 			})
 
@@ -220,7 +224,8 @@ func _spawn_racers(mp_loadouts = null):
 			"is_player": config.is_player,
 			"track_width": track.track_width,
 			# Handle power IDs: if config.powers is Objects (SP), convert to IDs. If IDs (MP), use as is.
-			"power_ids": [] 
+			"power_ids": [] ,
+			"player_name": config.display_name,
 		}
 		
 		if GameData.is_singleplayer:
@@ -320,11 +325,26 @@ func _spawn_hazard_custom(data: Dictionary) -> Node:
 		#var color = Color.GREEN if i == 0 else Color.BLUE
 		#draw_circle(current_p, 10.0, color)
 
+@rpc("any_peer", "call_local", "reliable") 
 func winner_screen(winner_name: String):
-	if winner_name == "1":
+	# 1. Check if the winner is ME based on name
+	var is_me = false
+	
+	if GameData.is_singleplayer:
+		if winner_name == "You": is_me = true
+	else:
+		# Check against my local name stored in MultiplayerManager
+		var my_id = multiplayer.get_unique_id()
+		if my_id in MultiplayerManager.players:
+			if winner_name == MultiplayerManager.players[my_id]["name"]:
+				is_me = true
+	
+	# 2. Show Text
+	if is_me:
 		$Victory/Panel/Winner.text = "You!"
 	else:
-		$Victory/Panel/Winner.text = winner_name
+		$Victory/Panel/Winner.text = winner_name + "!"
+
 	$Victory.visible = true
 	get_tree().paused = true
 
@@ -349,3 +369,7 @@ func start_countdown():
 	$Start.visible = false
 	get_tree().paused = false
 	
+func _on_race_finished(winner_name: String):
+	# Only the person who actually won triggers the broadcast
+	# (This prevents duplicate calls if we had server-side checks later)
+	rpc("winner_screen", winner_name)

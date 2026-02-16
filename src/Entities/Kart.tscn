@@ -1,7 +1,8 @@
-[gd_scene load_steps=7 format=3 uid="uid://ceh82rynpo7cg"]
+[gd_scene load_steps=8 format=3 uid="uid://ceh82rynpo7cg"]
 
 [ext_resource type="Texture2D" uid="uid://533g6wyyxxl3" path="res://assets/karts/Starter_Kart.png" id="1_1f23y"]
 [ext_resource type="Script" uid="uid://b33jv2vay4pj6" path="res://src/Entities/kart.gd" id="1_4um18"]
+[ext_resource type="Theme" uid="uid://crtg3dknqulx2" path="res://assets/UI/Theme.tres" id="3_4t204"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_4um18"]
 size = Vector2(30, 18)
@@ -60,3 +61,13 @@ theme_override_styles/fill = SubResource("StyleBoxFlat_4t204")
 step = 1.0
 value = 50.0
 show_percentage = false
+
+[node name="PlayerName" type="Label" parent="HealthBarAnchor"]
+offset_left = -40.0
+offset_top = -30.0
+offset_right = 40.0
+offset_bottom = -21.0
+theme = ExtResource("3_4t204")
+theme_override_font_sizes/font_size = 10
+text = "You"
+horizontal_alignment = 1
