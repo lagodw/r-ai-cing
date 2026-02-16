@@ -14,7 +14,7 @@ func _ready():
 	
 	# --- NEW SERVER CHECK ---
 	# If we are the Dedicated Server (ID 1) AND NOT playing locally (headless/render):
-	if multiplayer.is_server():
+	if multiplayer.is_server() and not GameData.is_singleplayer:
 		print("Server loaded Track. Waiting for loadouts...")
 		# The server skips UI and just waits for the signal from MultiplayerManager
 		var all_loadouts = await MultiplayerManager.game_started_with_loadouts
@@ -26,7 +26,7 @@ func _ready():
 		_spawn_racers(all_loadouts)
 		return
 	# ------------------------
-
+	
 	# --- CLIENT LOGIC (Original) ---
 	# 1. Instantiate Selection Screen
 	var selection = load("res://src/World/selection.tscn").instantiate()
