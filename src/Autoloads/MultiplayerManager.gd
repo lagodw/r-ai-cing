@@ -150,16 +150,10 @@ func server_handle_start_game(code):
 	if selected_track_id in GameData.tracks:
 		GameData.current_track = GameData.tracks[selected_track_id]
 	
-	# 3. Force Server Scene Refresh
-	# If the server is still in the Track scene from the last game, we must explicitly reload it
-	# to ensure _ready() runs again and resets the spawner logic.
-	var current = get_tree().current_scene
-	if current and current.scene_file_path == "res://src/World/Track.tscn":
-		print("Server is already in Track scene. Reloading...")
-		# Reload current scene is safer than change_scene_to_file for the same scene
-		get_tree().reload_current_scene()
-	else:
-		get_tree().change_scene_to_file("res://src/World/Track.tscn")
+	# 3. Force Full Scene Reload
+	# We use change_scene_to_file even if we are already in Track.tscn.
+	# This ensures a complete teardown of the old scene and a fresh start for Physics/TrackBuilder.
+	get_tree().change_scene_to_file("res://src/World/Track.tscn")
 	
 	# 4. Notify Clients
 	for p_id in players:

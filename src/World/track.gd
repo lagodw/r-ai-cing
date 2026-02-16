@@ -340,6 +340,17 @@ func _spawn_hazard_custom(data: Dictionary) -> Node:
 
 @rpc("any_peer", "call_local", "reliable") 
 func winner_screen(winner_name: String):
+	# SERVER ONLY: Auto-Reset Logic
+	if multiplayer.is_server() and not GameData.is_singleplayer:
+		# Wait 5 seconds, then reset server to Main Menu
+		# This timer must have 'one_shot' and 'autostart' or be created via code
+		#var timer = get_tree().create_timer(5.0)
+		#await timer.timeout
+		#
+		# Server goes home, leaving clients on the victory screen
+		MultiplayerManager.reset_server_to_main_menu()
+		return
+
 	# 1. Check if the winner is ME based on name
 	var is_me = false
 	
@@ -361,16 +372,6 @@ func winner_screen(winner_name: String):
 	$Victory.visible = true
 	get_tree().paused = true
 	
-	# SERVER ONLY: Auto-Reset Logic
-	if multiplayer.is_server() and not GameData.is_singleplayer:
-		# Wait 5 seconds, then reset server to Main Menu
-		# This timer must have 'one_shot' and 'autostart' or be created via code
-		var timer = get_tree().create_timer(5.0)
-		await timer.timeout
-		
-		# Server goes home, leaving clients on the victory screen
-		MultiplayerManager.reset_server_to_main_menu()
-
 func go_again():
 	get_tree().paused = false
 	get_tree().change_scene_to_file("res://src/World/Track.tscn")
