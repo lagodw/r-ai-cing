@@ -84,6 +84,9 @@ func fire_projectile(kart: Kart, data: PowerDef):
 			"length": data.length,
 			"width": data.width,
 			"texture_path": "res://assets/powers/%s.png" % data.id,
+			"stat_target": data.stat_target,
+			"stat_amount": data.amount,
+			"effect_duration": data.effect_duration,
 			
 			# Extra Properties
 			"homing_turn_speed": data.turn_speed,
@@ -160,6 +163,9 @@ func drop_hazard(kart: Kart, data: PowerDef):
 			"lob_speed": data.speed,
 			"travel_dir": t_dir,
 			"max_travel_dist": t_dist,
+			"stat_target": data.stat_target,
+			"stat_amount": data.amount,
+			"effect_duration": data.effect_duration,
 			"texture_path": "res://assets/powers/%s.png" % data.id
 		}
 		
@@ -169,8 +175,12 @@ func drop_hazard(kart: Kart, data: PowerDef):
 func apply_buff(kart: Kart, data: PowerDef):
 	if data.stat_target == "max_speed":
 		kart.max_speed += data.amount
-		await get_tree().create_timer(data.duration).timeout
+		await get_tree().create_timer(data.effect_duration).timeout
 		kart.max_speed -= data.amount
+	elif data.stat_target == "traction":
+		kart.traction += data.amount
+		await get_tree().create_timer(data.effect_duration).timeout
+		kart.traction -= data.amount
 	elif data.stat_target == "health":
 		kart.current_health = min(kart.current_health + data.amount, kart.max_health)
 		kart.update_health_bar()

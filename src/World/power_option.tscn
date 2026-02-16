@@ -1,14 +1,14 @@
-[gd_scene load_steps=4 format=3 uid="uid://csk8fl7hwp3qm"]
+[gd_scene load_steps=4 format=3 uid="uid://ds4i1xicjsovx"]
 
-[ext_resource type="Theme" uid="uid://crtg3dknqulx2" path="res://assets/UI/Theme.tres" id="1_2okhg"]
-[ext_resource type="Texture2D" uid="uid://dqitcb6afhxmy" path="res://assets/powers/Shotgun.png" id="1_g0xjb"]
-[ext_resource type="Script" uid="uid://iucot3idffyq" path="res://src/World/power_option.gd" id="2_ngqix"]
+[ext_resource type="Theme" uid="uid://crtg3dknqulx2" path="res://assets/UI/Theme.tres" id="1_qnhvr"]
+[ext_resource type="Script" uid="uid://iucot3idffyq" path="res://src/World/power_option.gd" id="2_3gnd7"]
+[ext_resource type="Texture2D" uid="uid://dqitcb6afhxmy" path="res://assets/powers/Shotgun.png" id="3_qoiei"]
 
 [node name="PowerOption" type="MarginContainer"]
 offset_right = 233.0
 offset_bottom = 167.0
-theme = ExtResource("1_2okhg")
-script = ExtResource("2_ngqix")
+theme = ExtResource("1_qnhvr")
+script = ExtResource("2_3gnd7")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 2
@@ -32,7 +32,7 @@ size_flags_horizontal = 3
 unique_name_in_owner = true
 custom_minimum_size = Vector2(150, 150)
 layout_mode = 2
-texture = ExtResource("1_g0xjb")
+texture = ExtResource("3_qoiei")
 expand_mode = 1
 
 [node name="Control2" type="Control" parent="VBoxContainer/HBoxContainer2"]
@@ -41,6 +41,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="HBoxContainer5" type="HBoxContainer" parent="VBoxContainer"]
+visible = false
 layout_mode = 2
 
 [node name="PowerType" type="Label" parent="VBoxContainer/HBoxContainer5"]
@@ -52,6 +53,7 @@ text = "Projectile"
 horizontal_alignment = 1
 
 [node name="DescriptionBox" type="HBoxContainer" parent="VBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 
 [node name="Description" type="Label" parent="VBoxContainer/DescriptionBox"]
@@ -207,20 +209,20 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 18
 text = "500"
 
-[node name="HBoxContainer4" type="HBoxContainer" parent="VBoxContainer"]
+[node name="CooldownBox" type="HBoxContainer" parent="VBoxContainer"]
 visible = false
 layout_mode = 2
 
-[node name="Label3" type="Label" parent="VBoxContainer/HBoxContainer4"]
+[node name="Label3" type="Label" parent="VBoxContainer/CooldownBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
 text = "Cooldown:"
 
-[node name="Control" type="Control" parent="VBoxContainer/HBoxContainer4"]
+[node name="Control" type="Control" parent="VBoxContainer/CooldownBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="Cooldown" type="Label" parent="VBoxContainer/HBoxContainer4"]
+[node name="Cooldown" type="Label" parent="VBoxContainer/CooldownBox"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_font_sizes/font_size = 18

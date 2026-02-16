@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dffsn4npbi0x8"
-path="res://.godot/imported/Missle.png-ee64d7ede9283fb2783aa5c463207218.ctex"
+uid="uid://dqitcb6afhxmy"
+path="res://.godot/imported/Shotgun.png-a5fe7cccb77b561faefcb89001faef16.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/powers/Missle.png"
-dest_files=["res://.godot/imported/Missle.png-ee64d7ede9283fb2783aa5c463207218.ctex"]
+source_file="res://assets/powers/Shotgun.png"
+dest_files=["res://.godot/imported/Shotgun.png-a5fe7cccb77b561faefcb89001faef16.ctex"]
 
 [params]
 

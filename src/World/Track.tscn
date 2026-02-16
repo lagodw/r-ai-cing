@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://dhqvmde3vmpt3" path="res://src/World/track.gd" id="1_7nrbi"]
 [ext_resource type="Texture2D" uid="uid://cyg0bu5cqy8k2" path="res://assets/tracks/Palm.png" id="2_imajx"]
 [ext_resource type="Script" uid="uid://b7o1b0rqh288s" path="res://src/World/ui.gd" id="3_kehdh"]
-[ext_resource type="Texture2D" uid="uid://dqitcb6afhxmy" path="res://assets/powers/Bullet.png" id="3_wx37m"]
+[ext_resource type="Texture2D" uid="uid://dqitcb6afhxmy" path="res://assets/powers/Shotgun.png" id="3_wx37m"]
 [ext_resource type="Texture2D" uid="uid://8h0lnrrxltsp" path="res://assets/powers/Bomb.png" id="4_hoyjw"]
 [ext_resource type="Texture2D" uid="uid://co0jv3l2io2nm" path="res://assets/UI/Gray_Circle.png" id="5_kxkim"]
 [ext_resource type="Texture2D" uid="uid://d5k3gk1e4u0k" path="res://assets/UI/TransparentSquare.png" id="6_ckak7"]

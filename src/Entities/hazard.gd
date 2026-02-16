@@ -21,6 +21,10 @@ var travel_dir: Vector2 = Vector2.ZERO
 var max_travel_dist: float = 0.0
 var distance_traveled: float = 0.0
 
+var stat_target: String = ""
+var stat_amount: float = 0.0
+var stat_duration: float = 0.0
+
 func _ready() -> void:
 	body_entered.connect(_on_hit)
 	
@@ -114,9 +118,15 @@ func _on_hit(body: Node) -> void:
 	# if body.name == shooter_id: return
 		
 	if body.has_method("take_damage"):
-		# FIX: Only the Server Authority triggers the damage RPC
 		if is_multiplayer_authority():
-			body.rpc_id(body.get_multiplayer_authority(), "take_damage", damage)
+			# 1. Apply Damage
+			if damage > 0:
+				body.rpc_id(body.get_multiplayer_authority(), "take_damage", damage)
+			
+			# 2. Apply Stat Modifier
+			# Note: We use 'stat_duration' for the effect time, not 'duration' (which is how long the puddle lasts on the floor)
+			if stat_target != "" and stat_duration > 0:
+				body.rpc_id(body.get_multiplayer_authority(), "apply_stat_modifier", stat_target, stat_amount, stat_duration)
 		
 		_destroy()
 

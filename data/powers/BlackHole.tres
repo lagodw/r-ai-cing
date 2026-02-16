@@ -5,16 +5,20 @@
 [resource]
 script = ExtResource("1_6mbis")
 id = "Black Hole"
+description = "An orbiting projectile"
 type = "Projectile"
-cooldown = 0.5
+cooldown = 3.0
 length = 20.0
 width = 20.0
+projectile_count = 1
 speed = 750.0
 damage = 20
+can_bounce = false
 projectile_behavior = "Orbit"
 turn_speed = 4.0
 detection_radius = 400.0
+duration = 1.0
 stat_target = ""
 amount = 0.0
-duration = 1.0
+effect_duration = 0.0
 metadata/_custom_type_script = "uid://bcbsm06swr0r8"

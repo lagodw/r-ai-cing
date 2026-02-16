@@ -31,6 +31,9 @@ var orbit_angle: float = 0.0
 var orbit_duration: float = 5.0
 var orbit_timer: float = 0.0
 
+var stat_target: String = ""
+var stat_amount: float = 0.0
+var stat_duration: float = 0.0
 
 func _ready():
 	connect("body_entered", _on_hit)
@@ -179,7 +182,13 @@ func _on_hit(body):
 	# Hit a Kart
 	if body.has_method("take_damage"):
 		if is_multiplayer_authority():
-			body.rpc_id(body.get_multiplayer_authority(), "take_damage", damage)
+			# 1. Apply Damage
+			if damage > 0:
+				body.rpc_id(body.get_multiplayer_authority(), "take_damage", damage)
+			
+			# 2. Apply Stat Modifier
+			if stat_target != "" and stat_duration > 0:
+				body.rpc_id(body.get_multiplayer_authority(), "apply_stat_modifier", stat_target, stat_amount, stat_duration)
 			
 		_destroy()
 

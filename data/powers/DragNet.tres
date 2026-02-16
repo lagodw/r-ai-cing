@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="PowerDef" load_steps=2 format=3 uid="uid://bngh5uth0fpky"]
+
+[ext_resource type="Script" uid="uid://bcbsm06swr0r8" path="res://src/Classes/PowerDef.gd" id="1_fiqa5"]
+
+[resource]
+script = ExtResource("1_fiqa5")
+id = "Drag Net"
+description = "Slow down your opponents"
+type = "Projectile"
+cooldown = 5.0
+length = 40.0
+width = 40.0
+projectile_count = 1
+speed = 1000.0
+damage = 0
+can_bounce = false
+projectile_behavior = "Forward"
+turn_speed = 4.0
+detection_radius = 400.0
+duration = 0.0
+stat_target = "max_speed"
+amount = -300.0
+effect_duration = 2.0
+metadata/_custom_type_script = "uid://bcbsm06swr0r8"

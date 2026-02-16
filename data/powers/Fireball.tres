@@ -5,16 +5,20 @@
 [resource]
 script = ExtResource("1_0vws2")
 id = "Fireball"
+description = "High damage projectile"
 type = "Projectile"
 cooldown = 2.0
 length = 20.0
 width = 10.0
+projectile_count = 1
 speed = 600.0
 damage = 50
+can_bounce = false
 projectile_behavior = "straight"
 turn_speed = 4.0
 detection_radius = 400.0
+duration = 0.0
 stat_target = ""
 amount = 0.0
-duration = 3.0
+effect_duration = 0.0
 metadata/_custom_type_script = "uid://bcbsm06swr0r8"

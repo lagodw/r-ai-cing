@@ -452,3 +452,28 @@ func _play_locational_sound(stream: AudioStream):
 	
 	# Auto-destroy the player when sound finishes
 	player.finished.connect(player.queue_free)
+
+@rpc("call_local", "reliable")
+func apply_stat_modifier(stat_name: String, amount: float, duration: float):
+	# 1. Security/Safety check: Ensure variable exists
+	if not stat_name in self:
+		printerr("Attempted to modify unknown stat: ", stat_name)
+		return
+
+	# 2. Apply the change
+	var original_value = get(stat_name)
+	set(stat_name, original_value + amount)
+	
+	# Visual Feedback (Optional: Flash Blue for status effect)
+	var tween = create_tween()
+	tween.tween_property(sprite, "modulate", Color.CYAN, 0.2)
+	tween.tween_property(sprite, "modulate", Color.WHITE, 0.2)
+
+	# 3. Wait for duration
+	await get_tree().create_timer(duration).timeout
+	
+	# 4. Revert
+	# We re-fetch the current value in case it was modified again in the meantime,
+	# but strictly subtracting the amount ensures we only undo THIS specific effect.
+	var current_val = get(stat_name)
+	set(stat_name, current_val - amount)

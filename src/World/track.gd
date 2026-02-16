@@ -319,6 +319,10 @@ func _spawn_projectile_custom(data: Dictionary) -> Node:
 	if data.has("detection_radius"): proj.detection_radius = data["detection_radius"]
 	if data.has("can_bounce"): proj.can_bounce = data["can_bounce"]
 	if data.has("max_lifetime"): proj.max_lifetime = data["max_lifetime"]
+	if data.has("stat_target"): proj.stat_target = data["stat_target"]
+	if data.has("stat_amount"): proj.stat_amount = data["stat_amount"]
+	# We use "effect_duration" key to distinguish from projectile lifetime
+	if data.has("effect_duration"): proj.stat_duration = data["effect_duration"]
 	
 	# 5. Orbit Specifics
 	if data.has("orbit_center_path"):
@@ -343,6 +347,9 @@ func _spawn_hazard_custom(data: Dictionary) -> Node:
 	hazard.length = data["length"]
 	hazard.width = data["width"]
 	hazard.lob_speed = data["lob_speed"]
+	if data.has("stat_target"): hazard.stat_target = data["stat_target"]
+	if data.has("stat_amount"): hazard.stat_amount = data["stat_amount"]
+	if data.has("effect_duration"): hazard.stat_duration = data["effect_duration"]
 	
 	# Apply Lobbing/Movement Data
 	hazard.travel_dir = data["travel_dir"]
@@ -388,7 +395,10 @@ func winner_screen(winner_name: String):
 		return
 	
 	if GameData.is_singleplayer:
-		$Victory/Panel/Winner.text = "You!"
+		if winner_name == "1":
+			$Victory/Panel/Winner.text = "You!"
+		else:
+			$Victory/Panel/Winner.text = winner_name + "!"
 	else:
 		## Check against my local name stored in MultiplayerManager
 		#var my_id = multiplayer.get_unique_id()

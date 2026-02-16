@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dffsn4npbi0x8"
-path="res://.godot/imported/Missle.png-ee64d7ede9283fb2783aa5c463207218.ctex"
+uid="uid://8deeoy1q0364"
+path="res://.godot/imported/Drag Net.png-6ec7ed329822126fa2ae33576b13fa88.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/powers/Missle.png"
-dest_files=["res://.godot/imported/Missle.png-ee64d7ede9283fb2783aa5c463207218.ctex"]
+source_file="res://assets/powers/Drag Net.png"
+dest_files=["res://.godot/imported/Drag Net.png-6ec7ed329822126fa2ae33576b13fa88.ctex"]
 
 [params]
 

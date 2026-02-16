@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dqitcb6afhxmy"
-path="res://.godot/imported/Bullet.png-ee8f41b18d3bafc94e627e7de99f64b1.ctex"
+uid="uid://m7litxmjiujv"
+path="res://.godot/imported/Oil Slick.png-e7a245af933a68187aa9e9c566ca076e.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/powers/Bullet.png"
-dest_files=["res://.godot/imported/Bullet.png-ee8f41b18d3bafc94e627e7de99f64b1.ctex"]
+source_file="res://assets/powers/Oil Slick.png"
+dest_files=["res://.godot/imported/Oil Slick.png-e7a245af933a68187aa9e9c566ca076e.ctex"]
 
 [params]
 

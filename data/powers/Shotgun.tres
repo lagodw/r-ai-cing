@@ -1,22 +1,24 @@
 [gd_resource type="Resource" script_class="PowerDef" load_steps=2 format=3 uid="uid://oul85qrwiggj"]
 
-[ext_resource type="Script" uid="uid://bcbsm06swr0r8" path="res://src/Classes/PowerDef.gd" id="1_b5p2y"]
+[ext_resource type="Script" uid="uid://bcbsm06swr0r8" path="res://src/Classes/PowerDef.gd" id="1_0e4xx"]
 
 [resource]
-script = ExtResource("1_b5p2y")
-id = "Bullet"
+script = ExtResource("1_0e4xx")
+id = "Shotgun"
+description = "Shoot several bouncing projectiles"
 type = "Projectile"
 cooldown = 2.0
 length = 20.0
 width = 10.0
 projectile_count = 3
 speed = 1000.0
-damage = 20
+damage = 10
 can_bounce = true
 projectile_behavior = "Forward"
 turn_speed = 4.0
 detection_radius = 400.0
+duration = 0.0
 stat_target = ""
 amount = 0.0
-duration = 0.75
+effect_duration = 0.0
 metadata/_custom_type_script = "uid://bcbsm06swr0r8"
